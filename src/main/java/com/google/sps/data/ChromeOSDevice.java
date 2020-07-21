@@ -52,4 +52,26 @@ public class ChromeOSDevice {
         throw new IllegalArgumentException(fieldName + "is not a valid annotated field");
     }
   }
+
+  public String getDeviceId() {
+    return deviceId;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    }
+
+    if (!(obj instanceof ChromeOSDevice)) {
+      return false;
+    }
+
+    ChromeOSDevice other = (ChromeOSDevice) obj;
+    return annotatedAssetId.equals(other.annotatedAssetId) &&
+        annotatedLocation.equals(other.annotatedLocation) &&
+        annotatedUser.equals(other.annotatedUser) &&
+        deviceId.equals(other.deviceId) &&
+        serialNumber.equals(other.serialNumber);
+  }
 }
