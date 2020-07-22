@@ -34,11 +34,11 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/aggregate")
 public class AggregationServlet extends HttpServlet {
 
-  // Used for testing
-  public AggregationServlet() {}
-
   private static final Set<String> aggregableFields =
       new HashSet<>(Arrays.asList("annotatedAssetId, annotatedLocation, annotatedUser"));
+  
+  // Used for testing
+  public AggregationServlet() {}
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
