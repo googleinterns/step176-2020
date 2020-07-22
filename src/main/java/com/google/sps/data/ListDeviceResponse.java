@@ -23,7 +23,7 @@ public final class ListDeviceResponse {
   }
 
   public List<ChromeOSDevice> getDeviceListCopy(List<ChromeOSDevice> original) {
-    final List<ChromeOSDevice> devices = new ArrayList<>(chromeosdevices);
+    final List<ChromeOSDevice> devices = new ArrayList<>();
     for (final ChromeOSDevice device : original) {
       devices.add(device.copy());
     }
