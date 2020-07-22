@@ -14,14 +14,14 @@ import java.lang.reflect.Type;
 */
 public final class ChromeOSDeviceDeserializer implements JsonDeserializer<ChromeOSDevice> {
 
-  private static final Gson gson = new Gson();
+  private static final Gson GSON = new Gson();
 
   @Override
   public ChromeOSDevice deserialize(
       JsonElement json,
       Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
-    ChromeOSDevice device = gson.fromJson(json, ChromeOSDevice.class);
+    final ChromeOSDevice device = GSON.fromJson(json, ChromeOSDevice.class);
     device.sanitize();
     return device;
   }

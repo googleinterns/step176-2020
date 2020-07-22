@@ -17,13 +17,20 @@ public final class ListDeviceResponse {
 
   public ListDeviceResponse(String kind, List<ChromeOSDevice> chromeosdevices, String nextPageToken, String etag) {
     this.kind = kind;
-    this.chromeosdevices = chromeosdevices;
+    this.chromeosdevices = getDeviceListCopy(chromeosdevices);
     this.nextPageToken = nextPageToken;
     this.etag = etag;
   }
 
+  public List<ChromeOSDevice> getDeviceListCopy(List<ChromeOSDevice> original) {
+    final List<ChromeOSDevice> devices = new ArrayList<>(chromeosdevices);
+    for (final ChromeOSDevice device : original) {
+      devices.add(device.copy());
+    }
+    return devices;
+  }
+
   public List<ChromeOSDevice> getDevices() {
-    List<ChromeOSDevice> devices = new ArrayList<>(chromeosdevices);
-    return chromeosdevices;
+    return getDeviceListCopy(chromeosdevices);
   }
 }
