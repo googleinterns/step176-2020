@@ -40,11 +40,12 @@ public class ChromeOSDevice {
   }
 
   public ChromeOSDevice copy() {
-    return new ChromeOSDevice(getAnnotatedAssetId(),
-                              getAnnotatedLocation(),
-                              getAnnotatedUser(),
-                              getDeviceId(),
-                              getSerialNumber());
+    return new ChromeOSDevice(
+                              annotatedAssetId,
+                              annotatedLocation,
+                              annotatedUser,
+                              deviceId,
+                              serialNumber);
   }
 
   public String getAnnotatedField(String fieldName) throws IllegalArgumentException {
@@ -96,15 +97,16 @@ public class ChromeOSDevice {
   }
 
   private boolean comparable(ChromeOSDevice other) {
-    return getAnnotatedAssetId().equals(other.getAnnotatedAssetId()) &&
-           getAnnotatedLocation().equals(other.getAnnotatedLocation()) &&
-           getAnnotatedUser().equals(other.getAnnotatedUser()) &&
-           getDeviceId().equals(other.getDeviceId()) &&
-           getSerialNumber().equals(other.getSerialNumber());
+    return annotatedAssetId.equals(other.getAnnotatedAssetId()) &&
+           annotatedLocation.equals(other.getAnnotatedLocation()) &&
+           annotatedUser.equals(other.getAnnotatedUser()) &&
+           deviceId.equals(other.getDeviceId()) &&
+           serialNumber.equals(other.getSerialNumber());
   }
 
   @Override
   public int hashCode() {
-    return (deviceId.hashCode() * 1163 + serialNumber.hashCode() * 769);
+    final String hashString = deviceId + "|" + serialNumber;
+    return hashString.hashCode();  
   }
 }
