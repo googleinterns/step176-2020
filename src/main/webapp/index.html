@@ -1,50 +1,32 @@
-<script src="https://apis.google.com/js/api.js"></script>
-<script>
-  /**
-   * Sample JavaScript code for directory.chromeosdevices.list
-   * See instructions for running APIs Explorer code samples locally:
-   * https://developers.google.com/explorer-help/guides/code_samples#javascript
-   */
-   var id;
-  function authenticate() {
-    return gapi.auth2.getAuthInstance()
-        .signIn({scope: "https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly"})
-        .then(function(user) { id = user.getId(); console.log(id);
-                           }
-              );
-  }
-  function loadClient() {
-    gapi.client.setApiKey("AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
-    return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/admin/directory_v1/rest")
-        .then(function() { console.log("GAPI client loaded for API"); },
-              function(err) { console.error("Error loading GAPI client for API", err); });
-  }
-  // Make sure the client is loaded and sign-in is complete before calling this method.
-  function execute() {
-    return gapi.client.directory.chromeosdevices.list({
-      "customerId": "my_customer",
-      "maxResults": 200,
-      "projection": "BASIC",
-      "sortOrder": "ASCENDING"
-    })
-        .then(function(response) {
-                // Handle the results here (response.result has the parsed body).
-                console.log("Response", response);
-                var element = document.getElementById("loc");
-                var devices = response.result.chromeosdevices;
-                element.innerHTML ="<h3>";
-                for (index = 0; index < devices.length; index++) {
-                  element.innerHTML += devices[index].serialNumber + "<br>" + devices[index].deviceId + "<br><br>";
-                }
 
-                element.innerHTML += "</h3>";
-              },
-              function(err) { console.error("Execute error", err); });
-  }
-  gapi.load("client:auth2", function() {
-    gapi.auth2.init({client_id: "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com"});
-  });
-</script>
-<button onclick="authenticate().then(loadClient)">authorize and load</button>
-<button onclick="execute()">execute</button>
-<div id="loc"></div>
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/Article">
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+    </script>
+    <meta charset="UTF-8">
+    <title>Devices Stuff</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <script>
+      function start() {
+        gapi.load('auth2', function() {
+          auth2 = gapi.auth2.init({
+            client_id: '934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly'
+          });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <button id="signinButton">Sign in with Google</button>
+    <script>
+      $('#signinButton').click(function() {
+        auth2.grantOfflineAccess().then(signInCallback);
+      });
+    </script>
+  </body>
+</html>
