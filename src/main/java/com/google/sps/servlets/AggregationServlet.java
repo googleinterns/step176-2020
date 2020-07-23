@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
 import com.google.sps.data.ListDeviceResponse;
 import com.google.sps.gson.Json;
@@ -34,26 +35,26 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/aggregate")
 public class AggregationServlet extends HttpServlet {
 
-  private static final Set<String> aggregableFields =
-      new HashSet<>(Arrays.asList("annotatedAssetId, annotatedLocation, annotatedUser"));
-  
   // Used for testing
-  public AggregationServlet() {}
+  AggregationServlet() {}
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
 
-    String aggregationField = request.getParameter("aggregationField");
-    if (!isValidField(aggregationField)) {
+    AnnotatedField field = null;
+    try {
+      field = AnnotatedField.create(request.getParameter("aggregationField"));
+    } catch (IllegalArgumentException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      response.getWriter().println(aggregationField + " is not a valid aggregation field");
+      response.getWriter().println(e.getMessage());
       return;
     }
 
     List<ChromeOSDevice> devices = amassDevices();
-    Map<String, Integer> data = processData(devices, aggregationField);
+    Map<String, Integer> data = processData(devices, field);
 
+    response.setStatus(HttpServletResponse.SC_OK);
     response.getWriter().println(Json.toJson(data));
   }
 
@@ -69,19 +70,15 @@ public class AggregationServlet extends HttpServlet {
     return devices;
   }
 
-  public Map<String, Integer> processData(List<ChromeOSDevice> devices, String aggregationField) {
+  public Map<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
     Map<String, Integer> counts = new HashMap<>();
 
     for (ChromeOSDevice device : devices) {
-      String fieldValue = device.getAnnotatedField(aggregationField);
+      String fieldValue = field.getField(device);
       Integer newVal = counts.getOrDefault(fieldValue, new Integer(0)).intValue() + 1;
       counts.put(fieldValue, newVal);
     }
 
     return counts;
-  }
-
-  private boolean isValidField(String field) {
-    return aggregableFields.contains(field);
   }
 }
