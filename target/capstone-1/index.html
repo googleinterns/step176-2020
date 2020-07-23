@@ -5,12 +5,13 @@
    * See instructions for running APIs Explorer code samples locally:
    * https://developers.google.com/explorer-help/guides/code_samples#javascript
    */
-
+   var id;
   function authenticate() {
     return gapi.auth2.getAuthInstance()
         .signIn({scope: "https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly"})
-        .then(function() { console.log("Sign-in successful"); },
-              function(err) { console.error("Error signing in", err); });
+        .then(function(user) { id = user.getId(); console.log(id);
+                           }
+              );
   }
   function loadClient() {
     gapi.client.setApiKey("AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
@@ -21,7 +22,7 @@
   // Make sure the client is loaded and sign-in is complete before calling this method.
   function execute() {
     return gapi.client.directory.chromeosdevices.list({
-      "customerId": gapi.auth2.currentUser.get().getId(),
+      "customerId": "my_customer",
       "maxResults": 200,
       "projection": "BASIC",
       "sortOrder": "ASCENDING"
@@ -29,6 +30,14 @@
         .then(function(response) {
                 // Handle the results here (response.result has the parsed body).
                 console.log("Response", response);
+                var element = document.getElementById("loc");
+                var devices = response.result.chromeosdevices;
+                element.innerHTML ="<h3>";
+                for (index = 0; index < devices.length; index++) {
+                  element.innerHTML += devices[index].serialNumber + "<br>" + devices[index].deviceId + "<br><br>";
+                }
+
+                element.innerHTML += "</h3>";
               },
               function(err) { console.error("Execute error", err); });
   }
@@ -38,3 +47,4 @@
 </script>
 <button onclick="authenticate().then(loadClient)">authorize and load</button>
 <button onclick="execute()">execute</button>
+<div id="loc"></div>
