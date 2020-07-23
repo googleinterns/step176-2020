@@ -1,5 +1,5 @@
-com/google/sps/servlets/AggregationServlet.class
 com/google/sps/gson/Json.class
+com/google/sps/servlets/AggregationServlet.class
 com/google/sps/data/ChromeOSDevice.class
 com/google/sps/data/ListDeviceResponse.class
 com/google/sps/gson/ChromeOSDeviceDeserializer.class
