@@ -21,6 +21,10 @@ public enum AnnotatedField {
 
 
   public static AnnotatedField create(String fieldName) {
+    if (fieldName == null) {
+      throw new IllegalArgumentException("Annotated field name cannot be null.");
+    }
+
     switch (fieldName) {
       case "annotatedAssetId":
         return AnnotatedField.ASSET_ID;
