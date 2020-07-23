@@ -1,15 +1,24 @@
 package com.google.sps.servlets;
 
+import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /*
  * Test the aggregation functionality to ensure it reports accurate counts and
@@ -42,50 +51,77 @@ public final class AggregationServletTest {
   private final List<ChromeOSDevice> allDevices = new ArrayList<>(
       Arrays.asList(DEVICE_ONE, DEVICE_TWO, DEVICE_THREE, DEVICE_FOUR, DEVICE_FIVE));
 
+  private AggregationServlet servlet = new AggregationServlet();
+  private HttpServletRequest request = mock(HttpServletRequest.class);
+  private HttpServletResponse response = mock(HttpServletResponse.class);
+
   @Test
   public void onlyOneUniqueField() {
-    AggregationServlet servlet = new AggregationServlet();
-
     Map<String, Integer> expected = new HashMap<>();
     expected.put(ASSET_ID_ONE, 5);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, "annotatedAssetId");
+    Map<String, Integer> actual = servlet.processData(allDevices, AnnotatedField.ASSET_ID);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
-  public void manyFields() {
-    AggregationServlet servlet = new AggregationServlet();
-
+  public void multipleResultEntries() {
     Map<String, Integer> expected = new HashMap<>();
     expected.put(USER_ONE, 2);
     expected.put(USER_TWO, 1);
     expected.put(USER_THREE, 2);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, "annotatedUser");
+    Map<String, Integer> actual = servlet.processData(allDevices, AnnotatedField.USER);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void annotatedLocation() {
-    AggregationServlet servlet = new AggregationServlet();
-
     Map<String, Integer> expected = new HashMap<>();
     expected.put(LOCATION_ONE, 3);
     expected.put(LOCATION_TWO, 2);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, "annotatedLocation");
+    Map<String, Integer> actual = servlet.processData(allDevices, AnnotatedField.LOCATION);
 
     Assert.assertEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void invalidArgument() {
-    AggregationServlet servlet = new AggregationServlet();
+  @Test
+  public void invalidArgumentReceivesBadRequest() throws IOException {
+    when(request.getParameter("aggregationField")).thenReturn("deviceId");
+    setNewResponseWriter(response);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, "deviceId");
+    servlet.doGet(request, response);
+
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+
+  @Test
+  public void nullArgumentReceivesBadRequest() throws IOException {
+    when(request.getParameter("aggregationField")).thenReturn(null);
+    setNewResponseWriter(response);
+
+    servlet.doGet(request, response);
+
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+
+  @Test
+  public void validArgumentReceivesSuccess() throws IOException{
+    when(request.getParameter("aggregationField")).thenReturn("annotatedLocation");
+    setNewResponseWriter(response);
+
+    servlet.doGet(request, response);
+
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
+
+  private void setNewResponseWriter(HttpServletResponse response) throws IOException{
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
   }
 
 }
