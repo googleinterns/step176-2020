@@ -1,14 +1,40 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="google-signin-client_id" content="934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com">
-    <title>CAPSTONE</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-  </head>
-  <body onload="handleLogin()">
-    <h1> loggged in! </h1>
-  </body>
-</html>
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+  /**
+   * Sample JavaScript code for directory.chromeosdevices.list
+   * See instructions for running APIs Explorer code samples locally:
+   * https://developers.google.com/explorer-help/guides/code_samples#javascript
+   */
+
+  function authenticate() {
+    return gapi.auth2.getAuthInstance()
+        .signIn({scope: "https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly"})
+        .then(function() { console.log("Sign-in successful"); },
+              function(err) { console.error("Error signing in", err); });
+  }
+  function loadClient() {
+    gapi.client.setApiKey("AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+    return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/admin/directory_v1/rest")
+        .then(function() { console.log("GAPI client loaded for API"); },
+              function(err) { console.error("Error loading GAPI client for API", err); });
+  }
+  // Make sure the client is loaded and sign-in is complete before calling this method.
+  function execute() {
+    return gapi.client.directory.chromeosdevices.list({
+      "customerId": gapi.auth2.currentUser.get().getId(),
+      "maxResults": 200,
+      "projection": "BASIC",
+      "sortOrder": "ASCENDING"
+    })
+        .then(function(response) {
+                // Handle the results here (response.result has the parsed body).
+                console.log("Response", response);
+              },
+              function(err) { console.error("Execute error", err); });
+  }
+  gapi.load("client:auth2", function() {
+    gapi.auth2.init({client_id: "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com"});
+  });
+</script>
+<button onclick="authenticate().then(loadClient)">authorize and load</button>
+<button onclick="execute()">execute</button>
