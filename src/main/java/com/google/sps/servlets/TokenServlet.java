@@ -37,31 +37,26 @@ public class TokenServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final String authCode = (String) request.getParameter("code");
     String CLIENT_SECRET_FILE = "/path/to/client_secret.json";
-    System.out.println(authCode);
-    System.out.println("was the given code!");
-
-List<String> parameterNames = new ArrayList<String>(request.getParameterMap().keySet());
-        System.out.println(parameterNames);
 
     System.out.println("fin");
     // GoogleClientSecrets clientSecrets =
     //     GoogleClientSecrets.load(
     //         JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRET_FILE));
             
-    // GoogleTokenResponse tokenResponse =
-    //         new GoogleAuthorizationCodeTokenRequest(
-    //             new NetHttpTransport(),
-    //             JacksonFactory.getDefaultInstance(),
-    //             "https://oauth2.googleapis.com/token",
-    //             "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com", //clientSecrets.getDetails().getClientId(),
-    //             "L0RvHrl9GHbl5cU6tbIPtOjt", //clientSecrets.getDetails().getClientSecret(),
-    //             authCode,
-    //             "/index.html") 
-    //             .execute();
+    GoogleTokenResponse tokenResponse =
+            new GoogleAuthorizationCodeTokenRequest(
+                new NetHttpTransport(),
+                JacksonFactory.getDefaultInstance(),
+                "https://oauth2.googleapis.com/token",
+                "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com", //clientSecrets.getDetails().getClientId(),
+                "L0RvHrl9GHbl5cU6tbIPtOjt", //clientSecrets.getDetails().getClientSecret(),
+                authCode,
+                "/index.html") 
+                .execute();
 
-    // String accessToken = tokenResponse.getAccessToken();
+    String accessToken = tokenResponse.getAccessToken();
 
-    // System.out.println(accessToken);
+    System.out.println(accessToken);
   }
 
 }
