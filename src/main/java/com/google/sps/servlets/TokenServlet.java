@@ -35,9 +35,6 @@ public class TokenServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    if (request.getHeader("X-Requested-With") == null) {
-        throw new IOException("Suspected forgery!");
-    }
     final String authCode = (String) request.getParameter("code");
     String CLIENT_SECRET_FILE = "/path/to/client_secret.json";
     System.out.println(authCode);
