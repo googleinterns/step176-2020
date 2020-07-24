@@ -1,10 +1,18 @@
 function signInCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
-    const request = new Request('/token', {method: 'POST', body: '{"foo": "bar"}'});
-    fetch(request).then(response => {
-      console.log("fetchhed");
-    });
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", '/token', true);
+
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhr.onreadystatechange = function() { // Call a function when the state changes.
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+console.log("donne");
+        }
+    }
+    xhr.send("foo=bar&code=" + authResult['code']);
   } else {
     console.log("no auth code!");
   }
