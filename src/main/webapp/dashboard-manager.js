@@ -8,7 +8,7 @@ class DashboardManager {
     this.pieChart = createNewPieChart();
 
     google.visualization.events.addListener(
-        this.aggregationSelector, 'statechange', this.updateData.bind(this));
+        this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
   }
 
   /* Get the initial data to be shown to the user and populate the main datatable*/
@@ -26,7 +26,7 @@ class DashboardManager {
     return data;
   }
 
-  updateData() {
+  async updateAndDrawData() {
     this.data = new google.visualization.DataTable();
 
     if (this.isAggregating()) {
@@ -34,11 +34,13 @@ class DashboardManager {
       this.data.addColumn('string', 'Aggregation Field Value');
       this.data.addColumn('number', 'Devices');
 
-      this.data.addRow(['California', 75]);
-      this.data.addRow(['New Jersey', 50]);
-      this.data.addRow(['Missouri', 10]);
-      this.data.addRow(['', 2]);
-
+      await (fetch(`/aggregate?aggregationField=${this.aggregationSelector.getState().selectedValues[0]}`)
+          .then(response => response.json())
+          .then(data => {
+              for (let [key, val] of Object.entries(data)) {
+                this.data.addRow([key, val]);
+              }
+      }));
     } else {
       // Setup data for standard table view
       this.data.addColumn('string', 'Serial Number');
@@ -47,6 +49,20 @@ class DashboardManager {
       this.data.addColumn('string', 'User');
       this.data.addColumn('string', 'Location');
 
+      /* TODO: once the server can send a list of devices, we can get real data here.
+      await (fetch('/devices')
+          .then(response => response.json())
+          .then(deviceJsons => {
+              for (let device of deviceJsons) {
+                this.data.addRow([
+                    device.serialNumber,
+                    device.status,
+                    device.assetId,
+                    device.user,
+                    device.location]);
+              }
+      }));
+      */
       this.data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
       this.data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
     }
