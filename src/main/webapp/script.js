@@ -12,7 +12,7 @@ function signInCallback(authResult) {
         console.log("was sent properly");
       },
       processData: false,
-      data: authResult['code']
+      data: '{code: ' + authResult['code'] + '}'
     });
   } else {
     console.log("sending wenttttt wrong");

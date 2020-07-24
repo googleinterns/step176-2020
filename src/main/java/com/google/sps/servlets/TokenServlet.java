@@ -36,7 +36,7 @@ public class TokenServlet extends HttpServlet {
     if (request.getHeader("X-Requested-With") == null) {
         throw new IOException("Suspected forgery!");
     }
-    final String authCode = (String) request.getParameter("data");
+    final String authCode = (String) request.getParameter("code");
     String CLIENT_SECRET_FILE = "/path/to/client_secret.json";
     System.out.println(authCode);
 
