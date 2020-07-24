@@ -57,6 +57,7 @@ public class TokenServlet extends HttpServlet {
     String accessToken = tokenResponse.getAccessToken();
 
     System.out.println(accessToken);
+    System.out.println("is the access token!");
   }
 
 }
