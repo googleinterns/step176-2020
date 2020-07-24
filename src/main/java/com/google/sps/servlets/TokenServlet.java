@@ -20,6 +20,8 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 // import com.google.api.services.admin.directory.model.User;
 // import com.google.api.services.admin.directory.model.Users;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 @WebServlet("/token")
 public class TokenServlet extends HttpServlet {
@@ -41,11 +43,9 @@ public class TokenServlet extends HttpServlet {
     System.out.println(authCode);
     System.out.println("was the given code!");
 
-           Enumeration enumeration = request.getParameterNames();
-        while(enumeration.hasMoreElements()){
-            String parameterName = enumeration.nextElement();
-             System.out.println(parameterName);
-        }
+List<String> parameterNames = new ArrayList<String>(request.getParameterMap().keySet());
+        System.out.println(parameterNames);
+
     System.out.println("fin");
     // GoogleClientSecrets clientSecrets =
     //     GoogleClientSecrets.load(
