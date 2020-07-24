@@ -28,7 +28,7 @@ import java.io.FileReader;
 public class TokenServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
-  private final String CLIENT_SECRET_FILE = "src/main/resources/client_info.json";
+  private final String CLIENT_SECRET_FILE = "/client_info.json";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -39,9 +39,11 @@ public class TokenServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final String authCode = (String) request.getParameter("code");
     
+    File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
+
     GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
-            JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRET_FILE));
+            JacksonFactory.getDefaultInstance(), new FileReader(file));
             
     GoogleTokenResponse tokenResponse =
             new GoogleAuthorizationCodeTokenRequest(
