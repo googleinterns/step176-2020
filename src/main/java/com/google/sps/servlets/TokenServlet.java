@@ -28,7 +28,7 @@ import java.io.FileReader;
 public class TokenServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
-  private final String CLIENT_SECRET_FILE = "client_secret.json";
+  private final String CLIENT_SECRET_FILE = "client_info.json";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
