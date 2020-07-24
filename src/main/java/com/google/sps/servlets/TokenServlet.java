@@ -77,8 +77,7 @@ public class TokenServlet extends HttpServlet {
     String myUrl = urlBuilder.build().toString();
     System.out.println(myUrl);
     Request req = new Request.Builder()
-        .header("Authorization", accessToken)
-        .url(myUrl)
+        .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
         .build();
     Response myResponse = client.newCall(req).execute();
     System.out.println(myResponse.body().string());
