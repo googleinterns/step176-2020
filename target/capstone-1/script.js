@@ -1,20 +1,11 @@
 function signInCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
-    $.ajax({
-      type: 'POST',
-      url: '/token',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      contentType: 'application/octet-stream; charset=utf-8',
-      success: function(result) {
-        console.log("was sent properly");
-      },
-      processData: false,
-      data: authResult['code']
+    const request = new Request('/token', {method: 'POST', body: '{"foo": "bar"}'});
+    fetch(request).then(response => {
+      console.log("fetchhed");
     });
   } else {
-    console.log("sending wenttttt wrong");
+    console.log("no auth code!");
   }
 }
