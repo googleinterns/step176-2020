@@ -27,6 +27,7 @@ import java.util.ArrayList;
 public class TokenServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
+  private final String CLIENT_SECRET_FILE = "client_secret.json";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -36,20 +37,18 @@ public class TokenServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final String authCode = (String) request.getParameter("code");
-    String CLIENT_SECRET_FILE = "/path/to/client_secret.json";
-
-    System.out.println("fin");
-    // GoogleClientSecrets clientSecrets =
-    //     GoogleClientSecrets.load(
-    //         JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRET_FILE));
+    
+    GoogleClientSecrets clientSecrets =
+        GoogleClientSecrets.load(
+            JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRET_FILE));
             
     GoogleTokenResponse tokenResponse =
             new GoogleAuthorizationCodeTokenRequest(
                 new NetHttpTransport(),
                 JacksonFactory.getDefaultInstance(),
                 "https://oauth2.googleapis.com/token",
-                "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com", //clientSecrets.getDetails().getClientId(),
-                "L0RvHrl9GHbl5cU6tbIPtOjt", //clientSecrets.getDetails().getClientSecret(),
+                clientSecrets.getDetails().getClientId(),
+                clientSecrets.getDetails().getClientSecret(),
                 authCode,
                 "http://localhost:8080") 
                 .execute();
