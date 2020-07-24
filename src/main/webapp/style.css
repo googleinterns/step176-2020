@@ -19,7 +19,8 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 1.5em;
-  background-color: green;
+  background-color: #3367D6;
+  color: white;
 }
 
 .header > div {
@@ -29,12 +30,14 @@ body {
 
 .aggregation-input {
   grid-area: aggregation-input;
-  background-color: blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
 }
 
 .table {
   grid-area: table;
-  background-color: pink;
 }
 
 #table-container {
@@ -42,10 +45,32 @@ body {
   width: 100%;
 }
 
+.table-header-row {
+  background-color: #e0e0e0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.table-header-row th, .google-visualization-table-table .table-header-row th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 1.3em;
+  text-align: center;
+  border-top: 1px solid #eee;
+}
+
+.table-row td, .google-visualization-table-table .table-row td {
+  height: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 1.3em;
+  text-align: center;
+}
+
 .chart {
   grid-area: chart;
   width: 350px;
-  background-color: yellow;
+  border-left: 2px solid #e0e0e0;
 }
 
 #piechart-container {
@@ -55,5 +80,10 @@ body {
 
 .footer {
   grid-area: footer;
-  background-color: purple;
+  background-color: white;
+  border-top: 2px solid #e0e0e0;
+}
+
+#dashboard {
+  display: contents;
 }

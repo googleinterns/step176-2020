@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>ChromeOS Annotated Field Manager</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="dashboard-manager.js"></script>
     <script type="text/javascript" src="table.js"></script>
     <link rel="stylesheet" href="style.css">
   </head>
@@ -17,14 +18,16 @@
           <a href="">Logout</a>
         </div>
       </div>
-      <div class="aggregation-input">
-      </div>
-      <div class="table">
-        <div id="table-container">
+      <div id="dashboard">
+        <div class="aggregation-input" id="aggregation-input">
         </div>
-      </div>
-      <div class="chart">
-        <div id="piechart-container">
+        <div class="table">
+          <div id="table-container">
+          </div>
+        </div>
+        <div class="chart">
+          <div id="piechart-container">
+          </div>
         </div>
       </div>
       <div class="footer">
