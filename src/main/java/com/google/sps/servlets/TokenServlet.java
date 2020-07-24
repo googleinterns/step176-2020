@@ -21,7 +21,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 // import com.google.api.services.admin.directory.model.Users;
 import java.io.IOException;
 
-@WebServlet("/Token")
+@WebServlet("/token")
 public class TokenServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
