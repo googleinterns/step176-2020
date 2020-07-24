@@ -39,7 +39,14 @@ public class TokenServlet extends HttpServlet {
     final String authCode = (String) request.getParameter("code");
     String CLIENT_SECRET_FILE = "/path/to/client_secret.json";
     System.out.println(authCode);
+    System.out.println("was the given code!");
 
+           Enumeration enumeration = request.getParameterNames();
+        while(enumeration.hasMoreElements()){
+            String parameterName = enumeration.nextElement();
+             System.out.println(parameterName);
+        }
+    System.out.println("fin");
     // GoogleClientSecrets clientSecrets =
     //     GoogleClientSecrets.load(
     //         JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRET_FILE));
