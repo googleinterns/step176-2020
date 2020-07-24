@@ -51,7 +51,7 @@ public class TokenServlet extends HttpServlet {
                 "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com", //clientSecrets.getDetails().getClientId(),
                 "L0RvHrl9GHbl5cU6tbIPtOjt", //clientSecrets.getDetails().getClientSecret(),
                 authCode,
-                "/index.html") 
+                "http://localhost:8080") 
                 .execute();
 
     String accessToken = tokenResponse.getAccessToken();
