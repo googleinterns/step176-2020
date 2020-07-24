@@ -38,25 +38,26 @@ public class TokenServlet extends HttpServlet {
     }
     final String authCode = (String) request.getParameter("data");
     String CLIENT_SECRET_FILE = "/path/to/client_secret.json";
+    System.out.println(authCode);
 
     // GoogleClientSecrets clientSecrets =
     //     GoogleClientSecrets.load(
     //         JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRET_FILE));
             
-    GoogleTokenResponse tokenResponse =
-            new GoogleAuthorizationCodeTokenRequest(
-                new NetHttpTransport(),
-                JacksonFactory.getDefaultInstance(),
-                "https://oauth2.googleapis.com/token",
-                "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com", //clientSecrets.getDetails().getClientId(),
-                "L0RvHrl9GHbl5cU6tbIPtOjt", //clientSecrets.getDetails().getClientSecret(),
-                authCode,
-                "/index.html") 
-                .execute();
+    // GoogleTokenResponse tokenResponse =
+    //         new GoogleAuthorizationCodeTokenRequest(
+    //             new NetHttpTransport(),
+    //             JacksonFactory.getDefaultInstance(),
+    //             "https://oauth2.googleapis.com/token",
+    //             "934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com", //clientSecrets.getDetails().getClientId(),
+    //             "L0RvHrl9GHbl5cU6tbIPtOjt", //clientSecrets.getDetails().getClientSecret(),
+    //             authCode,
+    //             "/index.html") 
+    //             .execute();
 
-    String accessToken = tokenResponse.getAccessToken();
+    // String accessToken = tokenResponse.getAccessToken();
 
-    System.out.println(accessToken);
+    // System.out.println(accessToken);
   }
 
 }
