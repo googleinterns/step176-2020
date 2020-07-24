@@ -12,7 +12,7 @@ function signInCallback(authResult) {
 console.log("donne");
         }
     }
-    xhr.send("foo=bar&code=" + authResult['code']);
+    xhr.send("code=" + authResult['code']);
   } else {
     console.log("no auth code!");
   }
