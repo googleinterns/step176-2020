@@ -52,7 +52,7 @@ public class TokenServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final String authCode = (String) request.getParameter("code");
-    final File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
+    File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
             JacksonFactory.getDefaultInstance(), new FileReader(file));
