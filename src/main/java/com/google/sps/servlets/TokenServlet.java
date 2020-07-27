@@ -91,8 +91,26 @@ public class TokenServlet extends HttpServlet {
 
 
     final String content = myResponse.body().string();//has the nextpage token, and chromeosdevices list
-    final ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
-    System.out.println(resp.getNextPageToken());
+    final List<ChromeOSDevice> allDevices = new ArrayList<>();
+    ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
+    while (resp.hasNextPageToken()) {
+        allDevices.addAll(resp.getDevices());
+        urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
+        urlBuilder.addQueryParameter("maxResults", "55");
+        urlBuilder.addQueryParameter("projection", "FULL");
+        urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+        urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+        System.out.println((String) resp.getNextPageToken());
+        urlBuilder.addQueryParameter("pageToken", (String) resp.getNextPageToken());
+        String newUrl = urlBuilder.build().toString();
+        Request newReq = new Request.Builder()
+            .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
+            .build();
+        Response newResponse = client.newCall(newReq).execute();
+        final String newContent = newResponse.body().string();
+        resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
+    }
+    System.out.println(allDevices);
 
 
     // try {

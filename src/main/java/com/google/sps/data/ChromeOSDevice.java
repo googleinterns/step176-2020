@@ -109,4 +109,10 @@ public class ChromeOSDevice {
     final String hashString = deviceId + "|" + serialNumber;
     return hashString.hashCode();  
   }
+
+  @Override
+  public String toString() {
+    return "(Device with ID:" + deviceId + "]";  
+  }
+
 }
