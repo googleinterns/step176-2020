@@ -106,7 +106,7 @@ public class TokenServlet extends HttpServlet {
                 .build();
             Response newResponse = client.newCall(newReq).execute();
             final String newContent  =newResponse.body().string();
-            obj = parser.parse(content);
+            obj = parser.parse(newContent);
             mainResponseJSON = (JSONObject) obj;
             devices.addAll( (JSONArray)  mainResponseJSON.get("chromeosdevices"));
         }
