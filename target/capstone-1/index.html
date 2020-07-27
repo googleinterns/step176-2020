@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/Article">
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+    </script>
+    <meta charset="UTF-8">
+    <title>Devices Stuff</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <script>
+      function start() {
+        console.log("starting");
+      }
+    </script>
+  </head>
+  <body>
+    <button id="signinButton">Sign in with Google</button>
+    <script>
+        gapi.load('auth2', function() {
+          auth2 = gapi.auth2.init({
+            client_id: '934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly'
+          });
+        });
+      $('#signinButton').click(function() {
+        auth2.grantOfflineAccess().then(signInCallback);
+      });
+    </script>
+  </body>
+</html>
