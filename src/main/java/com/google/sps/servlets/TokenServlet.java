@@ -74,12 +74,11 @@ public class TokenServlet extends HttpServlet {
 
     OkHttpClient client = new OkHttpClient();
     HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
-    urlBuilder.addQueryParameter("maxResults", "3");
+    urlBuilder.addQueryParameter("maxResults", "55");
     urlBuilder.addQueryParameter("projection", "FULL");
     urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
     urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
     String myUrl = urlBuilder.build().toString();
-    System.out.println(myUrl);
     Request req = new Request.Builder()
         .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
         .build();
@@ -89,7 +88,28 @@ public class TokenServlet extends HttpServlet {
         JSONParser parser = new JSONParser();
         Object obj = parser.parse(content);
         JSONObject mainResponseJSON = (JSONObject) obj;
-        System.out.println(mainResponseJSON.size());
+        JSONArray devices = (JSONArray)  mainResponseJSON.get("chromeosdevices");
+                    System.out.println(devices.size());
+
+        while (mainResponseJSON.containsKey("nextPageToken")) {
+            System.out.println("next page token detected!");
+            urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
+            urlBuilder.addQueryParameter("maxResults", "55");
+            urlBuilder.addQueryParameter("projection", "FULL");
+            urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+            urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+            System.out.println((String) mainResponseJSON.get("nextPageToken"));
+            urlBuilder.addQueryParameter("pageToken", (String) mainResponseJSON.get("nextPageToken"));
+             String newUrl = urlBuilder.build().toString();
+            Request newReq = new Request.Builder()
+                .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+            Response newResponse = client.newCall(newReq).execute();
+            final String newContent  =newResponse.body().string();
+            obj = parser.parse(content);
+            mainResponseJSON = (JSONObject) obj;
+            devices.addAll( (JSONArray)  mainResponseJSON.get("chromeosdevices"));
+        }
     } catch(ParseException pe) {
 		
          System.out.println("position: " + pe.getPosition());
