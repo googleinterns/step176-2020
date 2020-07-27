@@ -7,6 +7,8 @@ class DashboardManager {
     this.table = createNewTable();
     this.pieChart = createNewPieChart();
 
+    this.pieChartDiv = document.getElementById('chart');
+
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
   }
@@ -31,7 +33,7 @@ class DashboardManager {
 
     if (this.isAggregating()) {
       // Setup data for aggregated table/chart view
-      this.data.addColumn('string', 'Aggregation Field Value');
+      this.data.addColumn('string', this.aggregationSelector.getState().selectedValues[0]);
       this.data.addColumn('number', 'Devices');
 
       await (fetch(`/aggregate?aggregationField=${this.aggregationSelector.getState().selectedValues[0]}`)
@@ -41,6 +43,8 @@ class DashboardManager {
                 this.data.addRow([key, val]);
               }
       }));
+
+      this.pieChartDiv.classList.remove('chart-hidden');
     } else {
       // Setup data for standard table view
       this.data = this.initData();
@@ -58,6 +62,8 @@ class DashboardManager {
               }
       }));
       */
+
+      this.pieChartDiv.classList.add('chart-hidden');
     }
 
     this.draw();
@@ -111,7 +117,8 @@ function createNewPieChart() {
       'options': {
           'title': 'Devices by Location',
           'legend': 'none',
-          'width': '100%',
+          // This needs to be hardcoded because the div moves which causes 100% to be innacurate
+          'width': 350,
           'height': '50%',
           'chartArea': {
               'left': '5', 'width': '100%', 'height': '95%'

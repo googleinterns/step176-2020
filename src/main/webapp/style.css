@@ -71,6 +71,13 @@ body {
   grid-area: chart;
   width: 350px;
   border-left: 2px solid #e0e0e0;
+  transition: 0.5s ease;
+  overflow: hidden;
+}
+
+.chart-hidden {
+  width: 0px;
+  transition: 0.5s ease;
 }
 
 #piechart-container {
