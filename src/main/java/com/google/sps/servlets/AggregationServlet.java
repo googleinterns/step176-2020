@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 public class AggregationServlet extends HttpServlet {
 
   // Used for testing
-  AggregationServlet() {}
+  public AggregationServlet() {}
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
