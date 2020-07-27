@@ -14,8 +14,8 @@ class DashboardManager {
   /* Get the initial data to be shown to the user and populate the main datatable*/
   initData() {
     let data = new google.visualization.DataTable();
-    data.addColumn('string', 'Serial Number');
-    data.addColumn('string', 'Status');
+    data.addColumn('string', 'Serial Number');//this is fake data
+    data.addColumn('string', 'Status');//TODO: integrate in real data
     data.addColumn('string', 'Asset ID');
     data.addColumn('string', 'User');
     data.addColumn('string', 'Location');
