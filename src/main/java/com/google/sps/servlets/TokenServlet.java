@@ -24,6 +24,10 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.HttpUrl;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -80,7 +84,17 @@ public class TokenServlet extends HttpServlet {
         .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
         .build();
     Response myResponse = client.newCall(req).execute();
-    System.out.println(myResponse.body().string());
+    final String content  =myResponse.body().string();
+    try {
+        JSONParser parser = new JSONParser();
+        Object obj = parser.parse(content);
+        JSONObject mainResponseJSON = (JSONObject) obj;
+        System.out.println(mainResponseJSON.get("chromeosdevices"));
+    } catch(ParseException pe) {
+		
+         System.out.println("position: " + pe.getPosition());
+         System.out.println(pe);
+    }
 
 
 
