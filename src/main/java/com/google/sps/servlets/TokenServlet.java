@@ -93,8 +93,8 @@ public class TokenServlet extends HttpServlet {
     final String content = myResponse.body().string();//has the nextpage token, and chromeosdevices list
     final List<ChromeOSDevice> allDevices = new ArrayList<>();
     ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
+    allDevices.addAll(resp.getDevices());
     while (resp.hasNextPageToken()) {
-        allDevices.addAll(resp.getDevices());
         urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
         urlBuilder.addQueryParameter("maxResults", "55");
         urlBuilder.addQueryParameter("projection", "FULL");
@@ -109,6 +109,7 @@ public class TokenServlet extends HttpServlet {
         Response newResponse = client.newCall(newReq).execute();
         final String newContent = newResponse.body().string();
         resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
+        allDevices.addAll(resp.getDevices());
         System.out.println(allDevices.size());
     }
     
