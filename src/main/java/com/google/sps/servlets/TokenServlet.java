@@ -68,10 +68,6 @@ public class TokenServlet extends HttpServlet {
                 .execute();
 
     String accessToken = tokenResponse.getAccessToken();
-
-    System.out.println(accessToken);
-    System.out.println("is the access token!");
-
     OkHttpClient client = new OkHttpClient();
     HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
     urlBuilder.addQueryParameter("maxResults", "55");
@@ -85,11 +81,11 @@ public class TokenServlet extends HttpServlet {
     Response myResponse = client.newCall(req).execute();
     final String content  =myResponse.body().string();
     try {
-        JSONParser parser = new JSONParser();
-        Object obj = parser.parse(content);
-        JSONObject mainResponseJSON = (JSONObject) obj;
-        JSONArray devices = (JSONArray)  mainResponseJSON.get("chromeosdevices");
-        System.out.println(devices.size());
+        // JSONParser parser = new JSONParser();
+        // Object obj = parser.parse(content);
+        // JSONObject mainResponseJSON = (JSONObject) obj;
+        // JSONArray devices = (JSONArray)  mainResponseJSON.get("chromeosdevices");
+        // System.out.println(devices.size());
 
         // while (mainResponseJSON.containsKey("nextPageToken")) {
         //     System.out.println("next page token detected!");
@@ -111,12 +107,12 @@ public class TokenServlet extends HttpServlet {
         //     devices.addAll( (JSONArray)  mainResponseJSON.get("chromeosdevices"));
         // }
 
-        String allDevicesString = devices.toString();
-        System.out.println("all devices: ");
-        System.out.println(allDevicesString);
+        // String allDevicesString = devices.toString();
+        // System.out.println("all devices: ");
+        // System.out.println(allDevicesString);
 
-        System.out.println(devices.size());
-        System.out.println();
+        // System.out.println(devices.size());
+        // System.out.println();
     } catch(ParseException pe) {
 		
          System.out.println("position: " + pe.getPosition());
