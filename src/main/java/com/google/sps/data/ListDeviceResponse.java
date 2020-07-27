@@ -39,6 +39,7 @@ public final class ListDeviceResponse {
   }
 
   public List<ChromeOSDevice> getDevices() {
+      System.out.println(chromeOSdevices);
     return getDeviceListCopy(chromeOSdevices);
   }
 }
