@@ -67,6 +67,7 @@ public class TokenServlet extends HttpServlet {
                 "http://localhost:8080") 
                 .execute();
     final String accessToken = tokenResponse.getAccessToken();
+    System.out.println( tokenResponse.getRefreshToken());
     final OkHttpClient client = new OkHttpClient();
     HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
     urlBuilder.addQueryParameter("maxResults", "55");
