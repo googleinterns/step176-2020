@@ -89,7 +89,7 @@ public class TokenServlet extends HttpServlet {
         Object obj = parser.parse(content);
         JSONObject mainResponseJSON = (JSONObject) obj;
         JSONArray devices = (JSONArray)  mainResponseJSON.get("chromeosdevices");
-                    System.out.println(devices.size());
+        System.out.println(devices.size());
 
         while (mainResponseJSON.containsKey("nextPageToken")) {
             System.out.println("next page token detected!");
@@ -112,7 +112,8 @@ public class TokenServlet extends HttpServlet {
         }
 
         String allDevicesString = devices.toString();
-        System.out.print(allDevicesString);
+        System.out.println("all devices: ");
+        System.out.println(allDevicesString);
 
         System.out.println(devices.size());
         System.out.println();
