@@ -89,7 +89,7 @@ public class TokenServlet extends HttpServlet {
         JSONParser parser = new JSONParser();
         Object obj = parser.parse(content);
         JSONObject mainResponseJSON = (JSONObject) obj;
-        System.out.println(mainResponseJSON.get("chromeosdevices"));
+        System.out.println(mainResponseJSON.size);
     } catch(ParseException pe) {
 		
          System.out.println("position: " + pe.getPosition());
