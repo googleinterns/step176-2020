@@ -4,7 +4,7 @@ class DashboardManager {
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
-    this.table = createNewTable()
+    this.table = createNewTable();
     this.pieChart = createNewPieChart();
 
     google.visualization.events.addListener(
@@ -43,12 +43,7 @@ class DashboardManager {
       }));
     } else {
       // Setup data for standard table view
-      this.data.addColumn('string', 'Serial Number');
-      this.data.addColumn('string', 'Status');
-      this.data.addColumn('string', 'Asset ID');
-      this.data.addColumn('string', 'User');
-      this.data.addColumn('string', 'Location');
-
+      this.data = this.initData();
       /* TODO: once the server can send a list of devices, we can get real data here.
       await (fetch('/devices')
           .then(response => response.json())
@@ -63,8 +58,6 @@ class DashboardManager {
               }
       }));
       */
-      this.data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
-      this.data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
     }
 
     this.draw();
@@ -141,7 +134,8 @@ function createNewAggregationSelector() {
             'filterColumnIndex': '0',
             'ui': {
                 'label': 'Aggregate By...',
-                'selectedValuesLayout': 'aside'
+                'selectedValuesLayout': 'aside',
+                'allowMultiple': false
             }
         }
   });
