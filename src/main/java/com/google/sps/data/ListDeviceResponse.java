@@ -11,13 +11,13 @@ import java.util.List;
 public final class ListDeviceResponse {
 
   private final String kind;
-  private final List<ChromeOSDevice> chromeOSdevices;
+  private final List<ChromeOSDevice> chromeosdevices;
   private final String nextPageToken;
   private final String etag;
 
-  public ListDeviceResponse(String kind, List<ChromeOSDevice> chromeOSdevices, String nextPageToken, String etag) {
+  public ListDeviceResponse(String kind, List<ChromeOSDevice> chromeosdevices, String nextPageToken, String etag) {
     this.kind = kind;
-    this.chromeOSdevices = getDeviceListCopy(chromeOSdevices);
+    this.chromeosdevices = getDeviceListCopy(chromeosdevices);
     this.nextPageToken = nextPageToken;
     this.etag = etag;
   }
@@ -39,7 +39,7 @@ public final class ListDeviceResponse {
   }
 
   public List<ChromeOSDevice> getDevices() {
-      System.out.println(chromeOSdevices);
-    return getDeviceListCopy(chromeOSdevices);
+    System.out.println(chromeosdevices);
+    return getDeviceListCopy(chromeosdevices);
   }
 }
