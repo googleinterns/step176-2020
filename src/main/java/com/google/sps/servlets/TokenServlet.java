@@ -110,6 +110,12 @@ public class TokenServlet extends HttpServlet {
             mainResponseJSON = (JSONObject) obj;
             devices.addAll( (JSONArray)  mainResponseJSON.get("chromeosdevices"));
         }
+
+        String allDevicesString = devices.toString();
+        System.out.print(allDevicesString);
+
+        System.out.println(devices.size());
+        System.out.println();
     } catch(ParseException pe) {
 		
          System.out.println("position: " + pe.getPosition());
