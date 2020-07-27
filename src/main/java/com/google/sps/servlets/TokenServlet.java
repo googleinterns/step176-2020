@@ -52,14 +52,11 @@ public class TokenServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final String authCode = (String) request.getParameter("code");
-    
-    File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
-
-    GoogleClientSecrets clientSecrets =
+    final File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
+    final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
             JacksonFactory.getDefaultInstance(), new FileReader(file));
-            
-    GoogleTokenResponse tokenResponse =
+    final GoogleTokenResponse tokenResponse =
             new GoogleAuthorizationCodeTokenRequest(
                 new NetHttpTransport(),
                 JacksonFactory.getDefaultInstance(),
@@ -69,9 +66,8 @@ public class TokenServlet extends HttpServlet {
                 authCode,
                 "http://localhost:8080") 
                 .execute();
-
-    String accessToken = tokenResponse.getAccessToken();
-    OkHttpClient client = new OkHttpClient();
+    final String accessToken = tokenResponse.getAccessToken();
+    final OkHttpClient client = new OkHttpClient();
     HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
     urlBuilder.addQueryParameter("maxResults", "55");
     urlBuilder.addQueryParameter("projection", "FULL");
@@ -82,15 +78,7 @@ public class TokenServlet extends HttpServlet {
         .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
         .build();
     Response myResponse = client.newCall(req).execute();
-
-
-
-
-
-
-
-
-    final String content = myResponse.body().string();//has the nextpage token, and chromeosdevices list
+    final String content = myResponse.body().string();
     final List<ChromeOSDevice> allDevices = new ArrayList<>();
     ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
     allDevices.addAll(resp.getDevices());
