@@ -14,6 +14,6 @@ console.log("donne");
     }
     xhr.send("code=" + authResult['code']);
   } else {
-    console.log("no auth code!");
+    console.log("user is not signed in");
   }
 }
