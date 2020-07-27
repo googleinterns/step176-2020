@@ -1,2 +1,6 @@
 client_info.json
 *.class
+*.jar
+target/*
+.project
+.classpath
