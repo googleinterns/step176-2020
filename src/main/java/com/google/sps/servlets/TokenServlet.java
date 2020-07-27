@@ -91,25 +91,25 @@ public class TokenServlet extends HttpServlet {
         JSONArray devices = (JSONArray)  mainResponseJSON.get("chromeosdevices");
         System.out.println(devices.size());
 
-        while (mainResponseJSON.containsKey("nextPageToken")) {
-            System.out.println("next page token detected!");
-            urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
-            urlBuilder.addQueryParameter("maxResults", "55");
-            urlBuilder.addQueryParameter("projection", "FULL");
-            urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
-            urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
-            System.out.println((String) mainResponseJSON.get("nextPageToken"));
-            urlBuilder.addQueryParameter("pageToken", (String) mainResponseJSON.get("nextPageToken"));
-             String newUrl = urlBuilder.build().toString();
-            Request newReq = new Request.Builder()
-                .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
-                .build();
-            Response newResponse = client.newCall(newReq).execute();
-            final String newContent  =newResponse.body().string();
-            obj = parser.parse(newContent);
-            mainResponseJSON = (JSONObject) obj;
-            devices.addAll( (JSONArray)  mainResponseJSON.get("chromeosdevices"));
-        }
+        // while (mainResponseJSON.containsKey("nextPageToken")) {
+        //     System.out.println("next page token detected!");
+        //     urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
+        //     urlBuilder.addQueryParameter("maxResults", "55");
+        //     urlBuilder.addQueryParameter("projection", "FULL");
+        //     urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+        //     urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+        //     System.out.println((String) mainResponseJSON.get("nextPageToken"));
+        //     urlBuilder.addQueryParameter("pageToken", (String) mainResponseJSON.get("nextPageToken"));
+        //      String newUrl = urlBuilder.build().toString();
+        //     Request newReq = new Request.Builder()
+        //         .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
+        //         .build();
+        //     Response newResponse = client.newCall(newReq).execute();
+        //     final String newContent  =newResponse.body().string();
+        //     obj = parser.parse(newContent);
+        //     mainResponseJSON = (JSONObject) obj;
+        //     devices.addAll( (JSONArray)  mainResponseJSON.get("chromeosdevices"));
+        // }
 
         String allDevicesString = devices.toString();
         System.out.println("all devices: ");
