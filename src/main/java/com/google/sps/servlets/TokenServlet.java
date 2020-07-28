@@ -116,9 +116,12 @@ public class TokenServlet extends HttpServlet {
     urlBuilder.addQueryParameter("client_id", clientId);
     urlBuilder.addQueryParameter("client_secret", clientSecret);
     final String url = urlBuilder.build().toString();
+    System.out.println(url);
     Request req = new Request.Builder().url(url).build();
     Response resp = client.newCall(req).execute();
     final String content = resp.body().string();
+    System.out.println(resp.message());
+    System.out.println(resp.code());
     System.out.println(content);
     try {
         Object obj = parser.parse(content);
