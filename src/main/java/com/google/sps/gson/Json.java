@@ -15,7 +15,6 @@ public class Json {
 
   private static final Gson GSON = new GsonBuilder()
       .registerTypeAdapter(ChromeOSDevice.class, new ChromeOSDeviceDeserializer())
-      .registerTypeAdapter(MultiKeyMap.class, new MultiKeyMapSerializer())
       .create();
 
 

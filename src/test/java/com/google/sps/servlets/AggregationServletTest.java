@@ -97,8 +97,8 @@ public final class AggregationServletTest {
   @Test
   public void multipleAggregationFields() {
     MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
-    expected.put(new MultiKey(new String[] {LOCATION_ONE, ASSET_ID_ONE}), 3);
-    expected.put(new MultiKey(new String[] {LOCATION_TWO, ASSET_ID_ONE}), 2);
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_ONE}), 3);
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_TWO}), 2);
 
     MultiKeyMap<String, Integer> actual = AggregationServlet.processData(allDevices,
         new HashSet<>(Arrays.asList(AnnotatedField.LOCATION, AnnotatedField.ASSET_ID)));
