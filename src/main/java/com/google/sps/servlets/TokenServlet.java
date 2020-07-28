@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
@@ -108,29 +110,16 @@ public class TokenServlet extends HttpServlet {
   }
 
   private String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
-    final JSONParser parser = new JSONParser();//
-    final String REFRESH_TOKEN_ENDPOINT = "https://accounts.google.com/o/oauth2/token";//https://oauth2.googleapis.com/token
-    HttpUrl.Builder urlBuilder = HttpUrl.parse(REFRESH_TOKEN_ENDPOINT).newBuilder();
-    urlBuilder.addQueryParameter("refreshToken", refreshToken);
-    urlBuilder.addQueryParameter("grant_type", "refresh_token");
-    urlBuilder.addQueryParameter("client_id", clientId);
-    urlBuilder.addQueryParameter("client_secret", clientSecret);
-    final String url = urlBuilder.build().toString();
-    System.out.println(url);
-    Request req = new Request.Builder().url(url).build();
-    Response resp = client.newCall(req).execute();
-    final String content = resp.body().string();
-    System.out.println(resp.message());
-    System.out.println(resp.code());
-    System.out.println(content);
     try {
-        Object obj = parser.parse(content);
-        JSONObject jsonInfo = (JSONObject) obj;
-        final String accessToken = (String) jsonInfo.get("access_token");
-        System.out.println("got access token from fxn : " + accessToken);
-        return accessToken;
-    } catch (ParseException e) {
-        System.out.println("there was a parse exception thrown");
+        GoogleTokenResponse response =
+            new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
+                refreshToken, clientId, clientSecret).execute();
+      System.out.println("Access token: " + response.getAccessToken());
+      return response.getAccessToken();
+    } catch (TokenResponseException e) {
+      if (e.getDetails() != null) {
+        System.out.println(e.getMessage());
+      }
     }
     return INVALID_ACCESS_TOKEN;
   }
