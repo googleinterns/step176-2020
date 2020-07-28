@@ -1,5 +1,6 @@
 package com.google.sps.gson;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
@@ -24,18 +25,24 @@ public class MultiKeyMapSerializer implements JsonSerializer<MultiKeyMap> {
       Type typeOfT,
       JsonSerializationContext context) throws JsonParseException {
     JsonObject json = new JsonObject();
+    JsonArray results = new JsonArray();
 
     MapIterator<MultiKey, Integer> it = map.mapIterator();
     while (it.hasNext()) {
       MultiKey key = it.next();
       Integer value = it.getValue();
 
-      String keyString = Arrays.toString(key.getKeys());
+      JsonObject result = new JsonObject();
+      int i = 0;
+      for (String keyString : (String[]) key.getKeys()) {
+        result.addProperty("field" + i++, keyString);
+      }
+      result.addProperty("value", value);
 
-      // Remove the brackets[] at the beginning and end of the key
-      json.addProperty(keyString.substring(1, keyString.length() - 1), value);
+      results.add(result);
     }
 
+    json.add("results", results);
     return json;
   }
 }
