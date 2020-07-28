@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,21 +31,20 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 
 /** Servlet that aggregates chrome devices by a given field */
 @WebServlet("/aggregate")
 public class AggregationServlet extends HttpServlet {
 
-  // Used for testing
-  AggregationServlet() {}
-
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
 
-    AnnotatedField field = null;
+    Set<AnnotatedField> fields = null;
     try {
-      field = AnnotatedField.create(request.getParameter("aggregationField"));
+      fields = getAggregationFields(request);
     } catch (IllegalArgumentException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       response.getWriter().println(e.getMessage());
@@ -52,7 +52,7 @@ public class AggregationServlet extends HttpServlet {
     }
 
     List<ChromeOSDevice> devices = amassDevices();
-    Map<String, Integer> data = processData(devices, field);
+    MultiKeyMap<String, Integer> data = processData(devices, fields);
 
     response.setStatus(HttpServletResponse.SC_OK);
     response.getWriter().println(Json.toJson(data));
@@ -66,19 +66,52 @@ public class AggregationServlet extends HttpServlet {
     // Some mock devices so we have data in the interim
     devices.add(new ChromeOSDevice("assetId", "location", "user", "deviceId", "serialNumber"));
     devices.add(new ChromeOSDevice("12345", "California", "Jane", "ae25f1-91ce6a", "SN54321"));
+    devices.add(new ChromeOSDevice("12345", "New Jersey", "Jane", "<deviceId>", "SN12345"));
 
     return devices;
   }
 
-  public Map<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
-    Map<String, Integer> counts = new HashMap<>();
+  public static MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, Set<AnnotatedField> fields) {
+    MultiKeyMap<String, Integer> counts = new MultiKeyMap<>();
 
     for (ChromeOSDevice device : devices) {
-      String fieldValue = field.getField(device);
-      Integer newVal = counts.getOrDefault(fieldValue, new Integer(0)).intValue() + 1;
-      counts.put(fieldValue, newVal);
+      String keyParts[] = new String[fields.size()];
+      Iterator<AnnotatedField> it = fields.iterator();
+      int i = 0;
+
+      while (it.hasNext()) {
+        keyParts[i++] = it.next().getField(device);
+      }
+
+      MultiKey key = new MultiKey(keyParts);
+      Integer newVal = counts.getOrDefault(key, new Integer(0)).intValue() + 1;
+      
+      counts.put(key, newVal);
     }
 
     return counts;
+  }
+
+  /** Used for convenience in tests when only aggregating by one field*/
+  public static MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
+    Set<AnnotatedField> fields = new HashSet<>();
+    fields.add(field);
+
+    return processData(devices, fields);
+  }
+
+  public static Set<AnnotatedField> getAggregationFields(HttpServletRequest request) {
+    String fieldString = request.getParameter("aggregationField");
+    if (fieldString == null) {
+      throw new IllegalArgumentException("Aggregation field cannot be null");
+    }
+
+    Set<AnnotatedField> aggregationFields = new HashSet<>();
+    String fieldNames[] = fieldString.split(",");
+    for (int i = 0; i < fieldNames.length; i++) {
+      aggregationFields.add(AnnotatedField.create(fieldNames[i]));
+    }
+
+    return aggregationFields;
   }
 }
