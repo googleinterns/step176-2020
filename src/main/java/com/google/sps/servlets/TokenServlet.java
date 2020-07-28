@@ -119,6 +119,7 @@ public class TokenServlet extends HttpServlet {
     Request req = new Request.Builder().url(url).build();
     Response resp = client.newCall(req).execute();
     final String content = resp.body().string();
+    System.out.println(content);
     try {
         Object obj = parser.parse(content);
         JSONObject jsonInfo = (JSONObject) obj;
