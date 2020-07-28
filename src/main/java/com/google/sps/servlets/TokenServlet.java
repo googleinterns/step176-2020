@@ -108,8 +108,8 @@ public class TokenServlet extends HttpServlet {
   }
 
   private String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
-    final JSONParser parser = new JSONParser();
-    final String REFRESH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+    final JSONParser parser = new JSONParser();//
+    final String REFRESH_TOKEN_ENDPOINT = "https://accounts.google.com/o/oauth2/token";//https://oauth2.googleapis.com/token
     HttpUrl.Builder urlBuilder = HttpUrl.parse(REFRESH_TOKEN_ENDPOINT).newBuilder();
     urlBuilder.addQueryParameter("refreshToken", refreshToken);
     urlBuilder.addQueryParameter("grant_type", "refresh_token");
