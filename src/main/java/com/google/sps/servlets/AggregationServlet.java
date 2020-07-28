@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+import com.google.sps.data.AggregationResponse;
 import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
 import com.google.sps.data.ListDeviceResponse;
@@ -55,7 +56,7 @@ public class AggregationServlet extends HttpServlet {
     MultiKeyMap<String, Integer> data = processData(devices, fields);
 
     response.setStatus(HttpServletResponse.SC_OK);
-    response.getWriter().println(Json.toJson(data));
+    response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
   }
 
   public List<ChromeOSDevice> amassDevices() {
@@ -85,7 +86,7 @@ public class AggregationServlet extends HttpServlet {
 
       MultiKey key = new MultiKey(keyParts);
       Integer newVal = counts.getOrDefault(key, new Integer(0)).intValue() + 1;
-      
+
       counts.put(key, newVal);
     }
 
