@@ -42,6 +42,8 @@ public class TokenServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
   private final String CLIENT_SECRET_FILE = "/client_info.json";
+  private final OkHttpClient client = new OkHttpClient();
+  private final String INVALID_ACCESS_TOKEN = "INVALIDDD";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -56,6 +58,8 @@ public class TokenServlet extends HttpServlet {
     final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
             JacksonFactory.getDefaultInstance(), new FileReader(file));
+    final String clientId = clientSecrets.getDetails().getClientId();
+    final String clientSecret = clientSecrets.getDetails().getClientSecret();
     final GoogleTokenResponse tokenResponse =
             new GoogleAuthorizationCodeTokenRequest(
                 new NetHttpTransport(),
@@ -67,8 +71,8 @@ public class TokenServlet extends HttpServlet {
                 "http://localhost:8080") 
                 .execute();
     final String accessToken = tokenResponse.getAccessToken();
-    System.out.println( tokenResponse.getRefreshToken());
-    final OkHttpClient client = new OkHttpClient();
+    final String refreshToken = tokenResponse.getRefreshToken();
+    getAccessToken(refreshToken, clientId, clientSecret);
     HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
     urlBuilder.addQueryParameter("maxResults", "55");
     urlBuilder.addQueryParameter("projection", "FULL");
@@ -101,8 +105,30 @@ public class TokenServlet extends HttpServlet {
         allDevices.addAll(resp.getDevices());
         System.out.println(allDevices.size());
     }
-    
+  }
 
+  private String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
+    final JSONParser parser = new JSONParser();
+    final String REFRESH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+    HttpUrl.Builder urlBuilder = HttpUrl.parse(REFRESH_TOKEN_ENDPOINT).newBuilder();
+    urlBuilder.addQueryParameter("refreshToken", refreshToken);
+    urlBuilder.addQueryParameter("grant_type", "refresh_token");
+    urlBuilder.addQueryParameter("client_id", clientId);
+    urlBuilder.addQueryParameter("client_secret", clientSecret);
+    final String url = urlBuilder.build().toString();
+    Request req = new Request.Builder().url(url).build();
+    Response resp = client.newCall(req).execute();
+    final String content = resp.body().string();
+    try {
+        Object obj = parser.parse(content);
+        JSONObject jsonInfo = (JSONObject) obj;
+        final String accessToken = (String) jsonInfo.get("access_token");
+        System.out.println("got access token from fxn : " + accessToken);
+        return accessToken;
+    } catch (ParseException e) {
+        System.out.println("there was a parse exception thrown");
+    }
+    return INVALID_ACCESS_TOKEN;
   }
 
 }
