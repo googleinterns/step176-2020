@@ -40,9 +40,14 @@ import java.io.FileReader;
 import java.io.File;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Entity;
 
 @WebServlet("/authorize")
-public class DevicesServlet extends HttpServlet {
+public class AuthorizeServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
   private final String CLIENT_SECRET_FILE = "/client_info.json";
@@ -64,7 +69,7 @@ public class DevicesServlet extends HttpServlet {
     final String authCode = (String) request.getParameter("code");
     Entity tokenEntity = new Entity("RefreshToken");
     final String userId = userService.getCurrentUser().getUserId();
-    final String refreshCode = getRefreshCode();
+    final String refreshToken = getRefreshCode(authCode);
     tokenEntity.setProperty("userId", userId);
     tokenEntity.setProperty("refreshToken", refreshToken);
     System.out.println("got the fresh token of: " + refreshToken);
@@ -72,7 +77,7 @@ public class DevicesServlet extends HttpServlet {
     response.sendRedirect("/index.html");
   }
 
-  private String getRefreshCode(String authCode) {
+  private String getRefreshCode(String authCode) throws IOException {
     File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
