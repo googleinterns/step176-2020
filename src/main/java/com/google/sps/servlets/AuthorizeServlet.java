@@ -72,9 +72,9 @@ public class AuthorizeServlet extends HttpServlet {
     final String refreshToken = getRefreshCode(authCode);
     tokenEntity.setProperty("userId", userId);
     tokenEntity.setProperty("refreshToken", refreshToken);
-    System.out.println("got the fresh token of: " + refreshToken);
     datastore.put(tokenEntity);
     response.sendRedirect("/index.html");
+    System.out.println("refresh token stored as : " + refreshToken);
   }
 
   private String getRefreshCode(String authCode) throws IOException {

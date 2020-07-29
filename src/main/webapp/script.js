@@ -8,6 +8,7 @@ function authorizeCallback(authResult) {
     xhr.onreadystatechange = function() { 
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
             console.log("logged refresh token successfully");
+            window.location.href = "/index.html";
         }
     }
     xhr.send("code=" + authResult['code']);
