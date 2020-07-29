@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body>
+  <body onload="handleLogin()">
     <button id="signinButton">You must first authorize or reauthorize!!</button>
     <script>
         gapi.load('auth2', function() {

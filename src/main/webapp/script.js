@@ -18,24 +18,17 @@ function authorizeCallback(authResult) {
   }
 }
 
-// function authorizeCallback(authResult) {
-//   if (authResult['code']) {
-//     $('#signinButton').attr('style', 'display: none');
-//     var xhr = new XMLHttpRequest();
-//     xhr.open("POST", '/devices', true);
-//     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-//     xhr.onreadystatechange = function() { 
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             console.log("logged successfully");
-//         }
-//     }
-//     xhr.send("code=" + authResult['code']);
-//   } else {
-//     console.log("user is not signed in");
-//     window.location.href = "/login";
-//   }
-// }
+function getDevices() {
+    const historyEl = document.getElementById('devices');
+    historyEl.innerHTML = 'things r loading!!!';
+    fetch("/devices").then(response => response.json())
+    .then(function(stuff) {
+        historyEl.innerHTML = JSON.stringify(stuff);
+    }).catch(function() {
+        console.log("error");
+        window.location.href = "/authorize.html";
+    });
+}
 
 
 async function handleLogin() {

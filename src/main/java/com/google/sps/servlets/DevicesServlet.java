@@ -38,6 +38,16 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.FileReader;
 import java.io.File;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 
 @WebServlet("/devices")
 public class DevicesServlet extends HttpServlet {
@@ -46,35 +56,33 @@ public class DevicesServlet extends HttpServlet {
   private final String CLIENT_SECRET_FILE = "/client_info.json";
   private final OkHttpClient client = new OkHttpClient();
   private final String INVALID_ACCESS_TOKEN = "INVALIDDD";
+  private final String EMPTY_REFRESH_TOKEN = "";
+  private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-  }
-
-
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final String authCode = (String) request.getParameter("code");
+    final UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+        response.sendRedirect("/login");
+    }
+    final String userId = userService.getCurrentUser().getUserId();
+    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
+    PreparedQuery results = datastore.prepare(query);
+    String refreshToken = EMPTY_REFRESH_TOKEN;
+    for (final Entity entity : results.asIterable()) {
+      refreshToken = (String) entity.getProperty("refreshToken");
+      break;
+    }
+    if (refreshToken == EMPTY_REFRESH_TOKEN) {
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+    }
     File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
             JacksonFactory.getDefaultInstance(), new FileReader(file));
     final String clientId = clientSecrets.getDetails().getClientId();
     final String clientSecret = clientSecrets.getDetails().getClientSecret();
-    final GoogleTokenResponse tokenResponse =
-            new GoogleAuthorizationCodeTokenRequest(
-                new NetHttpTransport(),
-                JacksonFactory.getDefaultInstance(),
-                "https://oauth2.googleapis.com/token",
-                clientSecrets.getDetails().getClientId(),
-                clientSecrets.getDetails().getClientSecret(),
-                authCode,
-                "http://localhost:8080") 
-                .execute();
-    final String accessToken = tokenResponse.getAccessToken();
-    final String refreshToken = tokenResponse.getRefreshToken();
-    getAccessToken(refreshToken, clientId, clientSecret);
+    final String accessToken = getAccessToken(refreshToken, clientId, clientSecret);
     HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
     urlBuilder.addQueryParameter("maxResults", "55");
     urlBuilder.addQueryParameter("projection", "FULL");
@@ -86,27 +94,37 @@ public class DevicesServlet extends HttpServlet {
         .build();
     Response myResponse = client.newCall(req).execute();
     final String content = myResponse.body().string();
-    final List<ChromeOSDevice> allDevices = new ArrayList<>();
-    ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
-    allDevices.addAll(resp.getDevices());
-    while (resp.hasNextPageToken()) {
-        urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
-        urlBuilder.addQueryParameter("maxResults", "55");
-        urlBuilder.addQueryParameter("projection", "FULL");
-        urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
-        urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
-        System.out.println((String) resp.getNextPageToken());
-        urlBuilder.addQueryParameter("pageToken", (String) resp.getNextPageToken());
-        String newUrl = urlBuilder.build().toString();
-        Request newReq = new Request.Builder()
-            .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
-            .build();
-        Response newResponse = client.newCall(newReq).execute();
-        final String newContent = newResponse.body().string();
-        resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
-        allDevices.addAll(resp.getDevices());
-        System.out.println(allDevices.size());
-    }
+    response.setContentType("application/json");
+    final String json = GSON_OBJECT.toJson(content);
+    response.getWriter().println(json);
+    System.out.println("SUCCESS!!!\n\n\n\n\n");
+    // final List<ChromeOSDevice> allDevices = new ArrayList<>();
+    // ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
+    // allDevices.addAll(resp.getDevices());
+    // while (resp.hasNextPageToken()) {
+    //     urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
+    //     urlBuilder.addQueryParameter("maxResults", "55");
+    //     urlBuilder.addQueryParameter("projection", "FULL");
+    //     urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+    //     urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+    //     System.out.println((String) resp.getNextPageToken());
+    //     urlBuilder.addQueryParameter("pageToken", (String) resp.getNextPageToken());
+    //     String newUrl = urlBuilder.build().toString();
+    //     Request newReq = new Request.Builder()
+    //         .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
+    //         .build();
+    //     Response newResponse = client.newCall(newReq).execute();
+    //     final String newContent = newResponse.body().string();
+    //     resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
+    //     allDevices.addAll(resp.getDevices());
+    //     System.out.println(allDevices.size());
+    // }
+  }
+
+
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
   }
 
   private String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
