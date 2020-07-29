@@ -2,36 +2,40 @@ function authorizeCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", '/devices', true);
+    xhr.open("POST", '/authorize', true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
     xhr.onreadystatechange = function() { 
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            console.log("logged successfully");
+            console.log("logged refresh token successfully");
         }
     }
     xhr.send("code=" + authResult['code']);
   } else {
-    console.log("user is not signed in");
-    window.location.href = "/login";
+    console.log("user is not authorized");
+    window.location.href = "/authorize.html";
   }
 }
 
-// function getDevices() {
+// function authorizeCallback(authResult) {
+//   if (authResult['code']) {
+//     $('#signinButton').attr('style', 'display: none');
 //     var xhr = new XMLHttpRequest();
-//     xhr.open("GET", '/devices', true);
+//     xhr.open("POST", '/devices', true);
 //     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//     xhr.onreadystatechange = function() { 
 //         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-// console.log("donne");
+//             console.log("logged successfully");
 //         }
 //     }
 //     xhr.send("code=" + authResult['code']);
 //   } else {
 //     console.log("user is not signed in");
+//     window.location.href = "/login";
 //   }
 // }
+
 
 async function handleLogin() {
   fetch('/status').then(response => response.json()).then((isLoggedIn) => {
