@@ -12,7 +12,7 @@
     <script src="script.js"></script>
   </head>
   <body>
-    <button id="signinButton">Click here to authorize!</button>
+    <button id="signinButton">You must first authorize or reauthorize!!</button>
     <script>
         gapi.load('auth2', function() {
           auth2 = gapi.auth2.init({
@@ -21,7 +21,7 @@
           });
         });
       $('#signinButton').click(function() {
-        auth2.grantOfflineAccess().then(signInCallback);
+        auth2.grantOfflineAccess().then(authorizeCallback);
       });
     </script>
   </body>
