@@ -2,7 +2,7 @@ function signInCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", '/token', true);
+    xhr.open("POST", '/devices', true);
 
     //Send the proper header information along with the request
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

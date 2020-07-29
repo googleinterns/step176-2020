@@ -39,8 +39,8 @@ import java.util.ArrayList;
 import java.io.FileReader;
 import java.io.File;
 
-@WebServlet("/token")
-public class TokenServlet extends HttpServlet {
+@WebServlet("/devices")
+public class DevicesServlet extends HttpServlet {
 
   private final Gson GSON_OBJECT = new Gson();
   private final String CLIENT_SECRET_FILE = "/client_info.json";
