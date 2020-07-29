@@ -17,3 +17,11 @@ console.log("donne");
     console.log("user is not signed in");
   }
 }
+
+async function handleLogin() {
+  fetch('/status').then(response => response.json()).then((isLoggedIn) => {
+    if (!isLoggedIn) {
+      window.location.replace("/login");
+    }
+  });
+}
