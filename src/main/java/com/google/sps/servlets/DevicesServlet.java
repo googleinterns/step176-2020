@@ -66,6 +66,7 @@ public class DevicesServlet extends HttpServlet {
         response.sendRedirect("/login");
     }
     final String userId = userService.getCurrentUser().getUserId();
+    System.out.println("current user id is :" + userId);
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
     String refreshToken = EMPTY_REFRESH_TOKEN;
@@ -132,7 +133,7 @@ public class DevicesServlet extends HttpServlet {
         GoogleTokenResponse response =
             new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
                 refreshToken, clientId, clientSecret).execute();
-      System.out.println("Access token: " + response.getAccessToken());
+      System.out.println("Access token gotten: " + response.getAccessToken());
       return response.getAccessToken();
     } catch (TokenResponseException e) {
       if (e.getDetails() != null) {
