@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.io.FileReader;
 import java.io.File;
 import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -65,8 +66,9 @@ public class DevicesServlet extends HttpServlet {
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
         response.sendRedirect("/login");
+        return;
     }
-    final String userId = user.getUserId();
+    final String currentUser = user.getUserId();
     System.out.println("current user id is :" + userId);
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
