@@ -62,10 +62,11 @@ public class DevicesServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+    final User currentUser = userService.getCurrentUser();
+    if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
         response.sendRedirect("/login");
     }
-    final String userId = userService.getCurrentUser().getUserId();
+    final String userId = user.getUserId();
     System.out.println("current user id is :" + userId);
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
