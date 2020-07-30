@@ -5,12 +5,17 @@ class DashboardManager {
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
     this.table = createNewTable();
-    this.pieChart = createNewPieChart();
+    this.pieChart = createNewPieChart('piechart-container');
+
+    this.table.setDataTable(this.data);
+    this.pieChart.setDataTable(this.data);
 
     this.pieChartDiv = document.getElementById('chart');
 
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
+
+    this.drawnControls = false;
   }
 
   /* Get the initial data to be shown to the user and populate the main datatable*/
@@ -33,40 +38,106 @@ class DashboardManager {
     this.data = new google.visualization.DataTable();
 
     if (this.isAggregating()) {
-      // Setup data for aggregated table/chart view
-      this.data.addColumn('string', this.aggregationSelector.getState().selectedValues[0]);
-      this.data.addColumn('number', 'Devices');
-
-      await (fetch(`/aggregate?aggregationField=${this.aggregationSelector.getState().selectedValues[0]}`)
-          .then(response => response.json())
-          .then(data => {
-              for (let [key, val] of Object.entries(data)) {
-                this.data.addRow([key, val]);
-              }
-      }));
+      await this.updateAggregation();
 
       this.pieChartDiv.classList.remove('chart-hidden');
     } else {
-      // Setup data for standard table view
-      this.data = this.initData();
-      /* TODO: once the server can send a list of devices, we can get real data here.
-      await (fetch('/devices')
-          .then(response => response.json())
-          .then(deviceJsons => {
-              for (let device of deviceJsons) {
-                this.data.addRow([
-                    device.serialNumber,
-                    device.status,
-                    device.assetId,
-                    device.user,
-                    device.location]);
-              }
-      }));
-      */
+      await this.updateNormal();
 
       this.pieChartDiv.classList.add('chart-hidden');
     }
 
+    this.draw();
+  }
+
+  async updateAggregation() {
+    /* Setup data for aggregated table/chart view */
+    let selectorState = this.aggregationSelector.getState().selectedValues;
+
+    // Create appropriate columns for tables depending on what was selected
+    for (let value of selectorState) {
+      this.data.addColumn('string', value);
+    }
+    this.data.addColumn('number', 'Devices');
+
+    const queryString = selectorState.map(displayName => getAnnotatedFieldFromDisplay(displayName).API);
+    await (fetch(`/aggregate?aggregationField=${queryString.join()}`)
+        .then(response => response.json())
+        .then(response => {
+            let results = response.response;
+            for (let entry of results) {
+              const row = selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
+              row.push(entry.count);
+
+              this.data.addRow(row);
+            }
+    }));
+
+    this.table.setDataTable(this.data);
+
+    this.configurePieChart(this.pieChart, this.data, selectorState, 1);
+  }
+
+  async updateNormal() {
+    // Setup data for standard table view
+    this.data = this.initData();
+    /* TODO: once the server can send a list of devices, we can get real data here.
+    await (fetch('/devices')
+        .then(response => response.json())
+        .then(deviceJsons => {
+            for (let device of deviceJsons) {
+              this.data.addRow([
+                  device.serialNumber,
+                  device.status,
+                  device.assetId,
+                  device.user,
+                  device.location]);
+            }
+    }));
+    */
+    this.table.setDataTable(this.data);
+  }
+
+  configurePieChart(pieChart, base_data, selectorState, depth, filter) {
+    let filtered = null;
+    if (filter != undefined) {
+      filtered = new google.visualization.DataView(base_data);
+      filtered.setRows(base_data.getFilteredRows([{'column': depth - 2, 'value': base_data.getValue(filter[0].row, depth - 2)}]));
+    } else {
+      filtered = base_data;
+    }
+    console.log(filtered.toJSON());
+
+    let result = google.visualization.data.group(
+        filtered,
+        [...Array(depth).keys()], // [0, 1, ..., depth-1]
+        [{'column': filtered.getNumberOfColumns() - 1, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+
+    pieChart.setView({'columns': [depth - 1, result.getNumberOfColumns() - 1]});
+    pieChart.setDataTable(result);
+
+    if (selectorState.length - depth > 0) {
+      // Create a new pie chart based on the selected slice
+      google.visualization.events.addListener(
+          pieChart, 'select', this.createSubPieChart.bind(this, pieChart, filtered, selectorState, depth + 1));
+    } else {
+      // TODO: Allow bulk updating the selected slice
+    }
+
+  }
+
+  createSubPieChart(parent, base_data, selectorState, depth) {
+    const chartContainer = document.getElementById('chart');
+
+    const subChartContainer = document.createElement('div');
+    const id = 'chart-' + depth;
+    subChartContainer.setAttribute('id', id);
+
+    chartContainer.appendChild(subChartContainer);
+
+    let pieChart = createNewPieChart(id);
+    this.configurePieChart(pieChart, base_data, selectorState, depth, parent.getChart().getSelection());
+    parent.childChart = pieChart;
     this.draw();
   }
 
@@ -76,16 +147,20 @@ class DashboardManager {
   }
 
   draw() {
-    this.dashboard.draw(this.data);
-
-    this.table.setDataTable(this.data);
+    if (!this.drawnControls) {
+      this.aggregationSelector.draw();
+      this.drawnControls = true;
+    }
 
     this.table.draw();
-    this.aggregationSelector.draw();
-
     if (this.isAggregating()) {
-      this.pieChart.setDataTable(this.data);
       this.pieChart.draw();
+
+      let pieChart = this.pieChart;
+      while (pieChart.childChart != null) {
+        pieChart = pieChart.childChart;
+        pieChart.draw();
+      }
     }
   }
 };
@@ -111,10 +186,10 @@ function createNewTable() {
   });
 }
 
-function createNewPieChart() {
+function createNewPieChart(container) {
   return new google.visualization.ChartWrapper({
       'chartType': 'PieChart',
-      'containerId': 'piechart-container',
+      'containerId': container,
       'options': {
           'title': 'Devices by Location',
           'legend': 'none',
@@ -132,7 +207,10 @@ function createNewPieChart() {
 function createNewAggregationSelector() {
   const aggregationOptions = new google.visualization.DataTable();
   aggregationOptions.addColumn('string', 'Aggregation Options');
-  aggregationOptions.addRows([['annotatedAssetId'], ['annotatedLocation'], ['annotatedUser']]);
+  aggregationOptions.addRows([
+      [AnnotatedFields.ASSET_ID.DISPLAY],
+      [AnnotatedFields.LOCATION.DISPLAY],
+      [AnnotatedFields.USER.DISPLAY]]);
 
   return new google.visualization.ControlWrapper({
       'controlType': 'CategoryFilter',
@@ -143,7 +221,7 @@ function createNewAggregationSelector() {
             'ui': {
                 'label': 'Aggregate By...',
                 'selectedValuesLayout': 'aside',
-                'allowMultiple': false
+                'sortValues': false
             }
         }
   });
