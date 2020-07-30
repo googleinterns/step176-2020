@@ -68,7 +68,7 @@ public class DevicesServlet extends HttpServlet {
         response.sendRedirect("/login");
         return;
     }
-    final String currentUser = user.getUserId();
+    final String userId = currentUser.getUserId();
     System.out.println("current user id is :" + userId);
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
