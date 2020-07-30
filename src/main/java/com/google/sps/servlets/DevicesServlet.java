@@ -79,6 +79,7 @@ public class DevicesServlet extends HttpServlet {
     }
     if (refreshToken == EMPTY_REFRESH_TOKEN) {
         response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        return;
     }
     File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
@@ -98,31 +99,32 @@ public class DevicesServlet extends HttpServlet {
         .build();
     Response myResponse = client.newCall(req).execute();
     final String content = myResponse.body().string();
-    response.setContentType("application/json");
-    final String json = GSON_OBJECT.toJson(content);
+    final List<ChromeOSDevice> allDevices = new ArrayList<>();
+    ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
+    allDevices.addAll(resp.getDevices());
+    while (resp.hasNextPageToken()) {
+        urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
+        urlBuilder.addQueryParameter("maxResults", "55");
+        urlBuilder.addQueryParameter("projection", "FULL");
+        urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+        urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+        System.out.println((String) resp.getNextPageToken());
+        urlBuilder.addQueryParameter("pageToken", (String) resp.getNextPageToken());
+        String newUrl = urlBuilder.build().toString();
+        Request newReq = new Request.Builder()
+            .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
+            .build();
+        Response newResponse = client.newCall(newReq).execute();
+        final String newContent = newResponse.body().string();
+        resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
+        allDevices.addAll(resp.getDevices());
+        System.out.println(allDevices.size());
+        
+    }
+        response.setContentType("application/json");
+    final String json = GSON_OBJECT.toJson(allDevices);
     response.getWriter().println(json);
     System.out.println("SUCCESS!!!\n\n\n\n\n");
-    // final List<ChromeOSDevice> allDevices = new ArrayList<>();
-    // ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
-    // allDevices.addAll(resp.getDevices());
-    // while (resp.hasNextPageToken()) {
-    //     urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
-    //     urlBuilder.addQueryParameter("maxResults", "55");
-    //     urlBuilder.addQueryParameter("projection", "FULL");
-    //     urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
-    //     urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
-    //     System.out.println((String) resp.getNextPageToken());
-    //     urlBuilder.addQueryParameter("pageToken", (String) resp.getNextPageToken());
-    //     String newUrl = urlBuilder.build().toString();
-    //     Request newReq = new Request.Builder()
-    //         .url( newUrl).addHeader("Authorization", "Bearer " + accessToken)
-    //         .build();
-    //     Response newResponse = client.newCall(newReq).execute();
-    //     final String newContent = newResponse.body().string();
-    //     resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
-    //     allDevices.addAll(resp.getDevices());
-    //     System.out.println(allDevices.size());
-    // }
   }
 
 
