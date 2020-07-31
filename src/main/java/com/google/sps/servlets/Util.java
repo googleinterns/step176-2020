@@ -56,22 +56,15 @@ class Util {
     private static final Gson GSON_OBJECT = new Gson();
     private static final String CLIENT_SECRET_FILE = "/client_info.json";
     private static final OkHttpClient client = new OkHttpClient();
-    private static final String INVALID_ACCESS_TOKEN = "INVALIDDD";
+    private static final String INVALID_ACCESS_TOKEN = "INVALID";
     private static final String EMPTY_REFRESH_TOKEN = "";
+    private static final String EMPTY_PAGE_TOKEN = "";
+    private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
+    private static final String MAX_DEVICES_COUNT = "200"; //is limited to effectively 200
     private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
-    System.out.println("current user id is :" + userId);
-    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
-    PreparedQuery results = datastore.prepare(query);
-    String refreshToken = EMPTY_REFRESH_TOKEN;
-    for (final Entity entity : results.asIterable()) {
-      refreshToken = (String) entity.getProperty("refreshToken");
-      break;
-    }
-    if (refreshToken == EMPTY_REFRESH_TOKEN) {
-        throw new IOException("no refresh token!!");
-    }
+    final String refreshToken = getRefreshToken(userId);
     File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(
@@ -79,12 +72,7 @@ class Util {
     final String clientId = clientSecrets.getDetails().getClientId();
     final String clientSecret = clientSecrets.getDetails().getClientSecret();
     final String accessToken = getAccessToken(refreshToken, clientId, clientSecret);
-    HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
-    urlBuilder.addQueryParameter("maxResults", "55");
-    urlBuilder.addQueryParameter("projection", "FULL");
-    urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
-    urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
-    String myUrl = urlBuilder.build().toString();
+    String myUrl = buildUrl(EMPTY_PAGE_TOKEN);
     Request req = new Request.Builder()
         .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
         .build();
@@ -94,7 +82,7 @@ class Util {
     final List<ChromeOSDevice> allDevices = new ArrayList<>();
     allDevices.addAll(resp.getDevices());
     while (resp.hasNextPageToken()) {
-        urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
+        HttpUrl.Builder  urlBuilder = HttpUrl.parse("https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos").newBuilder();
         urlBuilder.addQueryParameter("maxResults", "55");
         urlBuilder.addQueryParameter("projection", "FULL");
         urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
@@ -114,6 +102,20 @@ class Util {
     return allDevices;
     }
 
+    private static String getRefreshToken(String userId) throws IOException {
+            Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
+    PreparedQuery results = datastore.prepare(query);
+    String refreshToken = EMPTY_REFRESH_TOKEN;
+    for (final Entity entity : results.asIterable()) {
+      refreshToken = (String) entity.getProperty("refreshToken");
+      break;
+    }
+    if (refreshToken == EMPTY_REFRESH_TOKEN) {
+        throw new IOException("no refresh token!!");
+    }
+    return refreshToken;
+    }
+
     private static String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
     try {
         GoogleTokenResponse response =
@@ -127,6 +129,18 @@ class Util {
       }
     }
     return INVALID_ACCESS_TOKEN;
+  }
+
+  private static String buildUrl(String pageToken) {
+          HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
+    urlBuilder.addQueryParameter("maxResults", "55");
+    urlBuilder.addQueryParameter("projection", "FULL");
+    urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+    urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+    if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
+        urlBuilder.addQueryParameter("pageToken", pageToken);
+    }
+    return urlBuilder.build().toString();
   }
 
 }
