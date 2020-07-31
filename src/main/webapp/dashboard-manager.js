@@ -85,71 +85,50 @@ class DashboardManager {
 
   /* Setup data for standard table view */
   async updateNormal() {
+    // TODO: use real data
     this.data = this.initData();
-    /* TODO: once the server can send a list of devices, we can get real data here.
-    await (fetch('/devices')
-        .then(response => response.json())
-        .then(deviceJsons => {
-            for (let device of deviceJsons) {
-              this.data.addRow([
-                  device.serialNumber,
-                  device.status,
-                  device.assetId,
-                  device.user,
-                  device.location]);
-            }
-    }));
-    */
     this.table.setDataTable(this.data);
   }
 
+  /* Create a (sub)PieChart with the appropriate data and event handlers */
   configurePieChart(pieChart, baseData, selectorState, depth, parent) {
-    let filtered = null;
-    if (chartHasSelection(parent)) {
-      // The pieChart is being created from slice of parent, filter its data accordingly.
-      filtered = new google.visualization.DataView(baseData);
-      filtered.setRows(baseData.getFilteredRows([{'column': depth - 2, 'value': getChartSelectedValue(parent)}]));
-    } else {
-      filtered = baseData;
-    }
+    // Filer relevant entries from baseData based on which slice (if any) was selected
+    let filtered = filterDataFromParent(baseData, depth, parent);
 
+    // Perform the aggregation and set the result as the pieChart's data
     let result = google.visualization.data.group(
         filtered,
-        [depth - 1], // [0, 1, ..., depth-1]
+        [depth - 1],
         [{'column': filtered.getNumberOfColumns() - 1, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
-
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
-    if (selectorState.length - depth > 0) {
-      // Create a new pie chart based on the selected slice
-      removeAllChildren(pieChart);
-
-      if (pieChart.listener != undefined) {
-        google.visualization.events.removeListener(pieChart.listener);
-        pieChart.listener = undefined;
-      }
-      pieChart.listener = google.visualization.events.addListener(
-          pieChart, 'select', this.createSubPieChart.bind(this, pieChart, filtered, selectorState, depth + 1));
-
-      // Delete all children
+    if (isLastAggregation(selectorState.length, depth)) {
+      // We only want one event listener at a time, so we must remove/overwrite the previous one.
+      addOverwriteableChartEvent(
+        pieChart,
+        'select',
+        this.onSliceSelect.bind(this, pieChart, filtered, selectorState, depth + 1));
     } else {
       // TODO: Allow bulk updating the selected slice
     }
   }
 
+  onSliceSelect(parent, baseData, selectorState, depth) {
+    // Remove all current sub pie charts because a new slice has been selected and
+    // new sub pie charts will be generated
+    removeAllChildren(parent);
+
+    this.createSubPieChart(parent, baseData, selectorState, depth);
+  }
+
   createSubPieChart(parent, baseData, selectorState, depth) {
-    const chartContainer = document.getElementById('chart');
-
-    const subChartContainer = document.createElement('div');
     const id = 'chart-' + depth;
-    subChartContainer.setAttribute('id', id);
+    let pieChart = createNewDivWithPieChart(id);
 
-    chartContainer.appendChild(subChartContainer);
-
-    let pieChart = createNewPieChart(id);
     this.configurePieChart(pieChart, baseData, selectorState, depth, parent);
     parent.childChart = pieChart;
+
     this.draw();
   }
 
@@ -178,6 +157,31 @@ class DashboardManager {
     }
   }
 };
+
+function isLastAggregation(aggregationsDesired, aggregationsDone) {
+  return aggregationsDesired - aggregationsDone > 0;
+}
+
+function filterDataFromParent(baseData, depth, parent) {
+  let filtered = null;
+  if (chartHasSelection(parent)) {
+    // The pieChart is being created from slice of parent, filter its data accordingly.
+    filtered = new google.visualization.DataView(baseData);
+    filtered.setRows(baseData.getFilteredRows([{'column': depth - 2, 'value': getChartSelectedValue(parent)}]));
+  } else {
+    filtered = baseData;
+  }
+  return filtered;
+}
+
+function addOverwriteableChartEvent(chart, eventType, func) {
+  if (chart.listener != null) {
+    google.visualization.events.removeListener(chart.listener);
+    chart.listener = null;
+  }
+
+  chart.listener = google.visualization.events.addListener(chart, eventType, func);
+}
 
 function chartHasSelection(chart) {
   return chart != null && chart.getChart().getSelection().length > 0;
@@ -235,6 +239,15 @@ function createNewPieChart(container) {
       },
       'view': {'columns': [0, 1]}
   });
+}
+
+function createNewDivWithPieChart(container) {
+  const chartContainer = document.getElementById('chart');
+  const subChartContainer = document.createElement('div');
+  subChartContainer.setAttribute('id', container);
+  chartContainer.appendChild(subChartContainer);
+
+  return createNewPieChart(container);
 }
 
 function createNewAggregationSelector() {
