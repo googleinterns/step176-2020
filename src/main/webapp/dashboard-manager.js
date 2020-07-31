@@ -49,7 +49,6 @@ class DashboardManager {
     } else {
       // Setup data for standard table view
       this.data = this.initData();
-      /* TODO: once the server can send a list of devices, we can get real data here.
       await (fetch('/devices')
           .then(response => response.json())
           .then(deviceJsons => {
@@ -62,7 +61,6 @@ class DashboardManager {
                     device.location]);
               }
       }));
-      */
 
       this.pieChartDiv.classList.add('chart-hidden');
     }
