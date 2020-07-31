@@ -3,5 +3,6 @@ google.charts.setOnLoadCallback(dashboardInit);
 
 function dashboardInit() {
   let dashboard = new DashboardManager();
+  dashboard.initData();
   dashboard.draw();
 }

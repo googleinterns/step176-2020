@@ -1,7 +1,6 @@
 class DashboardManager {
   constructor() {
-    this.data = await (this.initData());
-
+    this.data = null;
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
     this.table = createNewTable();
@@ -36,7 +35,7 @@ class DashboardManager {
               }
       }));
 
-    return data;
+    this.data = data;
   }
 
   async updateAndDrawData() {
