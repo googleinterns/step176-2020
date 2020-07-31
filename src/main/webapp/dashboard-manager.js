@@ -29,9 +29,9 @@ class DashboardManager {
                 data.addRow([
                     device.serialNumber,
                     device.status,
-                    device.assetId,
-                    device.user,
-                    device.location]);
+                    device.annotatedAssetId,
+                    device.annotatedUser,
+                    device.annotatedLocation]);
               }
       }));
 
