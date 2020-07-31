@@ -41,24 +41,11 @@ public class ChromeOSDevice {
 
   public ChromeOSDevice copy() {
     return new ChromeOSDevice(
-                              annotatedAssetId,
-                              annotatedLocation,
-                              annotatedUser,
-                              deviceId,
-                              serialNumber);
-  }
-
-  public String getAnnotatedField(String fieldName) throws IllegalArgumentException {
-    switch(fieldName) {
-      case "annotatedAssetId":
-        return getAnnotatedAssetId();
-      case "annotatedLocation":
-        return getAnnotatedLocation();
-      case "annotatedUser":
-        return getAnnotatedUser();
-      default:
-        throw new IllegalArgumentException(fieldName + "is not a valid annotated field");
-    }
+        annotatedAssetId,
+        annotatedLocation,
+        annotatedUser,
+        deviceId,
+        serialNumber);
   }
 
   public String getDeviceId() {
@@ -107,7 +94,7 @@ public class ChromeOSDevice {
   @Override
   public int hashCode() {
     final String hashString = deviceId + "|" + serialNumber;
-    return hashString.hashCode();  
+    return hashString.hashCode();
   }
 
   @Override

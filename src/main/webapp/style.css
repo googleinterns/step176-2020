@@ -1,0 +1,96 @@
+body {
+  margin: 0px;
+}
+
+#container {
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 50px 35px auto 50px;
+  grid-template-areas: "header header"
+                      "aggregation-input chart"
+                      "table chart"
+                      "footer chart";
+}
+
+.header {
+  grid-area: header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.5em;
+  background-color: #3367D6;
+  color: white;
+}
+
+.header > div {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.aggregation-input {
+  grid-area: aggregation-input;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+}
+
+.table {
+  grid-area: table;
+}
+
+#table-container {
+  height: 100%;
+  width: 100%;
+}
+
+.table-header-row {
+  background-color: #e0e0e0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.table-header-row th, .google-visualization-table-table .table-header-row th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 1.3em;
+  text-align: center;
+  border-top: 1px solid #eee;
+}
+
+.table-row td, .google-visualization-table-table .table-row td {
+  height: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.chart {
+  grid-area: chart;
+  width: 350px;
+  border-left: 2px solid #e0e0e0;
+  transition: 0.5s ease;
+  overflow: hidden;
+}
+
+.chart-hidden {
+  width: 0px;
+  transition: 0.5s ease;
+}
+
+#piechart-container {
+  height: 50%;
+  width: 100%;
+}
+
+.footer {
+  grid-area: footer;
+  background-color: white;
+  border-top: 2px solid #e0e0e0;
+}
+
+#dashboard {
+  display: contents;
+}
