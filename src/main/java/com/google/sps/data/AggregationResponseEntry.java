@@ -8,7 +8,7 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 /*
  * Class representing one row/entry in the aggregation response.  A NULL field value
  * means the field was not being aggregated by, and will be omitted from the JSON response
-*/
+ */
 public final class AggregationResponseEntry {
 
   private String assetId;

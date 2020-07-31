@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 /*
  * Custom deserializer for ChromeOSDevice objects. This is necessary because the default Gson
  * deserializer does not use the constructor, so there is no way to sanitize the input.
-*/
+ */
 public final class ChromeOSDeviceDeserializer implements JsonDeserializer<ChromeOSDevice> {
 
   private static final Gson GSON = new Gson();
