@@ -49,18 +49,21 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query.FilterOperator;
-
+import org.apache.commons.io.FileUtils;
 
 class Util {
 
     private static final Gson GSON_OBJECT = new Gson();
     private static final String CLIENT_SECRET_FILE = "/client_info.json";
+    private static final String API_KEY_FILE = "/api_key.txt";
     private static final OkHttpClient client = new OkHttpClient();
     private static final String INVALID_ACCESS_TOKEN = "INVALID";
     private static final String EMPTY_REFRESH_TOKEN = "";
     private static final String EMPTY_PAGE_TOKEN = "";
     private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
-    private static final String MAX_DEVICES_COUNT = "200"; //is limited to effectively 200
+    private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
+    private static final String DEFAULT_SORT_ORDER = "ASCENDING";
+    private static final String DEFAULT_PROJECTION = "FULL";
     private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
@@ -74,13 +77,20 @@ class Util {
     final String accessToken = getAccessToken(refreshToken, clientId, clientSecret);
     ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
-    while (resp.hasNextPageToken()) {//
+    while (resp.hasNextPageToken()) {
         final String pageToken = (String) resp.getNextPageToken();
         resp = getDevicesResponse(pageToken, accessToken);
         allDevices.addAll(resp.getDevices());
-        System.out.println(allDevices.size());
     }
+    System.out.println("finished");
+    System.out.println(getAPIKey());
     return allDevices;
+    }
+
+    public static String getAPIKey() throws IOException {
+        File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
+        String str = FileUtils.readFileToString(file);
+        return str;
     }
 
     private static String getRefreshToken(String userId) throws IOException {
@@ -102,7 +112,6 @@ class Util {
         GoogleTokenResponse response =
             new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
                 refreshToken, clientId, clientSecret).execute();
-      System.out.println("Access token gotten: " + response.getAccessToken());
       return response.getAccessToken();
     } catch (TokenResponseException e) {
       if (e.getDetails() != null) {
@@ -114,9 +123,9 @@ class Util {
 
   private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
-    urlBuilder.addQueryParameter("maxResults", "55");
-    urlBuilder.addQueryParameter("projection", "FULL");
-    urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
+    urlBuilder.addQueryParameter("maxResults", DEFAULT_MAX_DEVICES);
+    urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
+    urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
     urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
         urlBuilder.addQueryParameter("pageToken", pageToken);
