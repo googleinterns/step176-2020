@@ -59,6 +59,7 @@ class Util {
     private static final OkHttpClient client = new OkHttpClient();
     private static final String INVALID_ACCESS_TOKEN = "INVALID";
     private static final String EMPTY_REFRESH_TOKEN = "";
+    private static final String EMPTY_API_KEY = "";
     private static final String EMPTY_PAGE_TOKEN = "";
     private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
     private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
@@ -88,10 +89,15 @@ class Util {
     return allDevices;
     }
 
-    public static String getAPIKey() throws IOException {
-        File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
+    public static String getAPIKey() {
+        try {
+       File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
         String str = FileUtils.readFileToString(file);
         return str;
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return EMPTY_API_KEY;
     }
 
     private static String getRefreshToken(String userId) throws IOException {
