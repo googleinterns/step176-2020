@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +99,7 @@ public final class AggregationServletTest {
     expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_TWO}), 2);
 
     MultiKeyMap<String, Integer> actual = AggregationServlet.processData(allDevices,
-        new HashSet<>(Arrays.asList(AnnotatedField.LOCATION, AnnotatedField.ASSET_ID)));
+        new LinkedHashSet<>(Arrays.asList(AnnotatedField.ASSET_ID, AnnotatedField.LOCATION)));
 
     Assert.assertEquals(expected, actual);
   }
@@ -162,7 +162,7 @@ public final class AggregationServletTest {
 
   /** Used for convenience in tests when only aggregating by one field*/
   private MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
-    Set<AnnotatedField> fields = new HashSet<>();
+    LinkedHashSet<AnnotatedField> fields = new LinkedHashSet<>();
     fields.add(field);
 
     return servlet.processData(devices, fields);

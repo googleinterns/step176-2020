@@ -23,11 +23,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +42,7 @@ public class AggregationServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
 
-    Set<AnnotatedField> fields = null;
+    LinkedHashSet<AnnotatedField> fields = null;
     try {
       fields = getAggregationFields(request);
     } catch (IllegalArgumentException e) {
@@ -72,7 +71,9 @@ public class AggregationServlet extends HttpServlet {
     return devices;
   }
 
-  public static MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, Set<AnnotatedField> fields) {
+  public static MultiKeyMap<String, Integer> processData(
+      List<ChromeOSDevice> devices,
+      LinkedHashSet<AnnotatedField> fields) {
     MultiKeyMap<String, Integer> counts = new MultiKeyMap<>();
 
     for (ChromeOSDevice device : devices) {
@@ -93,13 +94,13 @@ public class AggregationServlet extends HttpServlet {
     return counts;
   }
 
-  public static Set<AnnotatedField> getAggregationFields(HttpServletRequest request) {
+  public static LinkedHashSet<AnnotatedField> getAggregationFields(HttpServletRequest request) {
     String fieldString = request.getParameter("aggregationField");
     if (fieldString == null) {
       throw new IllegalArgumentException("Aggregation field cannot be null");
     }
 
-    Set<AnnotatedField> aggregationFields = new HashSet<>();
+    LinkedHashSet<AnnotatedField> aggregationFields = new LinkedHashSet<>();
     String fieldNames[] = fieldString.split(",");
     for (int i = 0; i < fieldNames.length; i++) {
       aggregationFields.add(AnnotatedField.create(fieldNames[i]));

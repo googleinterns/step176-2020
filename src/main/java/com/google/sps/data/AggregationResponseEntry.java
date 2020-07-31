@@ -1,8 +1,8 @@
 package com.google.sps.data;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 
 /*
@@ -16,7 +16,7 @@ public final class AggregationResponseEntry {
   private String user;
   private final int count;
 
-  public AggregationResponseEntry(MultiKey key, int count, Set<AnnotatedField> fields) {
+  public AggregationResponseEntry(MultiKey key, int count, LinkedHashSet<AnnotatedField> fields) {
 
     String keys[] = (String[]) key.getKeys();
     int currKey = 0;
