@@ -51,8 +51,8 @@ public class AuthorizeServlet extends HttpServlet {
     final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-        response.sendRedirect("/login");
-        return;
+      response.sendRedirect("/login");
+      return;
     }
     final String userId = currentUser.getUserId();
     final String authCode = (String) request.getParameter("code");
@@ -67,20 +67,20 @@ public class AuthorizeServlet extends HttpServlet {
   private String getRefreshCode(String authCode) throws IOException {
     File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
-        GoogleClientSecrets.load(
-            JacksonFactory.getDefaultInstance(), new FileReader(file));
+    GoogleClientSecrets.load(
+      JacksonFactory.getDefaultInstance(), new FileReader(file));
     final String clientId = clientSecrets.getDetails().getClientId();
     final String clientSecret = clientSecrets.getDetails().getClientSecret();
     final GoogleTokenResponse tokenResponse =
-            new GoogleAuthorizationCodeTokenRequest(
-                new NetHttpTransport(),
-                JacksonFactory.getDefaultInstance(),
-                "https://oauth2.googleapis.com/token",
-                clientSecrets.getDetails().getClientId(),
-                clientSecrets.getDetails().getClientSecret(),
-                authCode,
-                "http://localhost:8080") 
-                .execute();
+    new GoogleAuthorizationCodeTokenRequest(
+      new NetHttpTransport(),
+      JacksonFactory.getDefaultInstance(),
+      "https://oauth2.googleapis.com/token",
+      clientSecrets.getDetails().getClientId(),
+      clientSecrets.getDetails().getClientSecret(),
+      authCode,
+      "http://localhost:8080") 
+      .execute();
     final String refreshToken = tokenResponse.getRefreshToken();
     return refreshToken;
   }

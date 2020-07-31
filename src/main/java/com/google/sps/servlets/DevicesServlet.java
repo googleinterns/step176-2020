@@ -26,8 +26,8 @@ public class DevicesServlet extends HttpServlet {
     final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-        response.sendRedirect("/login");
-        return;
+      response.sendRedirect("/login");
+      return;
     }
     final String userId = currentUser.getUserId();
     final List<ChromeOSDevice> allDevices = Util.getAllDevices(userId);
