@@ -1,8 +1,8 @@
 google.charts.load('current', {'packages':['table', 'corechart', 'controls']});
 google.charts.setOnLoadCallback(dashboardInit);
 
-function dashboardInit() {
+async function dashboardInit() {
   let dashboard = new DashboardManager();
-  dashboard.initData();
+  await dashboard.initData();
   dashboard.draw();
 }
