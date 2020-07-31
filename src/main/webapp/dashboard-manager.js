@@ -22,7 +22,7 @@ class DashboardManager {
     data.addColumn('string', 'User');
     data.addColumn('string', 'Location');
 
-      await (fetch('/devices')
+ (fetch('/devices')
           .then(response => response.json())
           .then(deviceJsons => {
               for (let device of deviceJsons) {
@@ -153,5 +153,13 @@ function createNewAggregationSelector() {
                 'allowMultiple': false
             }
         }
+  });
+}
+
+async function handleLogin() {
+  fetch('/status').then(response => response.json()).then((isLoggedIn) => {
+    if (!isLoggedIn) {
+      window.location.replace("/login");
+    }
   });
 }
