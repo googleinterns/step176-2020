@@ -24,7 +24,7 @@ class DashboardManager {
 
     // TODO: Use real data pulled from server.
     data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
-    data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
+    data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Bob', 'Alaska']);
 
     return data;
   }
