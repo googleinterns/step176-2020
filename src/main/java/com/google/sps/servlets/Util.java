@@ -72,23 +72,11 @@ class Util {
     final String clientId = clientSecrets.getDetails().getClientId();
     final String clientSecret = clientSecrets.getDetails().getClientSecret();
     final String accessToken = getAccessToken(refreshToken, clientId, clientSecret);
-    String myUrl = buildUrl(EMPTY_PAGE_TOKEN);
-    Request req = new Request.Builder()
-        .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
-        .build();
-    Response myResponse = client.newCall(req).execute();
-    final String content = myResponse.body().string();
-    ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
-    final List<ChromeOSDevice> allDevices = new ArrayList<>();
-    allDevices.addAll(resp.getDevices());
-    while (resp.hasNextPageToken()) {
-        String newUrl = buildUrl((String) resp.getNextPageToken());//urlBuilder.build().toString();
-        Request newReq = new Request.Builder()
-            .url(newUrl).addHeader("Authorization", "Bearer " + accessToken)
-            .build();
-        Response newResponse = client.newCall(newReq).execute();
-        final String newContent = newResponse.body().string();
-        resp = (ListDeviceResponse) Json.fromJson(newContent, ListDeviceResponse.class);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken);
+    final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
+    while (resp.hasNextPageToken()) {//
+        final String pageToken = (String) resp.getNextPageToken();
+        resp = getDevicesResponse(pageToken, accessToken);
         allDevices.addAll(resp.getDevices());
         System.out.println(allDevices.size());
     }
@@ -124,8 +112,8 @@ class Util {
     return INVALID_ACCESS_TOKEN;
   }
 
-  private static String buildUrl(String pageToken) {
-          HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
+  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken) throws IOException {
+    HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
     urlBuilder.addQueryParameter("maxResults", "55");
     urlBuilder.addQueryParameter("projection", "FULL");
     urlBuilder.addQueryParameter("sortOrder", "ASCENDING");
@@ -133,7 +121,14 @@ class Util {
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
         urlBuilder.addQueryParameter("pageToken", pageToken);
     }
-    return urlBuilder.build().toString();
+    final String myUrl = urlBuilder.build().toString();
+    Request req = new Request.Builder()
+        .url(myUrl).addHeader("Authorization", "Bearer " + accessToken)
+        .build();
+    Response myResponse = client.newCall(req).execute();
+    final String content = myResponse.body().string();
+    ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
+    return resp;
   }
 
 }
