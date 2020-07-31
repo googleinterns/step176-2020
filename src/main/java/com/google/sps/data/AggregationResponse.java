@@ -11,7 +11,7 @@ import org.apache.commons.collections4.MapIterator;
 /*
  * Class representing successful response to Aggregation Servlet request.
  * Contains the data for the device counts according to the specified aggregation fields
-*/
+ */
 public final class AggregationResponse {
 
   private final List<AggregationResponseEntry> response;

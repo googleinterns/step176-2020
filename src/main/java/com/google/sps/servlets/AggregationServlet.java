@@ -93,14 +93,6 @@ public class AggregationServlet extends HttpServlet {
     return counts;
   }
 
-  /** Used for convenience in tests when only aggregating by one field*/
-  public static MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
-    Set<AnnotatedField> fields = new HashSet<>();
-    fields.add(field);
-
-    return processData(devices, fields);
-  }
-
   public static Set<AnnotatedField> getAggregationFields(HttpServletRequest request) {
     String fieldString = request.getParameter("aggregationField");
     if (fieldString == null) {
