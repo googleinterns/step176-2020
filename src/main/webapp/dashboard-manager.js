@@ -1,6 +1,6 @@
 class DashboardManager {
   constructor() {
-    this.data = this.initData();
+    this.data = await(this.initData());
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
@@ -14,7 +14,7 @@ class DashboardManager {
   }
 
   /* Get the initial data to be shown to the user and populate the main datatable*/
-  initData() {
+  async initData() {
     let data = new google.visualization.DataTable();
     data.addColumn('string', 'Serial Number');//this is fake data
     data.addColumn('string', 'Status');//TODO: integrate in real data
@@ -22,9 +22,10 @@ class DashboardManager {
     data.addColumn('string', 'User');
     data.addColumn('string', 'Location');
 
- (fetch('/devices')
+    await (fetch('/devices')
           .then(response => response.json())
           .then(deviceJsons => {
+              console.log(deviceJsons);
               for (let device of deviceJsons) {
                 this.data.addRow([
                     device.serialNumber,
