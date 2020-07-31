@@ -22,9 +22,18 @@ class DashboardManager {
     data.addColumn('string', 'User');
     data.addColumn('string', 'Location');
 
-    // TODO: Use real data pulled from server.
-    data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
-    data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Bob', 'Alaska']);
+      await (fetch('/devices')
+          .then(response => response.json())
+          .then(deviceJsons => {
+              for (let device of deviceJsons) {
+                this.data.addRow([
+                    device.serialNumber,
+                    device.status,
+                    device.assetId,
+                    device.user,
+                    device.location]);
+              }
+      }));
 
     return data;
   }
