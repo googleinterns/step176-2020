@@ -50,8 +50,8 @@ class DashboardManager {
     this.draw();
   }
 
+  /* Setup data for aggregated table/chart view */
   async updateAggregation() {
-    /* Setup data for aggregated table/chart view */
     let selectorState = this.aggregationSelector.getState().selectedValues;
 
     // Create appropriate columns for tables depending on what was selected
@@ -60,13 +60,16 @@ class DashboardManager {
     }
     this.data.addColumn('number', 'Devices');
 
-    const queryString = selectorState.map(displayName => getAnnotatedFieldFromDisplay(displayName).API);
-    await (fetch(`/aggregate?aggregationField=${queryString.join()}`)
+    // Get fields we are aggregating by and convert from user-displayed name to API name.
+    const queryStringVals =
+        selectorState.map(displayName => getAnnotatedFieldFromDisplay(displayName).API);
+    await (fetch(`/aggregate?aggregationField=${queryStringVals.join()}`)
         .then(response => response.json())
         .then(response => {
             let results = response.response;
             for (let entry of results) {
-              const row = selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
+              const row =
+                  selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
 
               this.data.addRow(row);
@@ -75,6 +78,7 @@ class DashboardManager {
 
     this.table.setDataTable(this.data);
 
+    // Setup pie chart
     let curr = this.pieChart.childChart;
     while (curr != null) {
       let temp = curr.childChart;
@@ -85,8 +89,8 @@ class DashboardManager {
     this.configurePieChart(this.pieChart, this.data, selectorState, 1);
   }
 
+  /* Setup data for standard table view */
   async updateNormal() {
-    // Setup data for standard table view
     this.data = this.initData();
     /* TODO: once the server can send a list of devices, we can get real data here.
     await (fetch('/devices')
@@ -110,9 +114,6 @@ class DashboardManager {
     if (parent != undefined && parent.getChart().getSelection().length != 0) {
       filtered = new google.visualization.DataView(base_data);
       let filter = parent.getChart().getSelection();
-      console.log(parent.getDataTable().toJSON());
-      console.log(base_data.toJSON());
-      console.log('---------------');
       filtered.setRows(base_data.getFilteredRows([{'column': depth - 2, 'value': parent.getDataTable().getValue(filter[0].row, 0)}]));
     } else {
       filtered = base_data;
@@ -134,6 +135,8 @@ class DashboardManager {
       }
       pieChart.listener = google.visualization.events.addListener(
           pieChart, 'select', this.createSubPieChart.bind(this, pieChart, filtered, selectorState, depth + 1));
+
+      // Delete all children
     } else {
       // TODO: Allow bulk updating the selected slice
     }
