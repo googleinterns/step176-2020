@@ -1,6 +1,6 @@
 class DashboardManager {
   constructor() {
-    this.data = null;
+    this.data = new google.visualization.DataTable();
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
     this.table = createNewTable();
@@ -26,7 +26,7 @@ class DashboardManager {
           .then(deviceJsons => {
               console.log(deviceJsons);
               for (let device of deviceJsons) {
-                this.data.addRow([
+                data.addRow([
                     device.serialNumber,
                     device.status,
                     device.assetId,
