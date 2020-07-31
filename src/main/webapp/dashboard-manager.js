@@ -1,6 +1,6 @@
 class DashboardManager {
   constructor() {
-    this.data = await(this.initData());
+    this.data = await (this.initData());
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
