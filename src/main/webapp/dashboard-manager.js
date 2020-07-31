@@ -79,13 +79,7 @@ class DashboardManager {
     this.table.setDataTable(this.data);
 
     // Setup pie chart
-    let curr = this.pieChart.childChart;
-    while (curr != null) {
-      let temp = curr.childChart;
-      curr.getChart().clearChart();
-      curr = temp;
-    }
-    this.pieChart.childChart = null;
+    removeAllChildren(this.pieChart);
     this.configurePieChart(this.pieChart, this.data, selectorState, 1);
   }
 
@@ -109,14 +103,14 @@ class DashboardManager {
     this.table.setDataTable(this.data);
   }
 
-  configurePieChart(pieChart, base_data, selectorState, depth, parent) {
+  configurePieChart(pieChart, baseData, selectorState, depth, parent) {
     let filtered = null;
-    if (parent != undefined && parent.getChart().getSelection().length != 0) {
-      filtered = new google.visualization.DataView(base_data);
-      let filter = parent.getChart().getSelection();
-      filtered.setRows(base_data.getFilteredRows([{'column': depth - 2, 'value': parent.getDataTable().getValue(filter[0].row, 0)}]));
+    if (chartHasSelection(parent)) {
+      // The pieChart is being created from slice of parent, filter its data accordingly.
+      filtered = new google.visualization.DataView(baseData);
+      filtered.setRows(baseData.getFilteredRows([{'column': depth - 2, 'value': getChartSelectedValue(parent)}]));
     } else {
-      filtered = base_data;
+      filtered = baseData;
     }
 
     let result = google.visualization.data.group(
@@ -129,6 +123,8 @@ class DashboardManager {
 
     if (selectorState.length - depth > 0) {
       // Create a new pie chart based on the selected slice
+      removeAllChildren(pieChart);
+
       if (pieChart.listener != undefined) {
         google.visualization.events.removeListener(pieChart.listener);
         pieChart.listener = undefined;
@@ -140,10 +136,9 @@ class DashboardManager {
     } else {
       // TODO: Allow bulk updating the selected slice
     }
-
   }
 
-  createSubPieChart(parent, base_data, selectorState, depth) {
+  createSubPieChart(parent, baseData, selectorState, depth) {
     const chartContainer = document.getElementById('chart');
 
     const subChartContainer = document.createElement('div');
@@ -153,8 +148,7 @@ class DashboardManager {
     chartContainer.appendChild(subChartContainer);
 
     let pieChart = createNewPieChart(id);
-    console.log("Selection at depth ", depth, ": ", parent.getChart().getSelection());
-    this.configurePieChart(pieChart, base_data, selectorState, depth, parent);
+    this.configurePieChart(pieChart, baseData, selectorState, depth, parent);
     parent.childChart = pieChart;
     this.draw();
   }
@@ -173,18 +167,39 @@ class DashboardManager {
     this.table.draw();
     if (this.isAggregating()) {
       this.pieChart.draw();
+      this.drawChildren(this.pieChart);
+    }
+  }
 
-      let pieChart = this.pieChart;
-      while (pieChart.childChart != null) {
-        pieChart = pieChart.childChart;
-        pieChart.draw();
-      }
+  drawChildren(chart) {
+    while (chart.childChart != null) {
+      chart = chart.childChart;
+      chart.draw();
     }
   }
 };
 
+function chartHasSelection(chart) {
+  return chart != null && chart.getChart().getSelection().length > 0;
+}
 
+function getChartSelectedValue(chart) {
+  let cell = chart.getChart().getSelection()[0];
+  const row = cell.row == null ? 0 : cell.row;
+  const col = cell.col == null ? 0 : cell.col;
 
+  return chart.getDataTable().getValue(row, col);
+}
+
+function removeAllChildren(chart) {
+  let curr = chart.childChart;
+  while (curr != null) {
+    let temp = curr.childChart;
+    curr.getChart().clearChart();
+    curr = temp;
+  }
+  chart.childChart = null;
+}
 
 function createNewTable() {
   return new google.visualization.ChartWrapper({
