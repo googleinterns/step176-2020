@@ -65,6 +65,7 @@ class Util {
     private static final String DEFAULT_SORT_ORDER = "ASCENDING";
     private static final String DEFAULT_PROJECTION = "FULL";
     private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    private static final String API_KEY = getAPIKey(); 
 
   public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
     final String refreshToken = getRefreshToken(userId);
@@ -126,7 +127,7 @@ class Util {
     urlBuilder.addQueryParameter("maxResults", DEFAULT_MAX_DEVICES);
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
-    urlBuilder.addQueryParameter("key", "AIzaSyBq4godZxCMXHkkqLDSve1x27gCSYmBfVM");
+    urlBuilder.addQueryParameter("key", API_KEY);
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
         urlBuilder.addQueryParameter("pageToken", pageToken);
     }
