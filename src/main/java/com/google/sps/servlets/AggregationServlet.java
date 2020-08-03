@@ -40,12 +40,19 @@ public class AggregationServlet extends HttpServlet {
       response.getWriter().println(e.getMessage());
       return;
     }
-
-    List<ChromeOSDevice> devices = amassDevices();
-    Map<String, Integer> data = processData(devices, field);
-
-    response.setStatus(HttpServletResponse.SC_OK);
-    response.getWriter().println(Json.toJson(data));
+    try {
+      List<ChromeOSDevice> devices = amassDevices();
+      Map<String, Integer> data = processData(devices, field);
+      response.setStatus(HttpServletResponse.SC_OK);
+      response.getWriter().println(Json.toJson(data));
+    } catch (IOException e) {
+      response.sendRedirect("/login");
+      return;
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.getWriter().println(e.getMessage());
+      return;
+    }
   }
 
   public List<ChromeOSDevice> amassDevices() throws IOException {
@@ -53,7 +60,7 @@ public class AggregationServlet extends HttpServlet {
     final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-        throw new IOException("user is not logged in");
+      throw new IOException("user is not logged in");
     }
     final String userId = currentUser.getUserId();
     final List<ChromeOSDevice> allDevices = Util.getAllDevices(userId);

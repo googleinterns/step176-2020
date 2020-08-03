@@ -99,7 +99,7 @@ public class ChromeOSDevice {
 
   @Override
   public String toString() {
-    return "(Device with ID:" + deviceId + "]";  
+    return "[Device with ID:" + deviceId + "]";  
   }
 
 }

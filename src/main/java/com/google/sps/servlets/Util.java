@@ -1,59 +1,58 @@
 package com.google.sps.servlets;
 
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.sps.data.ChromeOSDevice;
-import com.google.sps.data.ListDeviceResponse;
-import com.google.sps.gson.Json;
-import javax.servlet.annotation.WebServlet;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import java.io.File;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import java.io.FileReader;
+import org.apache.commons.io.FileUtils;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import java.security.GeneralSecurityException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
-import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import java.security.GeneralSecurityException;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
+import com.squareup.okhttp.HttpUrl;
+import java.io.IOException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.sps.gson.Json;
+import com.google.api.client.json.JsonFactory;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import java.util.List;
+import com.google.sps.data.ListDeviceResponse;
 import com.squareup.okhttp.MediaType;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.squareup.okhttp.OkHttpClient;
+import org.json.simple.parser.ParseException;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.HttpUrl;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.ParseException;
-import org.json.simple.parser.JSONParser;
-import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.FileReader;
-import java.io.File;
-import com.google.appengine.api.users.UserService;
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import org.apache.commons.io.FileUtils;
+import javax.servlet.annotation.WebServlet;
 
 class Util {
 
-  private static final Gson GSON_OBJECT = new Gson();
   private static final String CLIENT_SECRET_FILE = "/client_info.json";
   private static final String API_KEY_FILE = "/api_key.txt";
   private static final OkHttpClient client = new OkHttpClient();
@@ -84,8 +83,6 @@ class Util {
       resp = getDevicesResponse(pageToken, accessToken);
       allDevices.addAll(resp.getDevices());
     }
-    System.out.println("finished");
-    System.out.println(getAPIKey());
     return allDevices;
   }
 
@@ -97,21 +94,19 @@ class Util {
     } catch (IOException e) {
       System.out.println(e.getMessage());
     }
-  return EMPTY_API_KEY;
+    return EMPTY_API_KEY;
   }
 
   private static String getRefreshToken(String userId) throws IOException {
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
-    String refreshToken = EMPTY_REFRESH_TOKEN;
-    for (final Entity entity : results.asIterable()) {
-      refreshToken = (String) entity.getProperty("refreshToken");
-      break;
+    try {
+      Entity entity = results.asSingleEntity();
+      String refreshToken = (String) entity.getProperty("refreshToken");
+      return refreshToken;
+    } catch (PreparedQuery.TooManyResultsException e) {
+      throw new IOException("Error while getting refresh token");
     }
-    if (refreshToken == EMPTY_REFRESH_TOKEN) {
-      throw new IOException("no refresh token!!");
-    }
-    return refreshToken;
   }
 
   private static String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
