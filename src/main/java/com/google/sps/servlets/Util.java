@@ -105,7 +105,7 @@ class Util {
       String refreshToken = (String) entity.getProperty("refreshToken");
       return refreshToken;
     } catch (PreparedQuery.TooManyResultsException e) {
-      System.out.println(e.getMessage());
+      System.out.println(e);
       throw new IOException("Error while getting refresh token");
     }
   }
