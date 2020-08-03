@@ -1,7 +1,5 @@
 package com.google.sps.servlets;
 
-import com.google.gson.Gson;
-import com.google.sps.gson.Json;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +34,8 @@ import com.google.appengine.api.users.User;
 @WebServlet("/authorize")
 public class AuthorizeServlet extends HttpServlet {
 
-  private final Gson GSON_OBJECT = new Gson();
+  private final String TOKEN_END_POINT = "https://oauth2.googleapis.com/token";
+  private final String REROUTE_LINK = "http://localhost:8080";
   private final String CLIENT_SECRET_FILE = "/client_info.json";
   private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -72,15 +71,15 @@ public class AuthorizeServlet extends HttpServlet {
     final String clientId = clientSecrets.getDetails().getClientId();
     final String clientSecret = clientSecrets.getDetails().getClientSecret();
     final GoogleTokenResponse tokenResponse =
-    new GoogleAuthorizationCodeTokenRequest(
-      new NetHttpTransport(),
-      JacksonFactory.getDefaultInstance(),
-      "https://oauth2.googleapis.com/token",
-      clientSecrets.getDetails().getClientId(),
-      clientSecrets.getDetails().getClientSecret(),
-      authCode,
-      "http://localhost:8080") 
-      .execute();
+      new GoogleAuthorizationCodeTokenRequest(
+        new NetHttpTransport(),
+        JacksonFactory.getDefaultInstance(),
+        TOKEN_END_POINT,
+        clientSecrets.getDetails().getClientId(),
+        clientSecrets.getDetails().getClientSecret(),
+        authCode,
+        REROUTE_LINK) 
+        .execute();
     final String refreshToken = tokenResponse.getRefreshToken();
     return refreshToken;
   }
