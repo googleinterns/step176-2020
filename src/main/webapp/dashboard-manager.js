@@ -111,6 +111,10 @@ class DashboardManager {
         this.onSliceSelect.bind(this, pieChart, filtered, selectorState, depth + 1));
     } else {
       // TODO: Allow bulk updating the selected slice
+      addOverwriteableChartEvent(
+        pieChart,
+        'select',
+        () => {console.log("Chart slice was clicked!")});
     }
   }
 
