@@ -1,18 +1,19 @@
 package com.google.sps.servlets;
 
-import java.util.ArrayList;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.ChromeOSDevice;
+import com.google.sps.gson.Json;
+import com.google.sps.servlets.Util;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import com.google.sps.gson.Json;
+import java.util.ArrayList;
 import java.util.List;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;import com.google.sps.servlets.Util;
-import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/devices")
 public class DevicesServlet extends HttpServlet {
