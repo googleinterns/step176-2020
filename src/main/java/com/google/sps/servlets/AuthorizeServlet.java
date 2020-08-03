@@ -1,5 +1,6 @@
 package com.google.sps.servlets;
 
+import java.util.ArrayList;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -24,7 +25,10 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import java.util.List;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
