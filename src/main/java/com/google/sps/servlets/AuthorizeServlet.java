@@ -56,6 +56,18 @@ public class AuthorizeServlet extends HttpServlet {
     response.sendRedirect("/index.html");
   }
 
+  private void deleteStaleTokens() {
+    Query query = new Query("RefreshToken");
+    PreparedQuery results = datastore.prepare(query);
+    List<Key> keysToDelete = new ArrayList<>();
+    for (final Entity entity : results.asIterable()) {
+      final long id = entity.getKey().getId();
+      final Key key = KeyFactory.createKey("RefreshToken", id);
+      keysToDelete.add(key);
+    }
+    datastore.delete(keysToDelete);
+  }
+
   private String getRefreshCode(String authCode) throws IOException {
     File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
