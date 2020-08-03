@@ -7,7 +7,7 @@ import java.util.List;
 /*
  * Class representing response to `list Chrome OS Devices` request.
  * See https://developers.google.com/admin-sdk/directory/v1/reference/chromeosdevices/list
-*/
+ */
 public final class ListDeviceResponse {
 
   private final String kind;
