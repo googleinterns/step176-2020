@@ -100,14 +100,16 @@ class Util {
   private static String getRefreshToken(String userId) throws IOException {
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
-    try {
-      Entity entity = results.asSingleEntity();
-      String refreshToken = (String) entity.getProperty("refreshToken");
-      return refreshToken;
-    } catch (PreparedQuery.TooManyResultsException e) {
-      System.out.println(e);
-      throw new IOException("Error while getting refresh token");
-    }
+    System.out.println(results.countEntities());
+    throw new IOException(":yikes");
+    // try {
+    //   Entity entity = results.asSingleEntity();
+    //   String refreshToken = (String) entity.getProperty("refreshToken");
+    //   return refreshToken;
+    // } catch (PreparedQuery.TooManyResultsException e) {
+    //   System.out.println(e);
+    //   throw new IOException("Error while getting refresh token");
+    // }
   }
 
   private static String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
