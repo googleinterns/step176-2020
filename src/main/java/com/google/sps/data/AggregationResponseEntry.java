@@ -11,9 +11,9 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
  */
 public final class AggregationResponseEntry {
 
-  private String assetId;
-  private String location;
-  private String user;
+  private String annotatedAssetId;
+  private String annotatedLocation;
+  private String annotatedUser;
   private final int count;
 
   public AggregationResponseEntry(MultiKey key, int count, LinkedHashSet<AnnotatedField> fields) {
@@ -25,13 +25,13 @@ public final class AggregationResponseEntry {
     while (it.hasNext()) {
       switch(it.next()) {
         case ASSET_ID:
-          this.assetId = keys[currKey++];
+          this.annotatedAssetId = keys[currKey++];
           break;
         case LOCATION:
-          this.location = keys[currKey++];
+          this.annotatedLocation = keys[currKey++];
           break;
         case USER:
-          this.user = keys[currKey++];
+          this.annotatedUser = keys[currKey++];
           break;
       }
     }
