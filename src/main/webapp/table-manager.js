@@ -1,8 +1,10 @@
 class TableManager {
   constructor() {
     this.table = this.createNewTable();
+    this.baseDataTable = new google.visualization.DataTable();
     this.currPage = 0;
     this.pageSize = 1;
+    this.aggregating = false;
 
     this.pageLeft = document.getElementById('page-left');
     this.pageRight = document.getElementById('page-right');
@@ -26,11 +28,13 @@ class TableManager {
 
     this.pageLeft.disabled = this.currPage == 0;
     this.pageRight.disabled = !this.hasNextPage();
+    console.log(this.hasNextPage());
     this.pageNumber.innerText = this.currPage + 1;
   }
 
   updateAggregation(dataTable) {
     this.currPage = 0;
+    this.aggregating = true;
     // Google charts API has a bug where setting pageSize will cause the table to be
     // paginated, regardles of if the 'page' property is set to 'disable'.  Thus, we
     // must remove the pageSize property entirely.
@@ -45,6 +49,7 @@ class TableManager {
 
   updateNormal(dataTable) {
     this.currPage = 0;
+    this.aggregating = false;
 
     this.table.setOption('page', 'event');
     this.table.setOption('pageSize', 1);
@@ -52,18 +57,35 @@ class TableManager {
   }
 
   setDataTable(dataTable) {
-    this.table.setDataTable(dataTable);
+    if (dataTable != null) {
+      this.baseDataTable = dataTable;
+    }
+
+    if (this.aggregating) {
+      this.table.setDataTable(this.baseDataTable);
+    } else {
+      let dt = new google.visualization.DataView(this.baseDataTable);
+      dt.setRows(
+          this.currPage * this.pageSize, this.currPage * this.pageSize + this.pageSize - 1);
+      this.table.setDataTable(dt);
+    }
   }
 
   hasNextPage() {
-    return true;
+    console.log(this.baseDataTable.getNumberOfRows());
+    return (this.currPage + 1) * this.pageSize < this.baseDataTable.getNumberOfRows();
   }
 
   onPageChange(properties) {
     const pageDelta = properties['page']; // 1 or -1
     const newPage = this.currPage + pageDelta;
 
+    // do some bounds checks on newPage
+
     this.currPage = newPage;
+    // TODO: Eventually this should use a server-side pagination endpoint to request material
+    this.setDataTable();
+
     this.draw();
   }
 
