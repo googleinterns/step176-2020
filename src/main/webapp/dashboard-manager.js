@@ -15,6 +15,21 @@ class DashboardManager {
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
 
+    google.visualization.events.addOneTimeListener(this.table, 'ready', () => {
+      google.visualization.events.addListener(
+          this.table.getChart(), 'page', this.onPageChange.bind(this));
+    });
+
+    this.currPage = 0;
+    this.pageSize = 1;
+
+    document.getElementById('page-left').onclick = () => {
+      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': -1});
+    };
+    document.getElementById('page-right').onclick = () => {
+      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': 1});
+    };
+
     this.drawnControls = false;
   }
 
@@ -30,6 +45,7 @@ class DashboardManager {
     // TODO: Use real data pulled from server.
     data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
     data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
+    data.addRow(['SNABCDE', 'Provisioned', '71ec9a', 'Jake', 'Missouri']);
 
     return data;
   }
@@ -141,12 +157,19 @@ class DashboardManager {
     return this.aggregationSelector.getState().selectedValues.length != 0;
   }
 
+  onPageChange(properties) {
+    const pageDelta = properties['page']; // 1 or -1
+    const newPage = this.currPage + pageDelta;
+
+  }
+
   draw() {
     if (!this.drawnControls) {
       this.aggregationSelector.draw();
       this.drawnControls = true;
     }
-
+    console.log(this.table);
+    console.log(this.table.getOptions());
     this.table.draw();
     if (this.isAggregating()) {
       this.pieChart.draw();
@@ -215,6 +238,8 @@ function createNewTable() {
       'containerId': 'table-container',
       'options': {
           'title': 'Sample Table',
+          'page': 'event',
+          'pageSize': 1,
           'width': '100%',
           'allowHtml': 'true',
           'cssClassNames': {

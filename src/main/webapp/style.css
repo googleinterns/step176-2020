@@ -67,6 +67,11 @@ body {
   text-align: center;
 }
 
+/* Forcefully suppress the default page view */
+.google-visualization-table-div-page {
+  display: none !important;
+}
+
 .chart {
   grid-area: chart;
   width: 350px;
@@ -89,6 +94,19 @@ body {
   grid-area: footer;
   background-color: white;
   border-top: 2px solid #e0e0e0;
+}
+
+.page-control {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.page-arrow {
+  background: none;
+  border: none;
+  font-size: 3em;
 }
 
 #dashboard {
