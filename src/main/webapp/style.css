@@ -38,6 +38,8 @@ body {
 
 .table {
   grid-area: table;
+  height: 100%;
+  overflow: hidden;
 }
 
 #table-container {
