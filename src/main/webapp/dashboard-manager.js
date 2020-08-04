@@ -4,31 +4,16 @@ class DashboardManager {
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
-    this.table = createNewTable();
+    this.tableManager = new TableManager();
     this.pieChart = createNewPieChart('piechart-container');
 
-    this.table.setDataTable(this.data);
+    this.tableManager.setDataTable(this.data);
     this.pieChart.setDataTable(this.data);
 
     this.pieChartDiv = document.getElementById('chart');
 
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
-
-    google.visualization.events.addOneTimeListener(this.table, 'ready', () => {
-      google.visualization.events.addListener(
-          this.table.getChart(), 'page', this.onPageChange.bind(this));
-    });
-
-    this.currPage = 0;
-    this.pageSize = 1;
-
-    document.getElementById('page-left').onclick = () => {
-      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': -1});
-    };
-    document.getElementById('page-right').onclick = () => {
-      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': 1});
-    };
 
     this.drawnControls = false;
   }
@@ -92,7 +77,7 @@ class DashboardManager {
             }
     }));
 
-    this.table.setDataTable(this.data);
+    this.tableManager.updateAggregation(this.data);
 
     // Setup pie chart
     removeAllChildren(this.pieChart);
@@ -103,7 +88,7 @@ class DashboardManager {
   async updateNormal() {
     // TODO: use real data
     this.data = this.initData();
-    this.table.setDataTable(this.data);
+    this.tableManager.updateNormal(this.data);
   }
 
   /* Create a (sub)PieChart with the appropriate data and event handlers */
@@ -157,20 +142,13 @@ class DashboardManager {
     return this.aggregationSelector.getState().selectedValues.length != 0;
   }
 
-  onPageChange(properties) {
-    const pageDelta = properties['page']; // 1 or -1
-    const newPage = this.currPage + pageDelta;
-
-  }
-
   draw() {
     if (!this.drawnControls) {
       this.aggregationSelector.draw();
       this.drawnControls = true;
     }
-    console.log(this.table);
-    console.log(this.table.getOptions());
-    this.table.draw();
+
+    this.tableManager.draw();
     if (this.isAggregating()) {
       this.pieChart.draw();
       this.drawChildren(this.pieChart);
@@ -230,26 +208,6 @@ function removeAllChildren(chart) {
     curr = temp;
   }
   chart.childChart = null;
-}
-
-function createNewTable() {
-  return new google.visualization.ChartWrapper({
-      'chartType': 'Table',
-      'containerId': 'table-container',
-      'options': {
-          'title': 'Sample Table',
-          'page': 'event',
-          'pageSize': 1,
-          'width': '100%',
-          'allowHtml': 'true',
-          'cssClassNames': {
-              'headerRow': 'table-header-row',
-              'tableRow': 'table-row',
-              'oddTableRow': 'table-row',
-              'tableCell': 'table-cell'
-          }
-      }
-  });
 }
 
 function createNewPieChart(container) {
