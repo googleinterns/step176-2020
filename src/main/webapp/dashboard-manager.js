@@ -92,7 +92,7 @@ class DashboardManager {
 
   /* Create a (sub)PieChart with the appropriate data and event handlers */
   configurePieChart(pieChart, baseData, selectorState, depth, parent) {
-    // Filer relevant entries from baseData based on which slice (if any) was selected
+    // Filter relevant entries from baseData based on which slice (if any) was selected
     let filtered = filterDataFromParent(baseData, depth, parent);
 
     // Perform the aggregation and set the result as the pieChart's data
@@ -103,7 +103,7 @@ class DashboardManager {
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
-    if (isLastAggregation(selectorState.length, depth)) {
+    if (!isLastAggregation(selectorState.length, depth)) {
       // We only want one event listener at a time, so we must remove/overwrite the previous one.
       addOverwriteableChartEvent(
         pieChart,
@@ -163,7 +163,7 @@ class DashboardManager {
 };
 
 function isLastAggregation(aggregationsDesired, aggregationsDone) {
-  return aggregationsDesired - aggregationsDone > 0;
+  return aggregationsDesired - aggregationsDone <= 0;
 }
 
 function filterDataFromParent(baseData, depth, parent) {
