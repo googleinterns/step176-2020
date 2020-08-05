@@ -94,10 +94,11 @@ class TableManager {
     const pageDelta = properties['page']; // 1 or -1
     const newPage = this.currPage + pageDelta;
 
-    if (newPage > 0) {
-      this.currPage = newPage;
+    if (newPage < 0) {
+      return;
     }
 
+    this.currPage = newPage;
     // TODO: Eventually this should use a server-side pagination endpoint to request material
     this.setDataTable();
 
