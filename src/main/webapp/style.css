@@ -8,7 +8,7 @@ body {
   grid-template-columns: 1fr auto;
   grid-template-rows: 50px 35px auto 50px;
   grid-template-areas: "header header"
-                      "aggregation-input chart"
+                      "aggregation-input aggregation-input"
                       "table chart"
                       "footer chart";
 }
@@ -34,6 +34,10 @@ body {
   align-items: center;
   justify-content: center;
   background-color: white;
+}
+
+.google-visualization-controls-categoryfilter > label {
+  vertical-align: middle;
 }
 
 .table {
@@ -80,10 +84,14 @@ body {
 
 .chart {
   grid-area: chart;
-  width: 350px;
+  align-items: center;
   border-left: 2px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
   transition: 0.5s ease;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  width: 360px;
 }
 
 .chart-hidden {
