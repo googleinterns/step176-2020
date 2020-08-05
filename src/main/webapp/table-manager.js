@@ -3,12 +3,13 @@ class TableManager {
     this.table = this.createNewTable();
     this.baseDataTable = new google.visualization.DataTable();
     this.currPage = 0;
-    this.pageSize = 1;
+    this.pageSize = 10;
     this.aggregating = false;
 
     this.pageLeft = document.getElementById('page-left');
     this.pageRight = document.getElementById('page-right');
     this.pageNumber = document.getElementById('page-number');
+    this.pageSizeSelect = document.getElementById('page-size-select');
 
     google.visualization.events.addOneTimeListener(this.table, 'ready', () => {
       google.visualization.events.addListener(
@@ -21,15 +22,26 @@ class TableManager {
     this.pageRight.onclick = () => {
       google.visualization.events.trigger(this.table.getChart(), 'page', {'page': 1});
     };
+    this.pageSizeSelect.onchange = () => {
+      this.onPageSizeChange(parseInt(this.pageSizeSelect.value));
+    };
   }
 
   draw() {
     this.table.draw();
-
-    this.pageLeft.disabled = this.currPage == 0;
-    this.pageRight.disabled = !this.hasNextPage();
-    console.log(this.hasNextPage());
     this.pageNumber.innerText = this.currPage + 1;
+
+    this.drawArrows();
+  }
+
+  drawArrows() {
+    if (this.aggregating) {
+      this.pageLeft.disabled = true;
+      this.pageRight.disabled = true;
+    } else {
+      this.pageLeft.disabled = this.currPage == 0;
+      this.pageRight.disabled = !this.hasNextPage();
+    }
   }
 
   updateAggregation(dataTable) {
@@ -52,7 +64,7 @@ class TableManager {
     this.aggregating = false;
 
     this.table.setOption('page', 'event');
-    this.table.setOption('pageSize', 1);
+    this.table.setOption('pageSize', this.pageSize);
     this.setDataTable(dataTable);
   }
 
@@ -64,15 +76,17 @@ class TableManager {
     if (this.aggregating) {
       this.table.setDataTable(this.baseDataTable);
     } else {
-      let dt = new google.visualization.DataView(this.baseDataTable);
-      dt.setRows(
-          this.currPage * this.pageSize, this.currPage * this.pageSize + this.pageSize - 1);
-      this.table.setDataTable(dt);
+      let view = new google.visualization.DataView(this.baseDataTable);
+      const startIndex = this.currPage * this.pageSize;
+      const endIndex = Math.min(
+          this.currPage * this.pageSize + this.pageSize - 1,
+          this.baseDataTable.getNumberOfRows() - 1);
+      view.setRows(startIndex, endIndex);
+      this.table.setDataTable(view);
     }
   }
 
   hasNextPage() {
-    console.log(this.baseDataTable.getNumberOfRows());
     return (this.currPage + 1) * this.pageSize < this.baseDataTable.getNumberOfRows();
   }
 
@@ -80,9 +94,21 @@ class TableManager {
     const pageDelta = properties['page']; // 1 or -1
     const newPage = this.currPage + pageDelta;
 
-    // do some bounds checks on newPage
+    if (newPage > 0) {
+      this.currPage = newPage;
+    }
 
-    this.currPage = newPage;
+    // TODO: Eventually this should use a server-side pagination endpoint to request material
+    this.setDataTable();
+
+    this.draw();
+  }
+
+  onPageSizeChange(newPageSize) {
+    this.pageSize = newPageSize;
+    this.table.setOption('pageSize', newPageSize);
+    this.currPage = 0;
+
     // TODO: Eventually this should use a server-side pagination endpoint to request material
     this.setDataTable();
 
@@ -96,7 +122,7 @@ class TableManager {
         'options': {
             'title': 'Sample Table',
             'page': 'event',
-            'pageSize': 1,
+            'pageSize': 10,
             'width': '100%',
             'allowHtml': 'true',
             'cssClassNames': {
