@@ -94,8 +94,16 @@ body {
 
 .footer {
   grid-area: footer;
+  align-items: center;
   background-color: white;
   border-top: 2px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.footer > div {
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .page-control {
