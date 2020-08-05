@@ -52,7 +52,7 @@ public class UpdateServlet extends HttpServlet {
         String newAnnotatedLocation = locations.get(rand.nextInt(5));
         updateDevice(accessToken, deviceId, newAnnotatedUser, newAnnotatedLocation);
     }
-          response.sendRedirect("/login");
+          response.sendRedirect("/index.html");
       return;
   }
 
