@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.api.client.http.HttpTransport;
-import com.squareup.okhttp.HttpUrl;
+import okhttp3.HttpUrl;
 import java.io.IOException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,15 +35,15 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import java.util.List;
 import com.google.sps.data.ListDeviceResponse;
-import com.squareup.okhttp.MediaType;
+import okhttp3.MediaType;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.squareup.okhttp.OkHttpClient;
+import okhttp3.OkHttpClient;
 import org.json.simple.parser.ParseException;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.users.User;
@@ -68,14 +68,7 @@ class Util {
   private static final String API_KEY = getAPIKey(); 
 
   public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
-    final String refreshToken = getRefreshToken(userId);
-    File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
-    final GoogleClientSecrets clientSecrets =
-    GoogleClientSecrets.load(
-      JacksonFactory.getDefaultInstance(), new FileReader(file));
-    final String clientId = clientSecrets.getDetails().getClientId();
-    final String clientSecret = clientSecrets.getDetails().getClientSecret();
-    final String accessToken = getAccessToken(refreshToken, clientId, clientSecret);
+    final String accessToken = getAccessToken(userId);
     ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
@@ -110,8 +103,15 @@ class Util {
     }
   }
 
-  private static String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
+  public static String getAccessToken(String userId) throws IOException {
     try {
+      final String refreshToken = getRefreshToken(userId);
+      File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
+      final GoogleClientSecrets clientSecrets =
+      GoogleClientSecrets.load(
+        JacksonFactory.getDefaultInstance(), new FileReader(file));
+      final String clientId = clientSecrets.getDetails().getClientId();
+      final String clientSecret = clientSecrets.getDetails().getClientSecret();
       GoogleTokenResponse response =
       new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
         refreshToken, clientId, clientSecret).execute();
