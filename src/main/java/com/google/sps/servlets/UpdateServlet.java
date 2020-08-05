@@ -15,17 +15,19 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.servlets.Util;
 import javax.servlet.annotation.WebServlet;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.FormBody;
-import okhttp3.Response;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.MediaType;
 import java.util.Random;
 import java.util.Arrays;
 
 @WebServlet("/update")
 public class UpdateServlet extends HttpServlet {
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -60,12 +62,15 @@ public class UpdateServlet extends HttpServlet {
     final String myUrl = getUpdateUrl(deviceId);
     final String accessToken = Util.getAccessToken(userId);
     OkHttpClient client = new OkHttpClient();
-    RequestBody formBody = new FormBody.Builder()
-      .add("annotatedLocation", newAnnotatedLocation)
-      .add("annotatedUser", newAnnotatedUser)
-      .build();
-    Request req = new Request.Builder().url(myUrl).put(formBody).addHeader("Authorization", "Bearer " + accessToken).build();
+    String json = getJson(newAnnotatedUser, newAnnotatedLocation);
+    RequestBody body = RequestBody.create(JSON, json);
+    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response myResponse = client.newCall(req).execute();
+  }
+
+  private String getJson(String newAnnotatedUser, String newAnnotatedLocation) {
+                  return "{'annotatedUser':'" + newAnnotatedUser + "',"
+                + "'annotatedLocation':'" + newAnnotatedLocation + "',}";
   }
 
   private String getUpdateUrl(String deviceId) {
