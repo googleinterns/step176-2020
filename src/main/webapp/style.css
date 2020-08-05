@@ -74,6 +74,10 @@ body {
   display: none !important;
 }
 
+.google-visualization-table > div:first-child {
+  height: 100% !important;
+}
+
 .chart {
   grid-area: chart;
   width: 350px;
