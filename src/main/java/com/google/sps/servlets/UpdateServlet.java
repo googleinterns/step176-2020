@@ -47,7 +47,7 @@ public class UpdateServlet extends HttpServlet {
     List<String> users = Arrays.asList("Bob", "Alice", "Eve", "george", "michael", "blab", "name");
     for (String deviceId : deviceIds) {
         Random rand = new Random();
-        String newAnnotatedUser = locations.get(rand.nextInt(7));
+        String newAnnotatedUser = users.get(rand.nextInt(7));
         String newAnnotatedLocation = locations.get(rand.nextInt(5));
         updateDevice(userId, deviceId, newAnnotatedUser, newAnnotatedLocation);
     }
