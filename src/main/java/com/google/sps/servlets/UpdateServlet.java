@@ -38,6 +38,7 @@ public class UpdateServlet extends HttpServlet {
       return;
     }
     final String userId = currentUser.getUserId();
+    final String accessToken = Util.getAccessToken(userId);
     final List<ChromeOSDevice> allDevices = Util.getAllDevices(userId);
     final List<String> deviceIds = new ArrayList<>();
     for (ChromeOSDevice device : allDevices) {
@@ -49,7 +50,7 @@ public class UpdateServlet extends HttpServlet {
         Random rand = new Random();
         String newAnnotatedUser = users.get(rand.nextInt(7));
         String newAnnotatedLocation = locations.get(rand.nextInt(5));
-        updateDevice(userId, deviceId, newAnnotatedUser, newAnnotatedLocation);
+        updateDevice(accessToken, deviceId, newAnnotatedUser, newAnnotatedLocation);
     }
   }
 
@@ -58,14 +59,14 @@ public class UpdateServlet extends HttpServlet {
 
   }
 
-  private void updateDevice(String userId, String deviceId, String newAnnotatedUser, String newAnnotatedLocation) throws IOException {
+  private void updateDevice(String accessToken, String deviceId, String newAnnotatedUser, String newAnnotatedLocation) throws IOException {
     final String myUrl = getUpdateUrl(deviceId);
-    final String accessToken = Util.getAccessToken(userId);
     OkHttpClient client = new OkHttpClient();
     String json = getJson(newAnnotatedUser, newAnnotatedLocation);
     RequestBody body = RequestBody.create(JSON, json);
     Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response myResponse = client.newCall(req).execute();
+    System.out.println("finished updating " + deviceId);
   }
 
   private String getJson(String newAnnotatedUser, String newAnnotatedLocation) {
