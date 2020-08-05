@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -57,13 +58,13 @@ public class AuthorizeServlet extends HttpServlet {
     final String refreshToken = getRefreshCode(authCode);
     tokenEntity.setProperty("userId", userId);
     tokenEntity.setProperty("refreshToken", refreshToken);
-    deleteStaleTokens();
+    deleteStaleTokens(userId);
     datastore.put(tokenEntity);
     response.sendRedirect("/index.html");
   }
 
-  private void deleteStaleTokens() {
-    Query query = new Query("RefreshToken");
+  private void deleteStaleTokens(String userId) {
+    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
     List<Key> keysToDelete = new ArrayList<>();
     for (final Entity entity : results.asIterable()) {

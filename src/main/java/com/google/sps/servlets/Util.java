@@ -68,14 +68,7 @@ class Util {
   private static final String API_KEY = getAPIKey(); 
 
   public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
-    final String refreshToken = getRefreshToken(userId);
-    File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
-    final GoogleClientSecrets clientSecrets =
-    GoogleClientSecrets.load(
-      JacksonFactory.getDefaultInstance(), new FileReader(file));
-    final String clientId = clientSecrets.getDetails().getClientId();
-    final String clientSecret = clientSecrets.getDetails().getClientSecret();
-    final String accessToken = getAccessToken(refreshToken, clientId, clientSecret);
+    final String accessToken = getAccessToken(userId);
     ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
@@ -106,13 +99,19 @@ class Util {
       String refreshToken = (String) entity.getProperty("refreshToken");
       return refreshToken;
     } catch (PreparedQuery.TooManyResultsException e) {
-      System.out.println(e);
       throw new IOException("Error while getting refresh token");
     }
   }
 
-  private static String getAccessToken(String refreshToken, String clientId, String clientSecret) throws IOException {
+  public static String getAccessToken(String userId) throws IOException {
     try {
+      final String refreshToken = getRefreshToken(userId);
+      File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
+      final GoogleClientSecrets clientSecrets =
+      GoogleClientSecrets.load(
+        JacksonFactory.getDefaultInstance(), new FileReader(file));
+      final String clientId = clientSecrets.getDetails().getClientId();
+      final String clientSecret = clientSecrets.getDetails().getClientSecret();
       GoogleTokenResponse response =
       new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
         refreshToken, clientId, clientSecret).execute();
