@@ -31,11 +31,11 @@ class Modal {
 
     let closeBtn = document.createElement('button');
     closeBtn.innerText = "X";
+    closeBtn.classList.add('modal-close-btn');
     closeBtn.onclick = () => {this.hide()};
 
     let heading = document.createElement('h1');
     heading.innerText = text;
-    heading.style.display = 'inline';
 
     this.header.appendChild(closeBtn);
     this.header.appendChild(heading);

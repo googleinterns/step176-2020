@@ -153,10 +153,22 @@ body {
   border-bottom: 2px solid #e0e0e0;
 }
 
+.modal-header > h1 {
+  margin: 0px;
+  text-align: center;
+}
+
+.modal-close-btn {
+  color: red;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
 .blocking {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0px;
+  left: 0px;
   width: 100vw;
   height: 100vh;
   background-color: rgba(1, 1, 1, 0.5);
