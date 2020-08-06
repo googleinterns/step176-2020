@@ -68,6 +68,7 @@ public class UpdateServlet extends HttpServlet {
     RequestBody body = RequestBody.create(JSON, json);
     Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response myResponse = client.newCall(req).execute();
+    myResponse.body().close();
     System.out.println("finished updating " + deviceId);
   }
 
