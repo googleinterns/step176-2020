@@ -15,6 +15,7 @@ public class ChromeOSDevice {
   private String annotatedUser;
   private final String deviceId;
   private final String serialNumber;
+  private final String status;
 
   public ChromeOSDevice(
       String annotatedAssetId,
@@ -27,6 +28,8 @@ public class ChromeOSDevice {
     this.annotatedUser = annotatedUser;
     this.deviceId = deviceId;
     this.serialNumber = serialNumber;
+    this.status = "Provisioned";
+    
     sanitize();
   }
 
@@ -99,7 +102,7 @@ public class ChromeOSDevice {
 
   @Override
   public String toString() {
-    return "[Device with ID:" + deviceId + "]";  
+    return "[Device with ID:" + deviceId + "]";
   }
 
 }

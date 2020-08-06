@@ -56,6 +56,7 @@ class TableManager {
     currOptions['page'] = 'disable';
 
     this.table.setOptions(currOptions);
+    this.table.setView({'columns': [...Array(dataTable.getNumberOfColumns()-1).keys()]});
     this.setDataTable(dataTable);
   }
 
@@ -65,6 +66,7 @@ class TableManager {
 
     this.table.setOption('page', 'event');
     this.table.setOption('pageSize', this.pageSize);
+    this.table.setView({'columns': [...Array(dataTable.getNumberOfColumns()).keys()]});
     this.setDataTable(dataTable);
   }
 
