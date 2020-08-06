@@ -4,16 +4,18 @@ class DashboardManager {
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
-    this.table = createNewTable();
+    this.tableManager = new TableManager();
     this.pieChart = createNewPieChart('piechart-container');
 
-    this.table.setDataTable(this.data);
+    this.tableManager.setDataTable(this.data);
     this.pieChart.setDataTable(this.data);
 
     this.pieChartDiv = document.getElementById('chart');
 
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
+
+    this.updateModal = new Modal('update-modal');
 
     this.drawnControls = false;
   }
@@ -30,6 +32,7 @@ class DashboardManager {
     // TODO: Use real data pulled from server.
     data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
     data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
+    data.addRow(['SNABCDE', 'Provisioned', '71ec9a', 'Jake', 'Missouri']);
 
     return data;
   }
@@ -59,6 +62,7 @@ class DashboardManager {
       this.data.addColumn('string', value);
     }
     this.data.addColumn('number', 'Devices');
+    this.data.addColumn('string', 'deviceIds');
 
     // Get fields we are aggregating by and convert from user-displayed name to API name.
     const queryStringVals =
@@ -72,11 +76,16 @@ class DashboardManager {
                   selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
 
+              if (entry.deviceIds == null) {
+                entry.deviceIds = ['abc', 'def', 'ghi', 'jkl', 'mno'];
+              }
+              row.push(JSON.stringify(entry.deviceIds));
+
               this.data.addRow(row);
             }
     }));
 
-    this.table.setDataTable(this.data);
+    this.tableManager.updateAggregation(this.data);
 
     // Setup pie chart
     removeAllChildren(this.pieChart);
@@ -87,7 +96,7 @@ class DashboardManager {
   async updateNormal() {
     // TODO: use real data
     this.data = this.initData();
-    this.table.setDataTable(this.data);
+    this.tableManager.updateNormal(this.data);
   }
 
   /* Create a (sub)PieChart with the appropriate data and event handlers */
@@ -95,11 +104,14 @@ class DashboardManager {
     // Filter relevant entries from baseData based on which slice (if any) was selected
     let filtered = filterDataFromParent(baseData, depth, parent);
 
+    setChartTitle(pieChart, parent, selectorState, depth);
+
     // Perform the aggregation and set the result as the pieChart's data
     let result = google.visualization.data.group(
         filtered,
         [depth - 1],
-        [{'column': filtered.getNumberOfColumns() - 1, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+                    // Devices count is second to last column
+        [{'column': filtered.getNumberOfColumns() - 2, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
@@ -110,11 +122,18 @@ class DashboardManager {
         'select',
         this.onSliceSelect.bind(this, pieChart, filtered, selectorState, depth + 1));
     } else {
-      // TODO: Allow bulk updating the selected slice
       addOverwriteableChartEvent(
         pieChart,
         'select',
-        () => {console.log("Chart slice was clicked!")});
+        () => {
+          let selectedRow = filterDataFromParent(filtered, depth + 1, pieChart);
+
+          let selectedValues =
+              [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
+          let deviceIds = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 1);
+
+          this.createModalBody(deviceIds, selectedValues);
+        });
     }
   }
 
@@ -128,7 +147,7 @@ class DashboardManager {
 
   createSubPieChart(parent, baseData, selectorState, depth) {
     const id = 'chart-' + depth;
-    let pieChart = createNewDivWithPieChart(id);
+    let pieChart = createNewDivWithPieChart(id, calcChartDiameter(depth));
 
     this.configurePieChart(pieChart, baseData, selectorState, depth, parent);
     parent.childChart = pieChart;
@@ -141,13 +160,48 @@ class DashboardManager {
     return this.aggregationSelector.getState().selectedValues.length != 0;
   }
 
+  createModalBody(deviceIds, selectedValues) {
+    let form = document.createElement('form');
+    form.setAttribute('method', 'POST');
+    form.setAttribute('action', '/update');
+    form.setAttribute('onsubmit', 'return false;');
+
+    for (let i = 0; i < selectedValues.length; i++) {
+      const aggregationField = this.aggregationSelector.getState().selectedValues[i];
+      const aggregationFieldValue = selectedValues[i];
+
+      let label = document.createElement('label');
+      label.innerHTML = aggregationField;
+
+      let input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('value', aggregationFieldValue);
+
+      form.appendChild(label);
+      form.appendChild(input);
+    }
+
+    let devicesInput = document.createElement('input');
+    devicesInput.setAttribute('type', 'hidden');
+    devicesInput.setAttribute('value', deviceIds);
+
+    let submit = document.createElement('input');
+    submit.setAttribute('type', 'submit');
+    form.appendChild(submit);
+
+    this.updateModal.setHeader('Perform Bulk Update');
+    this.updateModal.body.innerHTML = "";
+    this.updateModal.body.appendChild(form);
+    this.updateModal.show();
+  }
+
   draw() {
     if (!this.drawnControls) {
       this.aggregationSelector.draw();
       this.drawnControls = true;
     }
 
-    this.table.draw();
+    this.tableManager.draw();
     if (this.isAggregating()) {
       this.pieChart.draw();
       this.drawChildren(this.pieChart);
@@ -209,25 +263,25 @@ function removeAllChildren(chart) {
   chart.childChart = null;
 }
 
-function createNewTable() {
-  return new google.visualization.ChartWrapper({
-      'chartType': 'Table',
-      'containerId': 'table-container',
-      'options': {
-          'title': 'Sample Table',
-          'width': '100%',
-          'allowHtml': 'true',
-          'cssClassNames': {
-              'headerRow': 'table-header-row',
-              'tableRow': 'table-row',
-              'oddTableRow': 'table-row',
-              'tableCell': 'table-cell'
-          }
-      }
-  });
+function setChartTitle(chart, parent, selectorState, depth){
+  if (parent != null) {
+    chart.setOption('title', parent.getOption('title') + ' > ' + selectorState[depth - 2] + ': '+ getChartSelectedValue(parent));
+  } else {
+    chart.setOption('title', 'Devices by ' + selectorState[0]);
+  }
 }
 
-function createNewPieChart(container) {
+function calcChartDiameter(depth){
+  const base = 350; //pixels;
+  const decay = 0.9;
+
+  return base * Math.pow(decay, depth-1);
+}
+
+function createNewPieChart(container, diameter) {
+  if (diameter == null) {
+    diameter = 350; // pixels
+  }
   return new google.visualization.ChartWrapper({
       'chartType': 'PieChart',
       'containerId': container,
@@ -235,23 +289,23 @@ function createNewPieChart(container) {
           'title': 'Devices by Location',
           'legend': 'none',
           // This needs to be hardcoded because the div moves which causes 100% to be innacurate
-          'width': 350,
-          'height': '50%',
+          'width': diameter,
+          'height': diameter + 75, // room for title
           'chartArea': {
-              'left': '5', 'width': '100%', 'height': '95%'
+              'left': '5', 'width': '100%', 'height': '90%'
           }
       },
       'view': {'columns': [0, 1]}
   });
 }
 
-function createNewDivWithPieChart(container) {
+function createNewDivWithPieChart(container, diameter) {
   const chartContainer = document.getElementById('chart');
   const subChartContainer = document.createElement('div');
   subChartContainer.setAttribute('id', container);
   chartContainer.appendChild(subChartContainer);
 
-  return createNewPieChart(container);
+  return createNewPieChart(container, diameter);
 }
 
 function createNewAggregationSelector() {
