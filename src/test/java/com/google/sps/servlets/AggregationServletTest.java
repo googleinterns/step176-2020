@@ -7,11 +7,15 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,35 +61,57 @@ public final class AggregationServletTest {
 
   @Test
   public void onlyOneUniqueField() {
-    Map<String, Integer> expected = new HashMap<>();
-    expected.put(ASSET_ID_ONE, 5);
+    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE}), 5);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, AnnotatedField.ASSET_ID);
+    MultiKeyMap<String, Integer> actual = processData(allDevices, AnnotatedField.ASSET_ID);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void multipleResultEntries() {
-    Map<String, Integer> expected = new HashMap<>();
-    expected.put(USER_ONE, 2);
-    expected.put(USER_TWO, 1);
-    expected.put(USER_THREE, 2);
+    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(new String[] {USER_ONE}), 2);
+    expected.put(new MultiKey(new String[] {USER_TWO}), 1);
+    expected.put(new MultiKey(new String[] {USER_THREE}), 2);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, AnnotatedField.USER);
+    MultiKeyMap<String, Integer> actual = processData(allDevices, AnnotatedField.USER);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void annotatedLocation() {
-    Map<String, Integer> expected = new HashMap<>();
-    expected.put(LOCATION_ONE, 3);
-    expected.put(LOCATION_TWO, 2);
+    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(new String[] {LOCATION_ONE}), 3);
+    expected.put(new MultiKey(new String[] {LOCATION_TWO}), 2);
 
-    Map<String, Integer> actual = servlet.processData(allDevices, AnnotatedField.LOCATION);
+    MultiKeyMap<String, Integer> actual = processData(allDevices, AnnotatedField.LOCATION);
 
     Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void multipleAggregationFields() {
+    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_ONE}), 3);
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_TWO}), 2);
+
+    MultiKeyMap<String, Integer> actual = AggregationServlet.processData(allDevices,
+        new LinkedHashSet<>(Arrays.asList(AnnotatedField.ASSET_ID, AnnotatedField.LOCATION)));
+
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void invalidMultiFieldArgumentReceivesBadRequest() throws IOException {
+    when(request.getParameter("aggregationField")).thenReturn("annotatedLocation,deviceId");
+    setNewResponseWriter(response);
+
+    servlet.doGet(request, response);
+
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
   }
 
   @Test
@@ -118,10 +144,27 @@ public final class AggregationServletTest {
     verify(response).setStatus(HttpServletResponse.SC_OK);
   }
 
+  @Test
+  public void validMultiFieldArgumentReceivesSuccess() throws IOException{
+    when(request.getParameter("aggregationField")).thenReturn("annotatedLocation,annotatedAssetId");
+    setNewResponseWriter(response);
+
+    servlet.doGet(request, response);
+
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
+
   private void setNewResponseWriter(HttpServletResponse response) throws IOException{
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
   }
 
+  /** Used for convenience in tests when only aggregating by one field*/
+  private MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
+    LinkedHashSet<AnnotatedField> fields = new LinkedHashSet<>();
+    fields.add(field);
+
+    return servlet.processData(devices, fields);
+  }
 }
