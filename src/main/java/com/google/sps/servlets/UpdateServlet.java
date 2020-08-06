@@ -45,14 +45,14 @@ public class UpdateServlet extends HttpServlet {
       return;
     }
     Map<String, String> mp = new HashMap<>();
-    if (request.getParameterMap().containsKey("AnnotatedLocation")) {
-        mp.put("AnnotatedLocation", (String) request.getParameter("AnnotatedLocation"));
+    if (request.getParameterMap().containsKey("annotatedLocation")) {
+        mp.put("annotatedLocation", (String) request.getParameter("annotatedLocation"));
     }
-    if (request.getParameterMap().containsKey("AnnotatedAssetId")) {
-        mp.put("AnnotatedAssetId", (String) request.getParameter("AnnotatedAssetId"));
+    if (request.getParameterMap().containsKey("annotatedAssetId")) {
+        mp.put("annotatedAssetId", (String) request.getParameter("annotatedAssetId"));
     }
-    if (request.getParameterMap().containsKey("AnnotatedUser")) {
-        mp.put("AnnotatedUser", (String) request.getParameter("AnnotatedUser"));
+    if (request.getParameterMap().containsKey("annotatedUser")) {
+        mp.put("annotatedUser", (String) request.getParameter("annotatedUser"));
     }
     final String rawDeviceIds = (String) request.getParameter("deviceIds");
     Type listType = new TypeToken<List<String>>() {}.getType();

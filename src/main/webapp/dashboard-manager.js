@@ -167,7 +167,6 @@ class DashboardManager {
     let form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/update');
-    form.setAttribute('onsubmit', 'return false;');
 
     for (let i = 0; i < selectedValues.length; i++) {
       const aggregationField = this.aggregationSelector.getState().selectedValues[i];
@@ -179,6 +178,7 @@ class DashboardManager {
       let input = document.createElement('input');
       input.setAttribute('type', 'text');
       input.setAttribute('value', aggregationFieldValue);
+      input.setAttribute('name', getAnnotatedFieldFromDisplay(aggregationField).API);
 
       form.appendChild(label);
       form.appendChild(input);
@@ -187,6 +187,8 @@ class DashboardManager {
     let devicesInput = document.createElement('input');
     devicesInput.setAttribute('type', 'hidden');
     devicesInput.setAttribute('value', deviceIds);
+    devicesInput.setAttribute('name', 'deviceIds');
+    form.appendChild(devicesInput);
 
     let submit = document.createElement('input');
     submit.setAttribute('type', 'submit');
