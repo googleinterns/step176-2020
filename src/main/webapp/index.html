@@ -1,5 +1,6 @@
+
 <!DOCTYPE html>
-<html>
+<html itemscope itemtype="http://schema.org/Article">
   <head>
     <meta charset="UTF-8">
     <title>ChromeOS Annotated Field Manager</title>
@@ -11,14 +12,14 @@
     <script type="text/javascript" src="table.js"></script>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body>
+  <body onload="handleLogin();">
     <div id="container">
       <div class="header">
         <div id="branding">
           <p>ChromeOS Annotated Field Manager</p>
         </div>
         <div id="logout">
-          <a href="">Logout</a>
+          <a href="document.location.href='/login';">Logout</a>
         </div>
       </div>
       <div id="dashboard">

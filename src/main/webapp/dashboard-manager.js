@@ -1,14 +1,10 @@
 class DashboardManager {
   constructor() {
-    this.data = this.initData();
-
+    this.data = new google.visualization.DataTable();
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
     this.tableManager = new TableManager();
     this.pieChart = createNewPieChart('piechart-container');
-
-    this.tableManager.setDataTable(this.data);
-    this.pieChart.setDataTable(this.data);
 
     this.pieChartDiv = document.getElementById('chart');
 
@@ -21,20 +17,27 @@ class DashboardManager {
   }
 
   /* Get the initial data to be shown to the user and populate the main datatable*/
-  initData() {
+  async initData() {
     let data = new google.visualization.DataTable();
-    data.addColumn('string', 'Serial Number');//this is fake data
-    data.addColumn('string', 'Status');//TODO: integrate in real data
+    data.addColumn('string', 'Serial Number');
+    data.addColumn('string', 'Status');
     data.addColumn('string', 'Asset ID');
     data.addColumn('string', 'User');
     data.addColumn('string', 'Location');
 
-    // TODO: Use real data pulled from server.
-    data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
-    data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
-    data.addRow(['SNABCDE', 'Provisioned', '71ec9a', 'Jake', 'Missouri']);
-
-    return data;
+    await (fetch('/devices')
+          .then(response => response.json())
+          .then(deviceJsons => {
+              for (let device of deviceJsons) {
+                data.addRow([
+                    device.serialNumber,
+                    device.status,
+                    device.annotatedAssetId,
+                    device.annotatedUser,
+                    device.annotatedLocation]);
+              }
+      }));
+    this.data = data;
   }
 
   async updateAndDrawData() {
@@ -95,7 +98,7 @@ class DashboardManager {
   /* Setup data for standard table view */
   async updateNormal() {
     // TODO: use real data
-    this.data = this.initData();
+    await this.initData();
     this.tableManager.updateNormal(this.data);
   }
 
@@ -328,5 +331,13 @@ function createNewAggregationSelector() {
                 'sortValues': false
             }
         }
+  });
+}
+
+async function handleLogin() {
+  fetch('/status').then(response => response.json()).then((isLoggedIn) => {
+    if (!isLoggedIn) {
+      window.location.replace("/login");
+    }
   });
 }

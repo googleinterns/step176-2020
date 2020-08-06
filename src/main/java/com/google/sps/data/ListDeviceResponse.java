@@ -21,6 +21,14 @@ public final class ListDeviceResponse {
     this.nextPageToken = nextPageToken;
     this.etag = etag;
   }
+  
+  public boolean hasNextPageToken() {
+      return nextPageToken != null;
+  }
+
+  public String getNextPageToken() {
+      return nextPageToken;
+  }
 
   public List<ChromeOSDevice> getDeviceListCopy(List<ChromeOSDevice> original) {
     final List<ChromeOSDevice> devices = new ArrayList<>();
