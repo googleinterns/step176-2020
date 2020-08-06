@@ -152,3 +152,12 @@ body {
   margin-bottom: 8px;
   border-bottom: 2px solid #e0e0e0;
 }
+
+.blocking {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(1, 1, 1, 0.5);
+}
