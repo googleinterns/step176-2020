@@ -34,7 +34,7 @@ public class UpdateServlet extends HttpServlet {
     public static final Gson GSON_OBJECT = new Gson();
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
