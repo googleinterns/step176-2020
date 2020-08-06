@@ -134,3 +134,21 @@ body {
 #dashboard {
   display: contents;
 }
+
+.hidden {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  border: 2px solid black;
+  background-color: #eee;
+  top: 50px;
+  left: 400px;
+  padding: 15px;
+}
+
+.modal-header {
+  margin-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}

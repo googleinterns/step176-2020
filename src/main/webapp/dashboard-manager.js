@@ -15,6 +15,8 @@ class DashboardManager {
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
 
+    this.updateModal = new Modal('update-modal');
+
     this.drawnControls = false;
   }
 
@@ -60,6 +62,7 @@ class DashboardManager {
       this.data.addColumn('string', value);
     }
     this.data.addColumn('number', 'Devices');
+    this.data.addColumn('string', 'deviceIds');
 
     // Get fields we are aggregating by and convert from user-displayed name to API name.
     const queryStringVals =
@@ -72,6 +75,11 @@ class DashboardManager {
               const row =
                   selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
+
+              if (entry.deviceIds == null) {
+                entry.deviceIds = ['abc', 'def', 'ghi', 'jkl', 'mno'];
+              }
+              row.push(JSON.stringify(entry.deviceIds));
 
               this.data.addRow(row);
             }
@@ -102,7 +110,8 @@ class DashboardManager {
     let result = google.visualization.data.group(
         filtered,
         [depth - 1],
-        [{'column': filtered.getNumberOfColumns() - 1, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+                    // Devices count is second to last column
+        [{'column': filtered.getNumberOfColumns() - 2, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
@@ -113,11 +122,18 @@ class DashboardManager {
         'select',
         this.onSliceSelect.bind(this, pieChart, filtered, selectorState, depth + 1));
     } else {
-      // TODO: Allow bulk updating the selected slice
       addOverwriteableChartEvent(
         pieChart,
         'select',
-        () => {console.log("Chart slice was clicked!")});
+        () => {
+          let selectedRow = filterDataFromParent(filtered, depth + 1, pieChart);
+
+          let selectedValues =
+              [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
+          let deviceIds = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 1);
+
+          this.createModalBody(deviceIds, selectedValues);
+        });
     }
   }
 
@@ -142,6 +158,41 @@ class DashboardManager {
   isAggregating() {
     // If no aggregation tags are selected, we are not currently aggregating
     return this.aggregationSelector.getState().selectedValues.length != 0;
+  }
+
+  createModalBody(deviceIds, selectedValues) {
+    let form = document.createElement('form');
+    form.setAttribute('method', 'POST');
+    form.setAttribute('action', '/update');
+    form.setAttribute('onsubmit', 'return false;');
+
+    for (let i = 0; i < selectedValues.length; i++) {
+      const aggregationField = this.aggregationSelector.getState().selectedValues[i];
+      const aggregationFieldValue = selectedValues[i];
+
+      let label = document.createElement('label');
+      label.innerHTML = aggregationField;
+
+      let input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('value', aggregationFieldValue);
+
+      form.appendChild(label);
+      form.appendChild(input);
+    }
+
+    let devicesInput = document.createElement('input');
+    devicesInput.setAttribute('type', 'hidden');
+    devicesInput.setAttribute('value', deviceIds);
+
+    let submit = document.createElement('input');
+    submit.setAttribute('type', 'submit');
+    form.appendChild(submit);
+
+    this.updateModal.setHeader('Perform Bulk Update');
+    this.updateModal.body.innerHTML = "";
+    this.updateModal.body.appendChild(form);
+    this.updateModal.show();
   }
 
   draw() {
