@@ -290,6 +290,7 @@ function createNewPieChart(container, diameter) {
   return new google.visualization.ChartWrapper({
       'chartType': 'PieChart',
       'containerId': container,
+      'sliceVisibilityThreshold': 1/200,
       'options': {
           'title': 'Devices by Location',
           'legend': 'none',
