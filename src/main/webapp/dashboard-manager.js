@@ -15,7 +15,7 @@ class DashboardManager {
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
 
-    this.updateModal = new Modal('update-modal');
+    this.updateModal = new Modal('update-modal', true);
 
     this.drawnControls = false;
   }
@@ -132,7 +132,10 @@ class DashboardManager {
               [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
           let deviceIds = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 1);
 
-          this.createModalBody(deviceIds, selectedValues);
+          let body = this.createModalBody(deviceIds, selectedValues);
+          this.updateModal.setHeader('Perform Bulk Update');
+          this.updateModal.setBody([body]);
+          this.updateModal.show();
         });
     }
   }
@@ -164,7 +167,6 @@ class DashboardManager {
     let form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/update');
-    form.setAttribute('onsubmit', 'return false;');
 
     for (let i = 0; i < selectedValues.length; i++) {
       const aggregationField = this.aggregationSelector.getState().selectedValues[i];
@@ -176,6 +178,7 @@ class DashboardManager {
       let input = document.createElement('input');
       input.setAttribute('type', 'text');
       input.setAttribute('value', aggregationFieldValue);
+      input.setAttribute('name', getAnnotatedFieldFromDisplay(aggregationField).API);
 
       form.appendChild(label);
       form.appendChild(input);
@@ -184,15 +187,14 @@ class DashboardManager {
     let devicesInput = document.createElement('input');
     devicesInput.setAttribute('type', 'hidden');
     devicesInput.setAttribute('value', deviceIds);
+    devicesInput.setAttribute('name', 'deviceIds');
+    form.appendChild(devicesInput);
 
     let submit = document.createElement('input');
     submit.setAttribute('type', 'submit');
     form.appendChild(submit);
 
-    this.updateModal.setHeader('Perform Bulk Update');
-    this.updateModal.body.innerHTML = "";
-    this.updateModal.body.appendChild(form);
-    this.updateModal.show();
+    return form;
   }
 
   draw() {
