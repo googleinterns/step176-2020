@@ -50,21 +50,19 @@ class Modal {
   }
 
   show() {
-    if (this.blockingDiv == null) {
-      this.container.classList.remove('hidden');
-    } else {
+    if (this.blockingDiv != null) {
       this.blockingDiv.classList.remove('hidden');
     }
+    this.container.classList.remove('hidden');
 
     this.isVisible = true;
   }
 
   hide() {
-    if (this.blockingDiv == null) {
-      this.container.classList.add('hidden');
-    } else {
+    if (this.blockingDiv != null) {
       this.blockingDiv.classList.add('hidden');
     }
+    this.container.classList.add('hidden');
 
     this.isVisible = false;
   }
