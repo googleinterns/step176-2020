@@ -52,7 +52,7 @@ public class AggregationServlet extends HttpServlet {
     }
 
     List<ChromeOSDevice> devices = amassDevices();
-    MultiKeyMap<String, Integer> data = processData(devices, fields);
+    MultiKeyMap<String, List<String>> data = processData(devices, fields);
 
     response.setStatus(HttpServletResponse.SC_OK);
     response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
@@ -71,10 +71,10 @@ public class AggregationServlet extends HttpServlet {
     return devices;
   }
 
-  public static MultiKeyMap<String, Integer> processData(
+  public static MultiKeyMap<String, List<String>> processData(
       List<ChromeOSDevice> devices,
       LinkedHashSet<AnnotatedField> fields) {
-    MultiKeyMap<String, Integer> counts = new MultiKeyMap<>();
+    MultiKeyMap<String, List<String>> counts = new MultiKeyMap<>();
 
     for (ChromeOSDevice device : devices) {
       String keyParts[] = new String[fields.size()];
@@ -86,7 +86,8 @@ public class AggregationServlet extends HttpServlet {
       }
 
       MultiKey key = new MultiKey(keyParts);
-      Integer newVal = counts.getOrDefault(key, new Integer(0)).intValue() + 1;
+      List<String> newVal = counts.getOrDefault(key, new ArrayList<String>());
+      newVal.add(device.getDeviceId());
 
       counts.put(key, newVal);
     }

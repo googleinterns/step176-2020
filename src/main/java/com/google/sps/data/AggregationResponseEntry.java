@@ -15,8 +15,12 @@ public final class AggregationResponseEntry {
   private String annotatedLocation;
   private String annotatedUser;
   private final int count;
+  private List<String> deviceIds;
 
-  public AggregationResponseEntry(MultiKey key, int count, LinkedHashSet<AnnotatedField> fields) {
+  public AggregationResponseEntry(
+      MultiKey key,
+      List<String> deviceIds,
+      LinkedHashSet<AnnotatedField> fields) {
 
     String keys[] = (String[]) key.getKeys();
     int currKey = 0;
@@ -36,6 +40,7 @@ public final class AggregationResponseEntry {
       }
     }
 
-    this.count = count;
+    this.count = deviceIds.size();
+    this.deviceIds = deviceIds;
   }
 }
