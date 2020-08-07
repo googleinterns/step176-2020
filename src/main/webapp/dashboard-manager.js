@@ -134,10 +134,7 @@ class DashboardManager {
           // deviceIds is a serialized string so we can't directly get number of devices from it
           let devicesCount = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 2);
 
-          let bodyElements = this.createModalBody(deviceIds, selectedValues, devicesCount);
-          this.updateModal.setHeader('Perform Bulk Update');
-          this.updateModal.setBody(bodyElements);
-          this.updateModal.show();
+          this.populateAndShowModal(deviceIds, selectedValues, devicesCount);
         });
     }
   }
@@ -163,6 +160,13 @@ class DashboardManager {
   isAggregating() {
     // If no aggregation tags are selected, we are not currently aggregating
     return this.aggregationSelector.getState().selectedValues.length != 0;
+  }
+
+  populateAndShowModal(deviceIds, selectedValues, devicesCount) {
+    let bodyElements = this.createModalBody(deviceIds, selectedValues, devicesCount);
+    this.updateModal.setHeader('Perform Bulk Update');
+    this.updateModal.setBody(bodyElements);
+    this.updateModal.show();
   }
 
   createModalWarning(devicesCount, selectedValues) {
