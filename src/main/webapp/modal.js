@@ -27,10 +27,10 @@ class Modal {
   }
 
   setHeader(text) {
-    this.header.innerHTML = "";
+    this.header.innerHTML = '';
 
     let closeBtn = document.createElement('button');
-    closeBtn.innerText = "X";
+    closeBtn.innerText = '✕';
     closeBtn.classList.add('modal-close-btn');
     closeBtn.onclick = () => {this.hide()};
 
@@ -44,7 +44,7 @@ class Modal {
   }
 
   setBody(elements) {
-    this.body.innerHTML = "";
+    this.body.innerHTML = '';
 
     for (let element of elements) {
       this.body.appendChild(element);
