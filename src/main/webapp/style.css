@@ -141,11 +141,14 @@ body {
 
 .modal {
   position: fixed;
+  top: 50vh;
+  left: 50vw;
   border: 2px solid black;
   background-color: #eee;
-  top: 50px;
-  left: 400px;
   padding: 15px;
+  width: max(200px, 25vw);
+  max-height: 650px;
+  overflow-y: scroll;
 }
 
 .modal-header {

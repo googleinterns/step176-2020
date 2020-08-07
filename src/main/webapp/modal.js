@@ -39,6 +39,8 @@ class Modal {
 
     this.header.appendChild(closeBtn);
     this.header.appendChild(heading);
+
+    this.center();
   }
 
   setBody(elements) {
@@ -47,6 +49,16 @@ class Modal {
     for (let element of elements) {
       this.body.appendChild(element);
     }
+
+    this.center();
+  }
+
+  center() {
+    const width = this.container.clientWidth;
+    const height = this.container.clientHeight;
+
+    this.container.style['margin-left'] = -1 * width/2 + 'px';
+    this.container.style['margin-top'] = -1 * height/2 + 'px';
   }
 
   show() {
@@ -54,6 +66,8 @@ class Modal {
       this.blockingDiv.classList.remove('hidden');
     }
     this.container.classList.remove('hidden');
+
+    this.center();
 
     this.isVisible = true;
   }
