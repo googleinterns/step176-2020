@@ -204,14 +204,19 @@ class DashboardManager {
 
       let label = document.createElement('label');
       label.innerHTML = aggregationField;
+      label.classList.add('update-label');
 
       let input = document.createElement('input');
       input.setAttribute('type', 'text');
       input.setAttribute('value', aggregationFieldValue);
       input.setAttribute('name', getAnnotatedFieldFromDisplay(aggregationField).API);
+      input.classList.add('update-input');
 
-      form.appendChild(label);
-      form.appendChild(input);
+      let container = document.createElement('div');
+      container.appendChild(label);
+      container.appendChild(input);
+
+      form.appendChild(container);
     }
 
     let devicesInput = document.createElement('input');

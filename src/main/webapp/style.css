@@ -185,3 +185,21 @@ body {
   height: 100vh;
   background-color: rgba(1, 1, 1, 0.5);
 }
+
+.update-label {
+  display: inline-block;
+  text-align: left;
+  width: 3.7em;
+  padding-right: .2em;
+}
+
+.update-input {
+  background-color: inherit;
+  border: none;
+  border-bottom: 2px solid #c0c0c0;
+  outline: none;
+}
+
+.update-input:focus {
+  border-color: #3367D6;
+}
