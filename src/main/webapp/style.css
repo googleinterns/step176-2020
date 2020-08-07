@@ -145,15 +145,16 @@ body {
   left: 50vw;
   border: 2px solid black;
   background-color: #eee;
-  padding: 15px;
   width: max(200px, 25vw);
   max-height: 650px;
   overflow-y: scroll;
 }
 
 .modal-header {
+  color: white;
   margin-bottom: 8px;
-  border-bottom: 2px solid #e0e0e0;
+  padding: 15px 5px 5px 5px;
+  background-color: #3367D6;
 }
 
 .modal-header > h1 {
@@ -162,10 +163,18 @@ body {
 }
 
 .modal-close-btn {
-  color: red;
+  background-color: inherit;
+  color: inherit;
+  font-size: 1.2em;
   position: absolute;
   top: 0px;
   left: 0px;
+  border: none;
+  outline: none;
+}
+
+.modal-body {
+  padding: 0px 15px 15px 15px;
 }
 
 .blocking {
