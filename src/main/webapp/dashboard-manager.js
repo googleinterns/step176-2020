@@ -131,10 +131,12 @@ class DashboardManager {
           let selectedValues =
               [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
           let deviceIds = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 1);
+          // deviceIds is a serialized string so we can't directly get number of devices from it
+          let devicesCount = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 2);
 
-          let body = this.createModalBody(deviceIds, selectedValues);
+          let bodyElements = this.createModalBody(deviceIds, selectedValues, devicesCount);
           this.updateModal.setHeader('Perform Bulk Update');
-          this.updateModal.setBody([body]);
+          this.updateModal.setBody(bodyElements);
           this.updateModal.show();
         });
     }
@@ -163,7 +165,35 @@ class DashboardManager {
     return this.aggregationSelector.getState().selectedValues.length != 0;
   }
 
-  createModalBody(deviceIds, selectedValues) {
+  createModalWarning(devicesCount, selectedValues) {
+    let div = document.createElement('div');
+
+    let p1 = document.createElement('p');
+    p1.innerHTML  = `Warning: You are about to update <b>${devicesCount}</b> devices with the following properties:`;
+
+    let ul = document.createElement('ul');
+    for (let i = 0; i < selectedValues.length; i++) {
+      let li = document.createElement('li');
+
+      const aggregationField = this.aggregationSelector.getState().selectedValues[i];
+      const aggregationFieldValue = selectedValues[i];
+
+      li.innerHTML = `<b>${aggregationField}</b>: ${aggregationFieldValue}`;
+
+      ul.appendChild(li);
+    }
+
+    let p2 = document.createElement('p');
+    p2.innerText = 'This is a non-reversible action.  To continue, enter the desired values and press submit.';
+
+    div.appendChild(p1);
+    div.appendChild(ul);
+    div.appendChild(p2);
+
+    return div;
+  }
+
+  createModalForm(deviceIds, selectedValues) {
     let form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/update');
@@ -195,6 +225,12 @@ class DashboardManager {
     form.appendChild(submit);
 
     return form;
+  }
+
+  createModalBody(deviceIds, selectedValues, devicesCount) {
+    let warning = this.createModalWarning(devicesCount, selectedValues);
+    let form = this.createModalForm(deviceIds, selectedValues);
+    return [warning, form];
   }
 
   draw() {
