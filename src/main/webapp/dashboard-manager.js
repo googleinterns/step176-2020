@@ -4,10 +4,10 @@ class DashboardManager {
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
-    this.table = createNewTable();
+    this.tableManager = new TableManager();
     this.pieChart = createNewPieChart('piechart-container');
 
-    this.table.setDataTable(this.data);
+    this.tableManager.setDataTable(this.data);
     this.pieChart.setDataTable(this.data);
 
     this.pieChartDiv = document.getElementById('chart');
@@ -30,6 +30,7 @@ class DashboardManager {
     // TODO: Use real data pulled from server.
     data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
     data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
+    data.addRow(['SNABCDE', 'Provisioned', '71ec9a', 'Jake', 'Missouri']);
 
     return data;
   }
@@ -76,7 +77,7 @@ class DashboardManager {
             }
     }));
 
-    this.table.setDataTable(this.data);
+    this.tableManager.updateAggregation(this.data);
 
     // Setup pie chart
     removeAllChildren(this.pieChart);
@@ -87,13 +88,15 @@ class DashboardManager {
   async updateNormal() {
     // TODO: use real data
     this.data = this.initData();
-    this.table.setDataTable(this.data);
+    this.tableManager.updateNormal(this.data);
   }
 
   /* Create a (sub)PieChart with the appropriate data and event handlers */
   configurePieChart(pieChart, baseData, selectorState, depth, parent) {
     // Filter relevant entries from baseData based on which slice (if any) was selected
     let filtered = filterDataFromParent(baseData, depth, parent);
+
+    setChartTitle(pieChart, parent, selectorState, depth);
 
     // Perform the aggregation and set the result as the pieChart's data
     let result = google.visualization.data.group(
@@ -128,7 +131,7 @@ class DashboardManager {
 
   createSubPieChart(parent, baseData, selectorState, depth) {
     const id = 'chart-' + depth;
-    let pieChart = createNewDivWithPieChart(id);
+    let pieChart = createNewDivWithPieChart(id, calcChartDiameter(depth));
 
     this.configurePieChart(pieChart, baseData, selectorState, depth, parent);
     parent.childChart = pieChart;
@@ -147,7 +150,7 @@ class DashboardManager {
       this.drawnControls = true;
     }
 
-    this.table.draw();
+    this.tableManager.draw();
     if (this.isAggregating()) {
       this.pieChart.draw();
       this.drawChildren(this.pieChart);
@@ -209,25 +212,25 @@ function removeAllChildren(chart) {
   chart.childChart = null;
 }
 
-function createNewTable() {
-  return new google.visualization.ChartWrapper({
-      'chartType': 'Table',
-      'containerId': 'table-container',
-      'options': {
-          'title': 'Sample Table',
-          'width': '100%',
-          'allowHtml': 'true',
-          'cssClassNames': {
-              'headerRow': 'table-header-row',
-              'tableRow': 'table-row',
-              'oddTableRow': 'table-row',
-              'tableCell': 'table-cell'
-          }
-      }
-  });
+function setChartTitle(chart, parent, selectorState, depth){
+  if (parent != null) {
+    chart.setOption('title', parent.getOption('title') + ' > ' + selectorState[depth - 2] + ': '+ getChartSelectedValue(parent));
+  } else {
+    chart.setOption('title', 'Devices by ' + selectorState[0]);
+  }
 }
 
-function createNewPieChart(container) {
+function calcChartDiameter(depth){
+  const base = 350; //pixels;
+  const decay = 0.9;
+
+  return base * Math.pow(decay, depth-1);
+}
+
+function createNewPieChart(container, diameter) {
+  if (diameter == null) {
+    diameter = 350; // pixels
+  }
   return new google.visualization.ChartWrapper({
       'chartType': 'PieChart',
       'containerId': container,
@@ -235,23 +238,23 @@ function createNewPieChart(container) {
           'title': 'Devices by Location',
           'legend': 'none',
           // This needs to be hardcoded because the div moves which causes 100% to be innacurate
-          'width': 350,
-          'height': '50%',
+          'width': diameter,
+          'height': diameter + 75, // room for title
           'chartArea': {
-              'left': '5', 'width': '100%', 'height': '95%'
+              'left': '5', 'width': '100%', 'height': '90%'
           }
       },
       'view': {'columns': [0, 1]}
   });
 }
 
-function createNewDivWithPieChart(container) {
+function createNewDivWithPieChart(container, diameter) {
   const chartContainer = document.getElementById('chart');
   const subChartContainer = document.createElement('div');
   subChartContainer.setAttribute('id', container);
   chartContainer.appendChild(subChartContainer);
 
-  return createNewPieChart(container);
+  return createNewPieChart(container, diameter);
 }
 
 function createNewAggregationSelector() {
