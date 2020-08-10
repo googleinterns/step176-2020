@@ -19,6 +19,7 @@ import java.util.List;
 public class DevicesServlet extends HttpServlet {
 
   private UserService userService = UserServiceFactory.getUserService();
+  private Util utilObj = new Util();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -28,7 +29,8 @@ public class DevicesServlet extends HttpServlet {
       return;
     }
     final String userId = currentUser.getUserId();
-    final List<ChromeOSDevice> allDevices = Util.getAllDevices(userId);
+    System.out.println(userId);
+    final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
     response.setContentType("application/json");
     final String json = Json.toJson(allDevices);
     response.getWriter().println(json);
@@ -38,4 +40,8 @@ public class DevicesServlet extends HttpServlet {
     this.userService = newUserService;
   }
   
+  public void setUtilObj(Util util) {
+    this.utilObj = util;
+  }
+
 }

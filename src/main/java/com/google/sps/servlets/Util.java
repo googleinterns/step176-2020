@@ -65,15 +65,15 @@ class Util {
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  private static final String API_KEY = getAPIKey(); 
 
-  public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
+  public List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
+    final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
-    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
       final String pageToken = (String) resp.getNextPageToken();
-      resp = getDevicesResponse(pageToken, accessToken);
+      resp = getDevicesResponse(pageToken, accessToken, apiKey);
       allDevices.addAll(resp.getDevices());
     }
     return allDevices;
@@ -124,12 +124,12 @@ class Util {
     return INVALID_ACCESS_TOKEN;
   }
 
-  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken) throws IOException {
+  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
     urlBuilder.addQueryParameter("maxResults", DEFAULT_MAX_DEVICES);
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
-    urlBuilder.addQueryParameter("key", API_KEY);
+    urlBuilder.addQueryParameter("key", apiKey);
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
       urlBuilder.addQueryParameter("pageToken", pageToken);
     }

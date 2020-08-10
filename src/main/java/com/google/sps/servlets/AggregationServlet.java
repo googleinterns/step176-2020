@@ -63,7 +63,8 @@ public class AggregationServlet extends HttpServlet {
       throw new IOException("user is not logged in");
     }
     final String userId = currentUser.getUserId();
-    final List<ChromeOSDevice> allDevices = Util.getAllDevices(userId);
+    final Util utilObj = new Util();
+    final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
     return allDevices;
   }
 
