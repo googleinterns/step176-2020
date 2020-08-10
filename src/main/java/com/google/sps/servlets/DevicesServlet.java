@@ -18,10 +18,10 @@ import java.util.List;
 @WebServlet("/devices")
 public class DevicesServlet extends HttpServlet {
 
+  private UserService userService = UserServiceFactory.getUserService();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
       response.sendRedirect("/login");
@@ -34,9 +34,8 @@ public class DevicesServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
   }
-
+  
 }

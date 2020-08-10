@@ -44,4 +44,5 @@ public class LoginServlet extends HttpServlet {
   public void setUserService(UserService newUserService) {
     this.userService = newUserService;
   }
+  
 }
