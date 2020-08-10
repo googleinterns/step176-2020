@@ -29,7 +29,6 @@ public class DevicesServlet extends HttpServlet {
       return;
     }
     final String userId = currentUser.getUserId();
-    System.out.println(userId);
     final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
     response.setContentType("application/json");
     final String json = Json.toJson(allDevices);
