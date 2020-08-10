@@ -46,7 +46,7 @@ public final class LoginServletTest {
     servlet.doGet(request, response);
 
     verify(response).setContentType("text/html");
-    verify(response).sendRedirect(anyString());
+    verify(response).sendRedirect(LOGOUT_URL);
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).createLogoutURL("/index.html");
   }
