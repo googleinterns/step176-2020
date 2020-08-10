@@ -15,6 +15,14 @@ class DashboardManager {
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
 
+    document.addEventListener('bulkUpdate', (e) => {
+      let row = e.detail;
+      let deviceIds = this.data.getValue(row, this.data.getNumberOfColumns() - 2);
+      let selectedValues = [...Array(this.aggregationSelector.getState().selectedValues.length).keys()].map(index => this.data.getValue(row, index));
+      let devicesCount = this.data.getValue(row, this.data.getNumberOfColumns() - 3);
+      this.populateAndShowModal(deviceIds, selectedValues, devicesCount);
+    }, false);
+
     this.updateModal = new Modal('update-modal', true);
 
     this.drawnControls = false;
@@ -63,6 +71,7 @@ class DashboardManager {
     }
     this.data.addColumn('number', 'Devices');
     this.data.addColumn('string', 'deviceIds');
+    this.data.addColumn('string', '');
 
     // Get fields we are aggregating by and convert from user-displayed name to API name.
     const queryStringVals =
@@ -71,7 +80,7 @@ class DashboardManager {
         .then(response => response.json())
         .then(response => {
             let results = response.response;
-            for (let entry of results) {
+            for (let [index, entry] of results.entries()) {
               const row =
                   selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
@@ -81,6 +90,9 @@ class DashboardManager {
               }
               row.push(JSON.stringify(entry.deviceIds));
 
+              row.push(`<button onclick="document.dispatchEvent(
+                  new CustomEvent( \'bulkUpdate\', {detail: ${index} }))">Update Devices</button>`);
+
               this.data.addRow(row);
             }
     }));
@@ -89,7 +101,10 @@ class DashboardManager {
 
     // Setup pie chart
     removeAllChildren(this.pieChart);
-    this.configurePieChart(this.pieChart, this.data, selectorState, 1);
+    // pie chart doesn't need access to all the columns that table does
+    let pieChartView = new google.visualization.DataView(this.data);
+    pieChartView.setColumns([...Array(this.data.getNumberOfColumns() - 1).keys()]);
+    this.configurePieChart(this.pieChart, pieChartView, selectorState, 1);
   }
 
   /* Setup data for standard table view */
