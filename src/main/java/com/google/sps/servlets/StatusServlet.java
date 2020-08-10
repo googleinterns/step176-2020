@@ -12,13 +12,18 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/status")
 public class StatusServlet extends HttpServlet {
 
+  private UserService userService = UserServiceFactory.getUserService();
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final UserService userService = UserServiceFactory.getUserService();
     final boolean userLoggedIn = userService.isUserLoggedIn();
     response.setContentType("application/json");
     final String json = Json.toJson(userLoggedIn);
     response.getWriter().println(json);
+  }
+
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
   }
   
 }
