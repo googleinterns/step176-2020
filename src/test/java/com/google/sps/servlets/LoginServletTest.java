@@ -1,5 +1,6 @@
 package com.google.sps.servlets;
 
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
@@ -18,9 +19,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 /*
  * Test the status servlet.
@@ -31,24 +34,21 @@ public final class LoginServletTest {
   private LoginServlet servlet = new LoginServlet();
   private HttpServletRequest request = mock(HttpServletRequest.class);
   private HttpServletResponse response = mock(HttpServletResponse.class);
+  private final String LOGOUT_URL = "LOG OUT";
 
   @Test
   public void userLoggedIn() throws IOException {
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringWriter);
-    when(response.getWriter()).thenReturn(writer);
-
     UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-
+    when(mockedUserService.createLogoutURL("/index.html")).thenReturn(LOGOUT_URL);
+    
     servlet.setUserService(mockedUserService);
     servlet.doGet(request, response);
 
-    String result = stringWriter.getBuffer().toString().trim();
-    String expected = "true";
-
     verify(response).setContentType("text/html");
-    Assert.assertEquals(expected, result);
+    verify(response).sendRedirect(anyString());
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(mockedUserService, times(1)).createLogoutURL("/index.html");
   }
 
 

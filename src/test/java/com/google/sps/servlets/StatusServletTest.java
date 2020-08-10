@@ -21,6 +21,7 @@ import org.junit.runners.JUnit4;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 /*
  * Test the status servlet.
@@ -47,6 +48,7 @@ public final class StatusServletTest {
     String result = stringWriter.getBuffer().toString().trim();
     String expected = "true";
 
+    verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(response).setContentType("application/json");
     Assert.assertEquals(expected, result);
   }
@@ -66,6 +68,7 @@ public final class StatusServletTest {
     String result = stringWriter.getBuffer().toString().trim();
     String expected = "false";
 
+    verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(response).setContentType("application/json");
     Assert.assertEquals(expected, result);
   }

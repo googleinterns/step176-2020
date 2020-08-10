@@ -31,7 +31,6 @@ public class LoginServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("text/html");
     if (userService.isUserLoggedIn()) {
-      final String userEmail = userService.getCurrentUser().getEmail();
       final String urlToRedirectToAfterUserLogsOut = "/index.html";
       final String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
       response.sendRedirect(logoutUrl);
