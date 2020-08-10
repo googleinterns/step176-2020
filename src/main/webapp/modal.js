@@ -1,6 +1,9 @@
 class Modal {
   constructor(id, blocking) {
-    this.container = document.getElementById(id);
+    this.container = document.createElement('div');
+    this.container.setAttribute('id', id);
+    this.container.classList.add('modal', 'hidden');
+    document.body.appendChild(this.container);
 
     this.blockingDiv = null;
     if (blocking) {
