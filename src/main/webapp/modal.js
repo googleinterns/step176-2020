@@ -11,6 +11,10 @@ class Modal {
     this.body = this.createAndAddDiv('modal-body');
     this.footer = this.createAndAddDiv('modal-footer');
 
+    this.onResize = () => {
+      this.center();
+    };
+
     this.isVisible = false;
     this.hide();
   }
@@ -69,6 +73,7 @@ class Modal {
 
     this.center();
 
+    window.addEventListener('resize', this.onResize, true);
     this.isVisible = true;
   }
 
@@ -78,6 +83,7 @@ class Modal {
     }
     this.container.classList.add('hidden');
 
+    window.removeEventListener('resize', this.onResize), true;
     this.isVisible = false;
   }
 
