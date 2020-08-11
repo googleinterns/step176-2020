@@ -39,11 +39,9 @@ import java.util.List;
 @WebServlet("/authorize")
 public class AuthorizeServlet extends HttpServlet {
 
-  private final String TOKEN_END_POINT = "https://oauth2.googleapis.com/token";
-  private final String REROUTE_LINK = "http://localhost:8080";
-  private final String CLIENT_SECRET_FILE = "/client_info.json";
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   private UserService userService = UserServiceFactory.getUserService();
+  private Util utilObj = new Util();
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -55,45 +53,24 @@ public class AuthorizeServlet extends HttpServlet {
     final String userId = currentUser.getUserId();
     final String authCode = (String) request.getParameter("code");
     Entity tokenEntity = new Entity("RefreshToken");
-    final String refreshToken = getRefreshCode(authCode);
+    final String refreshToken = utilObj.getRefreshCode(authCode);
     tokenEntity.setProperty("userId", userId);
     tokenEntity.setProperty("refreshToken", refreshToken);
-    deleteStaleTokens(userId);
+    utilObj.deleteStaleTokens(userId);
     datastore.put(tokenEntity);
     response.sendRedirect("/index.html");
   }
 
-  private void deleteStaleTokens(String userId) {
-    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
-    PreparedQuery results = datastore.prepare(query);
-    List<Key> keysToDelete = new ArrayList<>();
-    for (final Entity entity : results.asIterable()) {
-      final long id = entity.getKey().getId();
-      final Key key = KeyFactory.createKey("RefreshToken", id);
-      keysToDelete.add(key);
-    }
-    datastore.delete(keysToDelete);
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
+  }
+  
+  public void setUtilObj(Util util) {
+    this.utilObj = util;
   }
 
-  private String getRefreshCode(String authCode) throws IOException {
-    File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
-    final GoogleClientSecrets clientSecrets =
-    GoogleClientSecrets.load(
-      JacksonFactory.getDefaultInstance(), new FileReader(file));
-    final String clientId = clientSecrets.getDetails().getClientId();
-    final String clientSecret = clientSecrets.getDetails().getClientSecret();
-    final GoogleTokenResponse tokenResponse =
-      new GoogleAuthorizationCodeTokenRequest(
-        new NetHttpTransport(),
-        JacksonFactory.getDefaultInstance(),
-        TOKEN_END_POINT,
-        clientSecrets.getDetails().getClientId(),
-        clientSecrets.getDetails().getClientSecret(),
-        authCode,
-        REROUTE_LINK) 
-        .execute();
-    final String refreshToken = tokenResponse.getRefreshToken();
-    return refreshToken;
+  public void setDataObj(DatastoreService dataObj) {
+    this.datastore = dataObj;
   }
 
 }

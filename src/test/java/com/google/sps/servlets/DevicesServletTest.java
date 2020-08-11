@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
 /*
- * Test the status servlet.
+ * Test the device servlet.
  */
 @RunWith(JUnit4.class)
 public final class DevicesServletTest {

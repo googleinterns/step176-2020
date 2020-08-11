@@ -53,6 +53,8 @@ import java.util.List;
 
 class Util {
 
+  private final String TOKEN_END_POINT = "https://oauth2.googleapis.com/token";
+  private final String REROUTE_LINK = "http://localhost:8080";
   private static final String CLIENT_SECRET_FILE = "/client_info.json";
   private static final String API_KEY_FILE = "/api_key.txt";
   private static final OkHttpClient client = new OkHttpClient();
@@ -139,6 +141,39 @@ class Util {
     final String content = myResponse.body().string();
     ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
     return resp;
+  }
+
+  public void deleteStaleTokens(String userId) {
+    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
+    PreparedQuery results = datastore.prepare(query);
+    List<Key> keysToDelete = new ArrayList<>();
+    for (final Entity entity : results.asIterable()) {
+      final long id = entity.getKey().getId();
+      final Key key = KeyFactory.createKey("RefreshToken", id);
+      keysToDelete.add(key);
+    }
+    datastore.delete(keysToDelete);
+  }
+
+  public String getRefreshCode(String authCode) throws IOException {
+    File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
+    final GoogleClientSecrets clientSecrets =
+    GoogleClientSecrets.load(
+      JacksonFactory.getDefaultInstance(), new FileReader(file));
+    final String clientId = clientSecrets.getDetails().getClientId();
+    final String clientSecret = clientSecrets.getDetails().getClientSecret();
+    final GoogleTokenResponse tokenResponse =
+      new GoogleAuthorizationCodeTokenRequest(
+        new NetHttpTransport(),
+        JacksonFactory.getDefaultInstance(),
+        TOKEN_END_POINT,
+        clientSecrets.getDetails().getClientId(),
+        clientSecrets.getDetails().getClientSecret(),
+        authCode,
+        REROUTE_LINK) 
+        .execute();
+    final String refreshToken = tokenResponse.getRefreshToken();
+    return refreshToken;
   }
 
 }
