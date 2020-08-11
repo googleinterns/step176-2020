@@ -64,7 +64,7 @@ public class AuthorizeServlet extends HttpServlet {
   }
 
   private void deleteStaleTokens(String userId) {
-    Query query = new Query("RefreshToken").sgietFilter(FilterOperator.EQUAL.of("userId", userId));
+    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
     List<Key> keysToDelete = new ArrayList<>();
     for (final Entity entity : results.asIterable()) {
