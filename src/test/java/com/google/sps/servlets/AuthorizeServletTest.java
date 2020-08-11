@@ -49,6 +49,8 @@ public final class AuthorizeServletTest {
   private final String TEST_USER_EMAIL = "testEmail";
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
   private final String TEST_AUTH_CODE = "authCode";
+  private final String TEST_REFRESH_TOKEN = "refreshToken";
+  private final String REQUEST_PARAMETER_NAME = "code";
 
   @Test
   public void userNotLoggedIn() throws IOException {
@@ -72,7 +74,9 @@ public final class AuthorizeServletTest {
     UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(request.getParameter("code")).thenReturn(TEST_AUTH_CODE);
+    when(request.getParameter(REQUEST_PARAMETER_NAME)).thenReturn(TEST_AUTH_CODE);
+    when(mockedUtil.getRefreshCode(TEST_AUTH_CODE)).thenReturn(TEST_REFRESH_TOKEN);
+
     servlet.setUserService(mockedUserService);
     servlet.setUtilObj(mockedUtil);
     servlet.setDataObj(mockedDataObj);
@@ -80,7 +84,17 @@ public final class AuthorizeServletTest {
     
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
+    verify(request, times(1)).getParameter(REQUEST_PARAMETER_NAME);
+    verify(mockedUtil, times(1)).getRefreshCode(TEST_AUTH_CODE);
+    verify(mockedUtil, times(1)).deleteStaleTokens(TEST_USER_ID);
     verify(response).sendRedirect(LOGIN_URL);  
+
+    // Entity tokenEntity = new Entity("RefreshToken");
+    // final String refreshToken = TEST_REFRESH_TOKEN; 
+    // tokenEntity.setProperty("userId", userId);
+    // tokenEntity.setProperty("refreshToken", refreshToken);
+    // verify(mockedDataObj, times(1)).put(tokenEntity);
+
   }
 
 //   @Test
