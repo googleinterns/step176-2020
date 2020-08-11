@@ -42,11 +42,11 @@ public class AuthorizeServlet extends HttpServlet {
   private final String TOKEN_END_POINT = "https://oauth2.googleapis.com/token";
   private final String REROUTE_LINK = "http://localhost:8080";
   private final String CLIENT_SECRET_FILE = "/client_info.json";
-  private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  private UserService userService = UserServiceFactory.getUserService();
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
       response.sendRedirect("/login");
@@ -64,7 +64,7 @@ public class AuthorizeServlet extends HttpServlet {
   }
 
   private void deleteStaleTokens(String userId) {
-    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
+    Query query = new Query("RefreshToken").sgietFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
     List<Key> keysToDelete = new ArrayList<>();
     for (final Entity entity : results.asIterable()) {

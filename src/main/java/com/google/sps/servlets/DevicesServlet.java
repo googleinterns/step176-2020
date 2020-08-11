@@ -29,10 +29,15 @@ public class DevicesServlet extends HttpServlet {
       return;
     }
     final String userId = currentUser.getUserId();
-    final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
-    response.setContentType("application/json");
-    final String json = Json.toJson(allDevices);
-    response.getWriter().println(json);
+    try {
+        final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
+        response.setContentType("application/json");
+        final String json = Json.toJson(allDevices);
+        response.getWriter().println(json);
+    } catch (IOException e) {//something went wrong during getting the devices
+        response.sendRedirect("/authorize");
+    }
+
   }
 
   public void setUserService(UserService newUserService) {
