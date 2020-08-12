@@ -81,15 +81,10 @@ class Util {
     return allDevices;
   }
 
-  public static String getAPIKey() {
-    try {
-      File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
-      String str = FileUtils.readFileToString(file);
-      return str;
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
-    return EMPTY_API_KEY;
+  public static String getAPIKey() throws IOException {
+    File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
+    String str = FileUtils.readFileToString(file);
+    return str;
   }
 
   private static String getRefreshToken(String userId) throws IOException {
@@ -110,20 +105,18 @@ class Util {
       final String refreshToken = getRefreshToken(userId);
       File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
       final GoogleClientSecrets clientSecrets =
-      GoogleClientSecrets.load(
-        JacksonFactory.getDefaultInstance(), new FileReader(file));
+        GoogleClientSecrets.load(
+          JacksonFactory.getDefaultInstance(), new FileReader(file));
       final String clientId = clientSecrets.getDetails().getClientId();
       final String clientSecret = clientSecrets.getDetails().getClientSecret();
       GoogleTokenResponse response =
-      new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
-        refreshToken, clientId, clientSecret).execute();
+        new GoogleRefreshTokenRequest(
+            new NetHttpTransport(), new JacksonFactory(), refreshToken, clientId, clientSecret)
+          .execute();
       return response.getAccessToken();
     } catch (TokenResponseException e) {
-      if (e.getDetails() != null) {
-        System.out.println(e.getMessage());
-      }
+      throw new IOException("exception while getting token response");
     }
-    return INVALID_ACCESS_TOKEN;
   }
 
   private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey) throws IOException {

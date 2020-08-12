@@ -37,7 +37,6 @@ public class DevicesServlet extends HttpServlet {
     } catch (IOException e) {//something went wrong during getting the devices
         response.sendRedirect("/authorize");
     }
-
   }
 
   public void setUserService(UserService newUserService) {
