@@ -3,7 +3,8 @@ class Loading {
    * func: the asynchronous function whose progress is being measured
    * isShort: if true, a spinning wheel will be displayed; otherwise, an actual loading bar will be used
    * status: a function that returns a number from 0-100 indicating how close to finishing func is.
-   *    Used only if isShort is false.
+   *    Used only if isShort is false. If isShort is true and status is undefined, an indeterminate progress
+   *    bar will be created.
    */
   constructor(func, isShort, status) {
     this.func = func;
@@ -13,15 +14,26 @@ class Loading {
     this.progress = 0;
     this.minimumLoadTime = 500; // miliseconds
 
-    this.container = new Modal('loading-bar', true);
+    this.container = new Modal('loading-modal', /*blocking*/ true, /*closeable*/ false);
     this.container.setHeader("Loading...");
     if (this.isShort) {
-      let loader = document.createElement('div');
-      loader.classList.add('spinning-wheel');
-      this.container.setBody([loader]);
+      this.loader = document.createElement('div');
+      this.loader.classList.add('spinning-wheel');
+      this.container.setBody([this.loader]);
     } else {
-      let loader = document.createElement('progress');
-      this.container.setBody([loader]);
+      let loaderContainer = document.createElement('div');
+      loaderContainer.classList.add('loading-bar-container');
+
+      this.loader = document.createElement('progress');
+      this.loader.setAttribute('max', 100);
+      this.loader.classList.add('loading-bar');
+
+      if (this.status != null) {
+        this.loader.setAttribute('value', 0);
+      }
+
+      loaderContainer.appendChild(this.loader);
+      this.container.setBody([loaderContainer]);
     }
 
     this.done = false;
@@ -42,24 +54,32 @@ class Loading {
       progress = 99;
     }
     this.progress = progress;
+    this.setProgress();
 
     if (!this.done) {
       // frequency with which to update, perhaps make this user controllable at some point?
-      setTimeout(this.updateProgress(), 500);
+      setTimeout(this.updateProgress.bind(this), 500);
+    }
+  }
+
+  setProgress() {
+    if (!this.isShort) {
+      this.loader.setAttribute('value', this.progress);
     }
   }
 
   async load() {
     this.container.show();
 
-    if (!this.isShort) {
-      setTimeout(this.updateProgress(), 250);
+    if (!this.isShort && this.status != null) {
+      setTimeout(this.updateProgress.bind(this), 250);
     }
 
     await this.doTask();
 
     if (!this.isShort) {
       // add a done button
+      this.container.hide();
     } else {
       this.container.hide();
     }
