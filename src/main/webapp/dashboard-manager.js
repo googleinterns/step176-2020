@@ -12,14 +12,20 @@ class DashboardManager {
 
     this.pieChartDiv = document.getElementById('chart');
 
+    // Updated as the table changes
+    this.DEVICE_ID_COL = 0;
+    this.DEVICE_COUNT_COL = 0;
+
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
 
     document.addEventListener('bulkUpdate', (e) => {
       let row = e.detail;
-      let deviceIds = this.data.getValue(row, this.data.getNumberOfColumns() - 2);
-      let selectedValues = [...Array(this.aggregationSelector.getState().selectedValues.length).keys()].map(index => this.data.getValue(row, index));
-      let devicesCount = this.data.getValue(row, this.data.getNumberOfColumns() - 3);
+      let deviceIds = this.data.getValue(row, this.DEVICE_ID_COL);
+      let selectedValues =
+          [...Array(this.aggregationSelector.getState().selectedValues.length).keys()]
+          .map(index => this.data.getValue(row, index));
+      let devicesCount = this.data.getValue(row, this.DEVICE_COUNT_COL);
       this.populateAndShowModal(deviceIds, selectedValues, devicesCount);
     }, false);
 
@@ -85,6 +91,7 @@ class DashboardManager {
                   selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
 
+              // TODO: remove fake data after the server-side is updated to provide real data.
               if (entry.deviceIds == null) {
                 entry.deviceIds = ['abc', 'def', 'ghi', 'jkl', 'mno'];
               }
@@ -97,14 +104,14 @@ class DashboardManager {
             }
     }));
 
+    this.DEVICE_ID_COL = this.data.getNumberOfColumns() - 2;
+    this.DEVICE_COUNT_COL = this.data.getNumberOfColumns() - 3;
+
     this.tableManager.updateAggregation(this.data);
 
     // Setup pie chart
     removeAllChildren(this.pieChart);
-    // pie chart doesn't need access to all the columns that table does
-    let pieChartView = new google.visualization.DataView(this.data);
-    pieChartView.setColumns([...Array(this.data.getNumberOfColumns() - 1).keys()]);
-    this.configurePieChart(this.pieChart, pieChartView, selectorState, 1);
+    this.configurePieChart(this.pieChart, this.data, selectorState, 1);
   }
 
   /* Setup data for standard table view */
@@ -125,8 +132,7 @@ class DashboardManager {
     let result = google.visualization.data.group(
         filtered,
         [depth - 1],
-                    // Devices count is second to last column
-        [{'column': filtered.getNumberOfColumns() - 2, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+        [{'column': this.DEVICE_COUNT_COL, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
@@ -145,9 +151,9 @@ class DashboardManager {
 
           let selectedValues =
               [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
-          let deviceIds = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 1);
+          let deviceIds = selectedRow.getValue(0, this.DEVICE_ID_COL);
           // deviceIds is a serialized string so we can't directly get number of devices from it
-          let devicesCount = selectedRow.getValue(0, selectedRow.getNumberOfColumns() - 2);
+          let devicesCount = selectedRow.getValue(0, this.DEVICE_COUNT_COL);
 
           this.populateAndShowModal(deviceIds, selectedValues, devicesCount);
         });
