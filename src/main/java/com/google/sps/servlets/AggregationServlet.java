@@ -28,6 +28,9 @@ import java.util.Map;
 @WebServlet("/aggregate")
 public class AggregationServlet extends HttpServlet {
 
+  private UserService userService = UserServiceFactory.getUserService();
+  private Util utilObj = new Util();
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json;");
@@ -57,14 +60,13 @@ public class AggregationServlet extends HttpServlet {
 
   public List<ChromeOSDevice> amassDevices() throws IOException {
     List<ChromeOSDevice> devices = new ArrayList<>();
-    final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
       throw new IOException("user is not logged in");
     }
     final String userId = currentUser.getUserId();
-    final Util utilObj = new Util();
     final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
+
     return allDevices;
   }
 
@@ -105,4 +107,13 @@ public class AggregationServlet extends HttpServlet {
 
     return aggregationFields;
   }
+
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
+  }
+  
+  public void setUtilObj(Util util) {
+    this.utilObj = util;
+  }
+
 }

@@ -1,5 +1,9 @@
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
 import java.io.IOException;
@@ -31,6 +35,13 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(JUnit4.class)
 public final class AggregationServletTest {
+
+  private final String LOGIN_URL = "/login";
+  private final String HOME_URL = "/index.html";
+  private final String AUTHORIZE_URL = "/authorize";
+  private final String TEST_USER_ID = "testUserId";
+  private final String TEST_USER_EMAIL = "testEmail";
+  private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
 
   private final String LOCATION_ONE = "New Jersey";
   private final String LOCATION_TWO = "California";
@@ -134,25 +145,43 @@ public final class AggregationServletTest {
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
   }
 
-//   @Test
-//   public void validArgumentReceivesSuccess() throws IOException{
-//     when(request.getParameter("aggregationField")).thenReturn("annotatedLocation");
-//     setNewResponseWriter(response);
+  @Test
+  public void validArgumentReceivesSuccess() throws IOException{
+    when(request.getParameter("aggregationField")).thenReturn("annotatedLocation");
+    setNewResponseWriter(response);
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    DatastoreService mockedDataObj = mock(DatastoreService.class);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
-//     servlet.doGet(request, response);
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+    servlet.doGet(request, response);
 
-//     verify(response).setStatus(HttpServletResponse.SC_OK);
-//   }
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
 
-//   @Test
-//   public void validMultiFieldArgumentReceivesSuccess() throws IOException{
-//     when(request.getParameter("aggregationField")).thenReturn("annotatedLocation,annotatedAssetId");
-//     setNewResponseWriter(response);
+  @Test
+  public void validMultiFieldArgumentReceivesSuccess() throws IOException{
+    when(request.getParameter("aggregationField")).thenReturn("annotatedLocation,annotatedAssetId");
+    setNewResponseWriter(response);
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    DatastoreService mockedDataObj = mock(DatastoreService.class);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
-//     servlet.doGet(request, response);
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+    servlet.doGet(request, response);
 
-//     verify(response).setStatus(HttpServletResponse.SC_OK);
-//   }
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+  }
 
   private void setNewResponseWriter(HttpServletResponse response) throws IOException{
     StringWriter stringWriter = new StringWriter();
@@ -167,4 +196,5 @@ public final class AggregationServletTest {
 
     return servlet.processData(devices, fields);
   }
+
 }
