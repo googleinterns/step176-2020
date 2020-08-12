@@ -73,6 +73,22 @@ class DashboardManager {
     this.data.addColumn('string', 'deviceIds');
     this.data.addColumn('string', '');
 
+    let aggregationLoader = new Loading(this.fetchAndPopulateAggregation.bind(this), false);
+    await aggregationLoader.load();
+
+    this.tableManager.updateAggregation(this.data);
+
+    // Setup pie chart
+    removeAllChildren(this.pieChart);
+    // pie chart doesn't need access to all the columns that table does
+    let pieChartView = new google.visualization.DataView(this.data);
+    pieChartView.setColumns([...Array(this.data.getNumberOfColumns() - 1).keys()]);
+    this.configurePieChart(this.pieChart, pieChartView, selectorState, 1);
+  }
+
+  async fetchAndPopulateAggregation() {
+    let selectorState = this.aggregationSelector.getState().selectedValues;
+
     // Get fields we are aggregating by and convert from user-displayed name to API name.
     const queryStringVals =
         selectorState.map(displayName => getAnnotatedFieldFromDisplay(displayName).API);
@@ -96,15 +112,6 @@ class DashboardManager {
               this.data.addRow(row);
             }
     }));
-
-    this.tableManager.updateAggregation(this.data);
-
-    // Setup pie chart
-    removeAllChildren(this.pieChart);
-    // pie chart doesn't need access to all the columns that table does
-    let pieChartView = new google.visualization.DataView(this.data);
-    pieChartView.setColumns([...Array(this.data.getNumberOfColumns() - 1).keys()]);
-    this.configurePieChart(this.pieChart, pieChartView, selectorState, 1);
   }
 
   /* Setup data for standard table view */
