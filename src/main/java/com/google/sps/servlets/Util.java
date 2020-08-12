@@ -155,7 +155,7 @@ class Util {
     datastore.delete(keysToDelete);
   }
 
-  public String getRefreshCode(String authCode) throws IOException {
+  public String getNewRefreshToken(String authCode) throws IOException {
     File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
     GoogleClientSecrets.load(
@@ -174,6 +174,14 @@ class Util {
         .execute();
     final String refreshToken = tokenResponse.getRefreshToken();
     return refreshToken;
+  }
+
+  public void associateRefreshToken(String userId, String refreshToken) {
+    Entity tokenEntity = new Entity("RefreshToken");
+    tokenEntity.setProperty("userId", userId);
+    tokenEntity.setProperty("refreshToken", refreshToken);
+    deleteStaleTokens(userId);
+    datastore.put(tokenEntity);
   }
 
 }

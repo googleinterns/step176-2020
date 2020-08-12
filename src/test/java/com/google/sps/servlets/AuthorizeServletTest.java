@@ -45,6 +45,7 @@ public final class AuthorizeServletTest {
   private HttpServletRequest request = mock(HttpServletRequest.class);
   private HttpServletResponse response = mock(HttpServletResponse.class);
   private final String LOGIN_URL = "/login";
+  private final String HOME_URL = "/index.html";
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
@@ -75,7 +76,7 @@ public final class AuthorizeServletTest {
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
     when(request.getParameter(REQUEST_PARAMETER_NAME)).thenReturn(TEST_AUTH_CODE);
-    when(mockedUtil.getRefreshCode(TEST_AUTH_CODE)).thenReturn(TEST_REFRESH_TOKEN);
+    when(mockedUtil.getNewRefreshToken(TEST_AUTH_CODE)).thenReturn(TEST_REFRESH_TOKEN);
 
     servlet.setUserService(mockedUserService);
     servlet.setUtilObj(mockedUtil);
@@ -85,16 +86,9 @@ public final class AuthorizeServletTest {
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(request, times(1)).getParameter(REQUEST_PARAMETER_NAME);
-    verify(mockedUtil, times(1)).getRefreshCode(TEST_AUTH_CODE);
-    verify(mockedUtil, times(1)).deleteStaleTokens(TEST_USER_ID);
-    verify(response).sendRedirect(LOGIN_URL);  
-
-    // Entity tokenEntity = new Entity("RefreshToken");
-    // final String refreshToken = TEST_REFRESH_TOKEN; 
-    // tokenEntity.setProperty("userId", userId);
-    // tokenEntity.setProperty("refreshToken", refreshToken);
-    // verify(mockedDataObj, times(1)).put(tokenEntity);
-
+    verify(mockedUtil, times(1)).getNewRefreshToken(TEST_AUTH_CODE);
+    verify(mockedUtil, times(1)).associateRefreshToken(TEST_USER_ID, TEST_REFRESH_TOKEN);
+    verify(response).sendRedirect(HOME_URL);  
   }
 
 //   @Test

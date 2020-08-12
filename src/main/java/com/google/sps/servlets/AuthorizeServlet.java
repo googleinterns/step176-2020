@@ -52,12 +52,8 @@ public class AuthorizeServlet extends HttpServlet {
     }
     final String userId = currentUser.getUserId();
     final String authCode = (String) request.getParameter("code");
-    Entity tokenEntity = new Entity("RefreshToken");
-    final String refreshToken = utilObj.getRefreshCode(authCode);
-    tokenEntity.setProperty("userId", userId);
-    tokenEntity.setProperty("refreshToken", refreshToken);
-    utilObj.deleteStaleTokens(userId);
-    datastore.put(tokenEntity);
+    final String refreshToken = utilObj.getNewRefreshToken(authCode);
+    utilObj.associateRefreshToken(userId, refreshToken);
     response.sendRedirect("/index.html");
   }
 
