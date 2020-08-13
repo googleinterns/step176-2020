@@ -68,7 +68,7 @@ class Util {
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-  public List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
+  public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
     ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
@@ -96,23 +96,19 @@ class Util {
     return refreshToken;
   }
 
-  public static String getAccessToken(String userId) throws IOException {
-    try {
-      final String refreshToken = getRefreshToken(userId);
-      File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
-      final GoogleClientSecrets clientSecrets =
-        GoogleClientSecrets.load(
-          JacksonFactory.getDefaultInstance(), new FileReader(file));
-      final String clientId = clientSecrets.getDetails().getClientId();
-      final String clientSecret = clientSecrets.getDetails().getClientSecret();
-      GoogleTokenResponse response =
-        new GoogleRefreshTokenRequest(
-            new NetHttpTransport(), new JacksonFactory(), refreshToken, clientId, clientSecret)
-          .execute();
-      return response.getAccessToken();
-    } catch (TokenResponseException e) {
-      throw new IOException("exception while getting token response");
-    }
+  public static String getAccessToken(String userId) throws IOException, TokenResponseException, TooManyResultsException {
+    final String refreshToken = getRefreshToken(userId);
+    File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
+    final GoogleClientSecrets clientSecrets =
+    GoogleClientSecrets.load(
+        JacksonFactory.getDefaultInstance(), new FileReader(file));
+    final String clientId = clientSecrets.getDetails().getClientId();
+    final String clientSecret = clientSecrets.getDetails().getClientSecret();
+    GoogleTokenResponse response =
+    new GoogleRefreshTokenRequest(
+        new NetHttpTransport(), new JacksonFactory(), refreshToken, clientId, clientSecret)
+        .execute();
+    return response.getAccessToken();
   }
 
   private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey) throws IOException {

@@ -1,5 +1,7 @@
 package com.google.sps.servlets;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -35,7 +37,9 @@ public class DevicesServlet extends HttpServlet {
         final String json = Json.toJson(allDevices);
         response.getWriter().println(json);
     } catch (IOException e) {//something went wrong during getting the devices
-        response.sendRedirect("/authorize");
+        response.sendRedirect("/authorize.html");
+    } catch (TooManyResultsException e) {
+        response.sendRedirect("/login.html");
     }
   }
 

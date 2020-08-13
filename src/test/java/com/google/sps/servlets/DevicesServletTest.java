@@ -1,5 +1,7 @@
 package com.google.sps.servlets;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -37,7 +39,7 @@ public final class DevicesServletTest {
   private HttpServletRequest request = mock(HttpServletRequest.class);
   private HttpServletResponse response = mock(HttpServletResponse.class);
   private final String LOGIN_URL = "/login";
-  private final String AUTHORIZE_URL = "/authorize";
+  private final String AUTHORIZE_URL = "/authorize.html";
 
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";

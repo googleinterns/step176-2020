@@ -1,5 +1,7 @@
 package com.google.sps.servlets;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import com.google.appengine.api.users.User;
@@ -48,14 +50,11 @@ public class AggregationServlet extends HttpServlet {
       MultiKeyMap<String, Integer> data = processData(devices, fields);
       response.setStatus(HttpServletResponse.SC_OK);
       response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
-    } catch (IOException e) {
-      response.sendRedirect("/login");
-      return;
-    } catch (Exception e) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      response.getWriter().println(e.getMessage());
-      return;
-    }
+    } catch (IOException e) {//something went wrong during getting the devices
+        response.sendRedirect("/authorize.html");
+    } catch (TooManyResultsException e) {
+        response.sendRedirect("/login.html");
+    } 
   }
 
   public List<ChromeOSDevice> amassDevices() throws IOException {
