@@ -12,8 +12,24 @@ class DashboardManager {
 
     this.pieChartDiv = document.getElementById('chart');
 
+    // Updated as the table changes
+    this.DEVICE_ID_COL = 0;
+    this.DEVICE_COUNT_COL = 0;
+
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
+
+    document.addEventListener('bulkUpdate', (e) => {
+      let row = e.detail;
+      let deviceIds = this.data.getValue(row, this.DEVICE_ID_COL);
+      let selectedValues =
+          [...Array(this.aggregationSelector.getState().selectedValues.length).keys()]
+          .map(index => this.data.getValue(row, index));
+      let devicesCount = this.data.getValue(row, this.DEVICE_COUNT_COL);
+      this.populateAndShowModal(deviceIds, selectedValues, devicesCount);
+    }, false);
+
+    this.updateModal = new Modal('update-modal', true);
 
     this.drawnControls = false;
   }
@@ -60,6 +76,8 @@ class DashboardManager {
       this.data.addColumn('string', value);
     }
     this.data.addColumn('number', 'Devices');
+    this.data.addColumn('string', 'deviceIds');
+    this.data.addColumn('string', '');
 
     // Get fields we are aggregating by and convert from user-displayed name to API name.
     const queryStringVals =
@@ -68,14 +86,26 @@ class DashboardManager {
         .then(response => response.json())
         .then(response => {
             let results = response.response;
-            for (let entry of results) {
+            for (let [index, entry] of results.entries()) {
               const row =
                   selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
 
+              // TODO: remove fake data after the server-side is updated to provide real data.
+              if (entry.deviceIds == null) {
+                entry.deviceIds = ['abc', 'def', 'ghi', 'jkl', 'mno'];
+              }
+              row.push(JSON.stringify(entry.deviceIds));
+
+              row.push(`<button onclick="document.dispatchEvent(
+                  new CustomEvent( \'bulkUpdate\', {detail: ${index} }))">Update Devices</button>`);
+
               this.data.addRow(row);
             }
     }));
+
+    this.DEVICE_ID_COL = this.data.getNumberOfColumns() - 2;
+    this.DEVICE_COUNT_COL = this.data.getNumberOfColumns() - 3;
 
     this.tableManager.updateAggregation(this.data);
 
@@ -102,7 +132,7 @@ class DashboardManager {
     let result = google.visualization.data.group(
         filtered,
         [depth - 1],
-        [{'column': filtered.getNumberOfColumns() - 1, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+        [{'column': this.DEVICE_COUNT_COL, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
@@ -113,11 +143,20 @@ class DashboardManager {
         'select',
         this.onSliceSelect.bind(this, pieChart, filtered, selectorState, depth + 1));
     } else {
-      // TODO: Allow bulk updating the selected slice
       addOverwriteableChartEvent(
         pieChart,
         'select',
-        () => {console.log("Chart slice was clicked!")});
+        () => {
+          let selectedRow = filterDataFromParent(filtered, depth + 1, pieChart);
+
+          let selectedValues =
+              [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
+          let deviceIds = selectedRow.getValue(0, this.DEVICE_ID_COL);
+          // deviceIds is a serialized string so we can't directly get number of devices from it
+          let devicesCount = selectedRow.getValue(0, this.DEVICE_COUNT_COL);
+
+          this.populateAndShowModal(deviceIds, selectedValues, devicesCount);
+        });
     }
   }
 
@@ -142,6 +181,86 @@ class DashboardManager {
   isAggregating() {
     // If no aggregation tags are selected, we are not currently aggregating
     return this.aggregationSelector.getState().selectedValues.length != 0;
+  }
+
+  populateAndShowModal(deviceIds, selectedValues, devicesCount) {
+    let bodyElements = this.createModalBody(deviceIds, selectedValues, devicesCount);
+    this.updateModal.setHeader('Perform Bulk Update');
+    this.updateModal.setBody(bodyElements);
+    this.updateModal.show();
+  }
+
+  createModalWarning(devicesCount, selectedValues) {
+    let div = document.createElement('div');
+
+    let p1 = document.createElement('p');
+    p1.innerHTML  = `Warning: You are about to update <b>${devicesCount}</b> devices with the following properties:`;
+
+    let ul = document.createElement('ul');
+    for (let i = 0; i < selectedValues.length; i++) {
+      let li = document.createElement('li');
+
+      const aggregationField = this.aggregationSelector.getState().selectedValues[i];
+      const aggregationFieldValue = selectedValues[i];
+
+      li.innerHTML = `<b>${aggregationField}</b>: ${aggregationFieldValue}`;
+
+      ul.appendChild(li);
+    }
+
+    let p2 = document.createElement('p');
+    p2.innerText = 'This is a non-reversible action.  To continue, enter the desired values and press submit.';
+
+    div.appendChild(p1);
+    div.appendChild(ul);
+    div.appendChild(p2);
+
+    return div;
+  }
+
+  createModalForm(deviceIds, selectedValues) {
+    let form = document.createElement('form');
+    form.setAttribute('method', 'POST');
+    form.setAttribute('action', '/update');
+
+    for (let i = 0; i < selectedValues.length; i++) {
+      const aggregationField = this.aggregationSelector.getState().selectedValues[i];
+      const aggregationFieldValue = selectedValues[i];
+
+      let label = document.createElement('label');
+      label.innerHTML = aggregationField;
+      label.classList.add('update-label');
+
+      let input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('value', aggregationFieldValue);
+      input.setAttribute('name', getAnnotatedFieldFromDisplay(aggregationField).API);
+      input.classList.add('update-input');
+
+      let container = document.createElement('div');
+      container.appendChild(label);
+      container.appendChild(input);
+
+      form.appendChild(container);
+    }
+
+    let devicesInput = document.createElement('input');
+    devicesInput.setAttribute('type', 'hidden');
+    devicesInput.setAttribute('value', deviceIds);
+    devicesInput.setAttribute('name', 'deviceIds');
+    form.appendChild(devicesInput);
+
+    let submit = document.createElement('input');
+    submit.setAttribute('type', 'submit');
+    form.appendChild(submit);
+
+    return form;
+  }
+
+  createModalBody(deviceIds, selectedValues, devicesCount) {
+    let warning = this.createModalWarning(devicesCount, selectedValues);
+    let form = this.createModalForm(deviceIds, selectedValues);
+    return [warning, form];
   }
 
   draw() {
