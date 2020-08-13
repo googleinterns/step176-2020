@@ -1,11 +1,17 @@
 class Modal {
-  constructor(id, blocking) {
-    this.container = document.getElementById(id);
+  constructor(id, blocking, closeable) {
+    this.container = document.createElement('div');
+    this.container.setAttribute('id', id);
+    this.container.classList.add('modal', 'hidden');
+    document.body.appendChild(this.container);
 
     this.blockingDiv = null;
     if (blocking) {
       this.blockingDiv = this.addBlockingBackgroundDiv();
     }
+
+    // By default, modals are closeable
+    this.closeable = closeable == null ? true : closeable;
 
     this.header = this.createAndAddDiv('modal-header');
     this.body = this.createAndAddDiv('modal-body');
@@ -33,15 +39,16 @@ class Modal {
   setHeader(text) {
     this.header.innerHTML = '';
 
-    let closeBtn = document.createElement('button');
-    closeBtn.innerText = '✕';
-    closeBtn.classList.add('modal-close-btn');
-    closeBtn.onclick = () => {this.hide()};
+    if (this.closeable) {
+      let closeBtn = document.createElement('button');
+      closeBtn.innerText = '✕';
+      closeBtn.classList.add('modal-close-btn');
+      closeBtn.onclick = () => {this.hide()};
+      this.header.appendChild(closeBtn);
+    }
 
     let heading = document.createElement('h1');
     heading.innerText = text;
-
-    this.header.appendChild(closeBtn);
     this.header.appendChild(heading);
 
     this.center();

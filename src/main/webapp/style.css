@@ -203,3 +203,31 @@ body {
 .update-input:focus {
   border-color: #3367D6;
 }
+
+.spinning-wheel {
+  border: 16px solid #e0e0e0;
+  border-top: 16px solid #3367D6;
+  border-radius: 50%;
+  margin: 0 auto;
+  width: 120px;
+  height: 120px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  /* 4 sections on loop: fast > normal > slow > normal */
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(135deg); }
+  50% { transform: rotate(225deg); }
+  75% { transform: rotate(270deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-bar {
+  width: 50%;
+}
+
+.loading-bar-container {
+  text-align: center;
+  width: 100%;
+}
