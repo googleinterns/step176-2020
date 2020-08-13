@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>ChromeOS Annotated Field Manager</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="fields.js"></script>
+    <script type="text/javascript" src="table-manager.js"></script>
     <script type="text/javascript" src="dashboard-manager.js"></script>
     <script type="text/javascript" src="table.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -32,6 +34,16 @@
         </div>
       </div>
       <div class="footer">
+        <select id="page-size-select">
+          <option value=10>10</option>
+          <option value=25>25</option>
+          <option value=50>50</option>
+        </select>
+        <div class="page-control">
+          <button id="page-left" class="page-arrow">&#8249;</button>
+          <p>Page <span id="page-number">1</span></p>
+          <button id="page-right" class="page-arrow">&#8250;</button>
+        </div>
       </div>
     </div>
   </body>

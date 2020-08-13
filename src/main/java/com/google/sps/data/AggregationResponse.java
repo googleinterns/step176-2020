@@ -19,7 +19,7 @@ public final class AggregationResponse {
   public AggregationResponse(MultiKeyMap map, LinkedHashSet<AnnotatedField> fields) {
     response = new ArrayList<>();
 
-    MapIterator<MultiKey, Integer> it = map.mapIterator();
+    MapIterator<MultiKey, List<String>> it = map.mapIterator();
     while (it.hasNext()) {
       response.add(new AggregationResponseEntry(it.next(), it.getValue(), fields));
     }
