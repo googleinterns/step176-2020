@@ -89,7 +89,8 @@ class TableManager {
   }
 
   setTableView(numOfCols) {
-    /* Aggregation table has Field 1 | ... | Field n | deviceCount | deviceIds | Button
+    /*
+     * Aggregation table has Field 1 | ... | Field n | deviceCount | deviceIds | Button
      * Normal view has Field 1 | ... | Field n
      * In the first case we want to hide only deviceIds; in the second case we show everything
      */
