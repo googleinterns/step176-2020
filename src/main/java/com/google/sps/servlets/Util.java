@@ -87,17 +87,13 @@ class Util {
     return str;
   }
 
-  private static String getRefreshToken(String userId) throws IOException {
+  private static String getRefreshToken(String userId) throws IOException, TooManyResultsException {
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
     System.out.println(results.countEntities());
-    try {
-      Entity entity = results.asSingleEntity();
-      String refreshToken = (String) entity.getProperty("refreshToken");
-      return refreshToken;
-    } catch (PreparedQuery.TooManyResultsException e) {
-      throw new IOException("Error while getting refresh token");
-    }
+    Entity entity = results.asSingleEntity();
+    String refreshToken = (String) entity.getProperty("refreshToken");
+    return refreshToken;
   }
 
   public static String getAccessToken(String userId) throws IOException {

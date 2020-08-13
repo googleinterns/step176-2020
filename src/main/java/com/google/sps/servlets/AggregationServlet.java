@@ -52,7 +52,7 @@ public class AggregationServlet extends HttpServlet {
       response.sendRedirect("/login");
       return;
     } catch (Exception e) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       response.getWriter().println(e.getMessage());
       return;
     }
