@@ -79,6 +79,22 @@ class DashboardManager {
     this.data.addColumn('string', 'deviceIds');
     this.data.addColumn('string', '');
 
+    let aggregationLoader = new Loading(this.fetchAndPopulateAggregation.bind(this), false);
+    await aggregationLoader.load();
+
+    this.DEVICE_ID_COL = this.data.getNumberOfColumns() - 2;
+    this.DEVICE_COUNT_COL = this.data.getNumberOfColumns() - 3;
+    
+    this.tableManager.updateAggregation(this.data);
+
+    // Setup pie chart
+    removeAllChildren(this.pieChart);
+    this.configurePieChart(this.pieChart, this.data, selectorState, 1);
+  }
+
+  async fetchAndPopulateAggregation() {
+    let selectorState = this.aggregationSelector.getState().selectedValues;
+
     // Get fields we are aggregating by and convert from user-displayed name to API name.
     const queryStringVals =
         selectorState.map(displayName => getAnnotatedFieldFromDisplay(displayName).API);
@@ -103,15 +119,6 @@ class DashboardManager {
               this.data.addRow(row);
             }
     }));
-
-    this.DEVICE_ID_COL = this.data.getNumberOfColumns() - 2;
-    this.DEVICE_COUNT_COL = this.data.getNumberOfColumns() - 3;
-
-    this.tableManager.updateAggregation(this.data);
-
-    // Setup pie chart
-    removeAllChildren(this.pieChart);
-    this.configurePieChart(this.pieChart, this.data, selectorState, 1);
   }
 
   /* Setup data for standard table view */
