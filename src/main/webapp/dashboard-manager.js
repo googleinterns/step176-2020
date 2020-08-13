@@ -6,7 +6,6 @@ class DashboardManager {
     this.tableManager = new TableManager();
     this.pieChart = createNewPieChart('piechart-container');
 
-    this.tableManager.setDataTable(this.data);
     this.pieChart.setDataTable(this.data);
 
     this.pieChartDiv = document.getElementById('chart');
@@ -302,7 +301,7 @@ function authorizeCallback(authResult) {
     xhr.open("POST", '/authorize', true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    xhr.onreadystatechange = function() { 
+    xhr.onreadystatechange = function() {
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
             console.log("logged refresh token successfully");
             window.location.href = "/index.html";
