@@ -44,8 +44,10 @@ class Loading {
   async doTask() {
     let passedMinimumLoadTime = new Promise(resolve => setTimeout(resolve, this.minimumLoadTime));
 
-    await this.func();
-    await passedMinimumLoadTime;
+    await Promise.all([this.func(), passedMinimumLoadTime]);
+
+    this.progress = 100;
+    this.setProgress();
 
     this.done = true;
   }

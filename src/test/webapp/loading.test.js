@@ -44,19 +44,21 @@ test('Progress function updates loading bar', async () => {
   const taskTime = 2500; // miliseconds
   const progressIncrement = 20;
 
-  let progressFunc = () => {
+  let progressFunc = function() {
     if (this.progress == null) {
       this.progress = progressIncrement;
     } else {
       this.progress += progressIncrement;
     }
-    console.log('progress in func: ' + this.progress);
     return this.progress;
   };
 
-  let loader = new Loading(() => {new Promise(resolve => {setTimeout(resolve, taskTime)})}, false, progressFunc);
-  loader.updateProgressWrapper = async () => {
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
+  let loader = new Loading(sleep.bind(this, 2500), false, progressFunc);
+  loader.updateProgressWrapper = async () => {
     if (loader.promiseQueue == null) {
       loader.promiseQueue = [];
     }
@@ -66,12 +68,15 @@ test('Progress function updates loading bar', async () => {
 
   expect(document.getElementById('loading-modal').getElementsByTagName('progress')[0].value).toBe(0);
 
-/*
+
   for (let i = 0; i < 100 / progressIncrement; i++) {
-    console.log(i);
     jest.advanceTimersByTime(500);
     await loader.promiseQueue[i];
-    console.log(document.getElementById('loading-modal').getElementsByTagName('progress')[0].value)//.toBe(progressIncrement * (i + 1));
+    if (!loader.done && progressIncrement * (i + 1) >= 100) {
+      expect(document.getElementById('loading-modal').getElementsByTagName('progress')[0].value).toBe(99);
+    } else {
+      expect(document.getElementById('loading-modal').getElementsByTagName('progress')[0].value).toBe(progressIncrement * (i + 1));
+    }
   }
-*/
+
 });
