@@ -1,3 +1,5 @@
+import {Modal} from './modal.js';
+
 class BulkUpdateModal {
   constructor(modalId) {
     this.modal = new Modal(modalId, /*Blocking*/ true);
@@ -92,3 +94,5 @@ class BulkUpdateModal {
     return div;
   }
 }
+
+export {BulkUpdateModal}

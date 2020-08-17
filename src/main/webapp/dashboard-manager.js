@@ -1,3 +1,8 @@
+import {BulkUpdateModal} from './bulk-update-modal.js';
+import {Loading} from './loading.js';
+import {PieChartManager} from './piechart-manager.js'
+import {TableManager} from './table-manager.js';
+
 class DashboardManager {
   constructor() {
     this.data = this.initData();
@@ -168,3 +173,5 @@ function createNewAggregationSelector() {
         }
   });
 }
+
+export {DashboardManager};

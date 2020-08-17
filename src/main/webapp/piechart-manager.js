@@ -1,3 +1,5 @@
+import {ChartUtil} from './chart-util.js';
+
 class PieChartManager {
   constructor(containerId, COLS) {
     this.container = document.getElementById(containerId);
@@ -146,3 +148,5 @@ class PieChartManager {
     });
   }
 }
+
+export {PieChartManager};

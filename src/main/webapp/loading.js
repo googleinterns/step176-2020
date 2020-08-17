@@ -1,3 +1,5 @@
+import {Modal} from './modal.js';
+
 class Loading {
   /*
    * func: the asynchronous function whose progress is being measured
@@ -48,17 +50,23 @@ class Loading {
     this.done = true;
   }
 
+  // Used for testing
+  async updateProgressWrapper() {
+    this.updateProgress();
+  }
+
   async updateProgress() {
     let progress = await this.status();
     if (progress >= 100 && !this.done) {
       progress = 99;
     }
+
     this.progress = progress;
     this.setProgress();
 
     if (!this.done) {
       // frequency with which to update, perhaps make this user controllable at some point?
-      setTimeout(this.updateProgress.bind(this), 500);
+      setTimeout(this.updateProgressWrapper.bind(this), 500);
     }
   }
 
@@ -72,16 +80,18 @@ class Loading {
     this.container.show();
 
     if (!this.isShort && this.status != null) {
-      setTimeout(this.updateProgress.bind(this), 250);
+      setTimeout(this.updateProgressWrapper.bind(this), 250);
     }
 
     await this.doTask();
 
     if (!this.isShort) {
       // add a done button
-      this.container.hide();
+      this.container.remove();
     } else {
-      this.container.hide();
+      this.container.remove();
     }
   }
 }
+
+export {Loading};
