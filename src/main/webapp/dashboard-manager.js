@@ -320,7 +320,7 @@ async function getCsv() {
         .then(response => response.json())
         .then(deviceJsons => {
             for (let device of deviceJsons) {
-                csvContent += device.serialNumber + ',' + device.status + ',' + device.annotatedAssetId + ',' + device.annotatedUser + ',' + device.annotatedLocation;
+                csvContent += device.serialNumber + ',' + device.annotatedAssetId + ',' + device.annotatedUser + ',' + device.annotatedLocation;
                 csvContent += '\r\n';
             }
     }));
@@ -328,6 +328,11 @@ async function getCsv() {
     console.log(csvContent);
     console.log("devices gotten");
     var encodedUri = encodeURI(csvContent);
-    window.open(encodedUri);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "my_data.csv");
+    document.body.appendChild(link); // Required for FF
+
+    link.click();
     console.log("download sent");
 }
