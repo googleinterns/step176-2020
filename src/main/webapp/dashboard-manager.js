@@ -313,3 +313,20 @@ function authorizeCallback(authResult) {
     window.location.href = "/authorize.html";
   }
 }
+
+async function getCsv() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    await (fetch('/devices')
+        .then(response => response.json())
+        .then(deviceJsons => {
+            for (let device of deviceJsons) {
+                let deviceInfo = ','.join(device);
+                csvContent += deviceInfo + '\r\n';
+            }
+    }));
+    console.log(csvContent);
+    console.log("devices gotten");
+    var encodedUri = encodeURI(csvContent);
+    window.open(encodedUri);
+    console.log("download sent");
+}
