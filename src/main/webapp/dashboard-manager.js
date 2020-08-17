@@ -320,7 +320,7 @@ async function getCsv() {
         .then(response => response.json())
         .then(deviceJsons => {
             for (let device of deviceJsons) {
-                let deviceInfo = ','.join(device);
+                let deviceInfo = device.join(',');
                 csvContent += deviceInfo + '\r\n';
             }
     }));
