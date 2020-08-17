@@ -320,10 +320,11 @@ async function getCsv() {
         .then(response => response.json())
         .then(deviceJsons => {
             for (let device of deviceJsons) {
-                let deviceInfo = device.join(',');
-                csvContent += deviceInfo + '\r\n';
+                csvContent += device.serialNumber + ',' + device.status + ',' + device.annotatedAssetId + ',' + device.annotatedUser + ',' + device.annotatedLocation;
+                csvContent += '\r\n';
             }
     }));
+
     console.log(csvContent);
     console.log("devices gotten");
     var encodedUri = encodeURI(csvContent);
