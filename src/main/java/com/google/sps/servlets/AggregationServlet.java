@@ -51,7 +51,7 @@ public class AggregationServlet extends HttpServlet {
       MultiKeyMap<String, List<String>> data = processData(devices, fields);
       response.setStatus(HttpServletResponse.SC_OK);
       response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
-    } catch (IOException e) {//something went wrong during getting the devices
+    } catch (IOException e) {//TODO: Return
         response.sendRedirect("/authorize.html");
     } catch (TooManyResultsException e) {
         response.sendRedirect("/login.html");

@@ -53,6 +53,7 @@ import java.util.List;
 
 class Util {
 
+  //This class only works locally [endpoints will not function if deployed]
   private final String TOKEN_END_POINT = "https://oauth2.googleapis.com/token";
   private final String REROUTE_LINK = "http://localhost:8080";
   private static final String CLIENT_SECRET_FILE = "/client_info.json";

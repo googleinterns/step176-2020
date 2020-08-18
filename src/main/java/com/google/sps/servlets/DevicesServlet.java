@@ -32,14 +32,14 @@ public class DevicesServlet extends HttpServlet {
     }
     final String userId = currentUser.getUserId();
     try {
-        final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
-        response.setContentType("application/json");
-        final String json = Json.toJson(allDevices);
-        response.getWriter().println(json);
+      final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
+      response.setContentType("application/json");
+      final String json = Json.toJson(allDevices);
+      response.getWriter().println(json);
     } catch (IOException e) {//something went wrong during getting the devices
         response.sendRedirect("/authorize.html");
     } catch (TooManyResultsException e) {
-        response.sendRedirect("/login.html");
+        response.sendRedirect("/login.html");//TODO: Return proper error message
     }
   }
 

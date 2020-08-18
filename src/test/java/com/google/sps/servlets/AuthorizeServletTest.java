@@ -69,7 +69,7 @@ public final class AuthorizeServletTest {
   }
 
   @Test
-  public void userLoggedInDevicesSuccess() throws IOException {
+  public void userLoggedInSuccess() throws IOException {
     Util mockedUtil = mock(Util.class);
     User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
     DatastoreService mockedDataObj = mock(DatastoreService.class);
