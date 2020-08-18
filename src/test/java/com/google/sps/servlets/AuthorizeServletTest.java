@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -52,14 +53,26 @@ public final class AuthorizeServletTest {
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
   private final String TEST_AUTH_CODE = "authCode";
   private final String TEST_REFRESH_TOKEN = "refreshToken";
-  private final String REQUEST_PARAMETER_NAME = "code";
+  private final String REQUEST_PARAM_KEY_CODE = "code";
+
+  private UserService mockedUserService;
+  private Util mockedUtil;
+  private User userFake;
+  private DatastoreService mockedDataObj;
+
+  @Before
+  public void setUp() {
+    mockedUserService = mock(UserService.class);
+    mockedUtil = mock(Util.class);
+    userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    mockedDataObj = mock(DatastoreService.class);
+    mockedUserService = mock(UserService.class);
+  }
 
   @Test
   public void userNotLoggedIn() throws IOException {
-    User userStub = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(false);
-    when(mockedUserService.getCurrentUser()).thenReturn(userStub);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
 
     servlet.setUserService(mockedUserService);
     servlet.doPost(request, response);
@@ -70,13 +83,9 @@ public final class AuthorizeServletTest {
 
   @Test
   public void userLoggedInSuccess() throws IOException {
-    Util mockedUtil = mock(Util.class);
-    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    DatastoreService mockedDataObj = mock(DatastoreService.class);
-    UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(request.getParameter(REQUEST_PARAMETER_NAME)).thenReturn(TEST_AUTH_CODE);
+    when(request.getParameter(REQUEST_PARAM_KEY_CODE)).thenReturn(TEST_AUTH_CODE);
     when(mockedUtil.getNewRefreshToken(TEST_AUTH_CODE)).thenReturn(TEST_REFRESH_TOKEN);
 
     servlet.setUserService(mockedUserService);
@@ -86,7 +95,7 @@ public final class AuthorizeServletTest {
     
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
-    verify(request, times(1)).getParameter(REQUEST_PARAMETER_NAME);
+    verify(request, times(1)).getParameter(REQUEST_PARAM_KEY_CODE);
     verify(mockedUtil, times(1)).getNewRefreshToken(TEST_AUTH_CODE);
     verify(mockedUtil, times(1)).associateRefreshToken(TEST_USER_ID, TEST_REFRESH_TOKEN);
     verify(response).sendRedirect(HOME_URL);  
@@ -94,12 +103,9 @@ public final class AuthorizeServletTest {
 
   @Test
   public void userLoggedInNoAuthCode() throws IOException {
-    Util mockedUtil = mock(Util.class);
-    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(request.getParameter(REQUEST_PARAMETER_NAME)).thenReturn(null);
+    when(request.getParameter(REQUEST_PARAM_KEY_CODE)).thenReturn(null);
 
     servlet.setUserService(mockedUserService);
     servlet.setUtilObj(mockedUtil);
@@ -108,18 +114,14 @@ public final class AuthorizeServletTest {
     verify(response).sendRedirect(LOGIN_URL);  
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
-    verify(request, times(1)).getParameter(REQUEST_PARAMETER_NAME);
+    verify(request, times(1)).getParameter(REQUEST_PARAM_KEY_CODE);
   }
 
   @Test
   public void userLoggedRefreshTokenFails() throws IOException {
-    Util mockedUtil = mock(Util.class);
-    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    DatastoreService mockedDataObj = mock(DatastoreService.class);
-    UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(request.getParameter(REQUEST_PARAMETER_NAME)).thenReturn(TEST_AUTH_CODE);
+    when(request.getParameter(REQUEST_PARAM_KEY_CODE)).thenReturn(TEST_AUTH_CODE);
     when(mockedUtil.getNewRefreshToken(TEST_AUTH_CODE)).thenThrow(IOException.class);
 
     servlet.setUserService(mockedUserService);
@@ -129,7 +131,7 @@ public final class AuthorizeServletTest {
     
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
-    verify(request, times(1)).getParameter(REQUEST_PARAMETER_NAME);
+    verify(request, times(1)).getParameter(REQUEST_PARAM_KEY_CODE);
     verify(mockedUtil, times(1)).getNewRefreshToken(TEST_AUTH_CODE);
     verify(response).sendRedirect(AUTHORIZE_URL);  
   }
