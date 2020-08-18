@@ -302,6 +302,7 @@ function authorizeCallback(authResult) {
     const request = new Request('/delete-comments', {method: 'POST', body: '{' + codeMsg + '}'});
     fetch(request).then(response => {
         console.log("auth code sent"); //TODO: handle failure case
+        document.location.href = "/index.html";
     });
   } else {
     console.log("user is not authorized");

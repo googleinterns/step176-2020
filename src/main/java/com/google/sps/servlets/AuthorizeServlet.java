@@ -55,6 +55,7 @@ public class AuthorizeServlet extends HttpServlet {
     try {
       final String refreshToken = utilObj.getNewRefreshToken(authCode);
       utilObj.associateRefreshToken(userId, refreshToken);
+      System.out.println("success");
       response.sendRedirect("/index.html");
     } catch (IOException e) {
       response.sendRedirect("/authorize");
