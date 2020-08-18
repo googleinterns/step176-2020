@@ -298,10 +298,11 @@ function authorizeCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
 
-    const codeMsg = {"code": authResult['code']};
+    // const codeMsg = {"code": authResult['code']};
+    const codeMsg = {"code": "potato"};
     const request = new Request('/authorize', {
                                                 method: 'POST', 
-                                                headers: { 'Content-Type': 'application/json', }, 
+                                                headers: { 'Content-Type': 'application/json'}, 
                                                 body: JSON.stringify(codeMsg)});
     fetch(request).then(response => {
         console.log("auth code sent"); //TODO: handle failure case
