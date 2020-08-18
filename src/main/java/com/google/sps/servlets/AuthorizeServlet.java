@@ -47,17 +47,17 @@ public class AuthorizeServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final User currentUser = userService.getCurrentUser();
-    System.out.println("a");
+    // System.out.println("a");
     final String authCode = (String) request.getParameter("code");
-    System.out.println(authCode);
+    // System.out.println(authCode);
 
 
-        Enumeration enumeration = request.getParameterNames();
-        while (enumeration.hasMoreElements()) {
-            String parameterName = (String) enumeration.nextElement();
-            System.out.println("Parameter = " + parameterName);
-        }
-    System.out.println("done enumerating");
+    //     Enumeration enumeration = request.getParameterNames();
+    //     while (enumeration.hasMoreElements()) {
+    //         String parameterName = (String) enumeration.nextElement();
+    //         System.out.println("Parameter = " + parameterName);
+    //     }
+    // System.out.println("done enumerating");
 
 
 
