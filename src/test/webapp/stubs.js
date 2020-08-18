@@ -323,24 +323,33 @@ let stubGoogleAPIs = function () {
             },
 
             //https://developers.google.com/chart/interactive/docs/reference#dataview-class
-            DataView: function () {
+            DataView: function() {
                 return {
                     setRows: function(rows) { }
                 }
             },
+
+            Dashboard: function() {
+                return {}
+            }
             //https://developers.google.com/chart/interactive/docs/reference#chartwrapperobject
             ChartWrapper: function () {
                 return {
                     getChart: function() { },
                     getDataTable: function() { },
                     getOption: function() { },
+                    setDataTable: function(dataTable) { },
                     setOption: function(optionName, value) { },
-                    setOptions: function(options) { }
+                    setOptions: function(options) { },
+                    setView: function(view) { }
                 }
             },
             //https://developers.google.com/chart/interactive/docs/reference#charteditor-class
             ChartEditor: {},
-
+            data: {
+              group: function(dataTable, carryoverCols, groupFunctionCols) { },
+              sum: function() { }
+            },
             events : {
               addListener: function (chart, eventType, callback) { return 10; },
               removeListener: function (listenerId) { }
