@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 @WebServlet("/authorize")
@@ -49,6 +50,17 @@ public class AuthorizeServlet extends HttpServlet {
     System.out.println("a");
     final String authCode = (String) request.getParameter("code");
     System.out.println(authCode);
+
+
+        Enumeration enumeration = request.getParameterNames();
+        while (enumeration.hasMoreElements()) {
+            String parameterName = (String) enumeration.nextElement();
+            System.out.println("Parameter = " + parameterName);
+        }
+    System.out.println("done enumerating");
+
+
+
     if ((!userService.isUserLoggedIn()) || (currentUser == null) || (authCode == null)) {
       response.sendRedirect("/login");
       return;
