@@ -299,7 +299,7 @@ function authorizeCallback(authResult) {
     $('#signinButton').attr('style', 'display: none');
 
     const codeMsg = "code=" + authResult['code'];
-    const request = new Request('/delete-comments', {method: 'POST', body: '{' + codeMsg + '}'});
+    const request = new Request('/authorize', {method: 'POST', body: '{' + codeMsg + '}'});
     fetch(request).then(response => {
         console.log("auth code sent"); //TODO: handle failure case
         document.location.href = "/index.html";
