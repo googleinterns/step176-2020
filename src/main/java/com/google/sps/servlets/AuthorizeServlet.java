@@ -47,7 +47,6 @@ public class AuthorizeServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final User currentUser = userService.getCurrentUser();
-    System.out.println("a");
     final String authCode = (String) request.getParameter("code");
     if ((!userService.isUserLoggedIn()) || (currentUser == null) || (authCode == null)) {
       response.sendRedirect("/login");
@@ -57,7 +56,6 @@ public class AuthorizeServlet extends HttpServlet {
     try {
       final String refreshToken = utilObj.getNewRefreshToken(authCode);
       utilObj.associateRefreshToken(userId, refreshToken);
-      System.out.println("success");
       response.sendRedirect("/index.html");
     } catch (IOException e) {
       response.sendRedirect("/authorize");
