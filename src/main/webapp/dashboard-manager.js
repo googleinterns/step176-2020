@@ -2,6 +2,7 @@ import {BulkUpdateModal} from './bulk-update-modal.js';
 import {Loading} from './loading.js';
 import {PieChartManager} from './piechart-manager.js'
 import {TableManager} from './table-manager.js';
+import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
 
 class DashboardManager {
   constructor() {
