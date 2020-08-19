@@ -1,5 +1,5 @@
 import {ChartUtil} from '../../main/webapp/chart-util.js';
-import {stubGoogleAPIs} from './stubs.js';
+import {stubGoogleAPIs} from './stubs/google-charts.js';
 
 stubGoogleAPIs();
 

@@ -1,5 +1,5 @@
 import {PieChartManager} from '../../main/webapp/piechart-manager.js';
-import {stubGoogleAPIs} from './stubs.js';
+import {stubGoogleAPIs} from './stubs/google-charts.js';
 import {ChartUtil} from '../../main/webapp/chart-util.js';
 jest.mock('../../main/webapp/chart-util.js');
 

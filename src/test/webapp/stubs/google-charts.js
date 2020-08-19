@@ -331,13 +331,15 @@ let stubGoogleAPIs = function () {
 
             Dashboard: function() {
                 return {}
-            }
+            },
             //https://developers.google.com/chart/interactive/docs/reference#chartwrapperobject
             ChartWrapper: function () {
                 return {
+                    draw: function() { },
                     getChart: function() { },
                     getDataTable: function() { },
-                    getOption: function() { },
+                    getOption: function(option) { },
+                    getOptions: function() { return {}; },
                     setDataTable: function(dataTable) { },
                     setOption: function(optionName, value) { },
                     setOptions: function(options) { },
@@ -347,12 +349,19 @@ let stubGoogleAPIs = function () {
             //https://developers.google.com/chart/interactive/docs/reference#charteditor-class
             ChartEditor: {},
             data: {
-              group: function(dataTable, carryoverCols, groupFunctionCols) { },
-              sum: function() { }
+                group: function(dataTable, carryoverCols, groupFunctionCols) { },
+                sum: function() { }
+            },
+            ControlWrapper: function() {
+                return {
+                    draw: function() { },
+                    getState: function() { return {selectedValues: []}; },
+                };
             },
             events : {
-              addListener: function (chart, eventType, callback) { return 10; },
-              removeListener: function (listenerId) { }
+                addListener: function(chart, eventType, callback) { return 10; },
+                addOneTimeListener: function(chart, eventType, callback) {},
+                removeListener: function(listenerId) { }
             }
 
         }
