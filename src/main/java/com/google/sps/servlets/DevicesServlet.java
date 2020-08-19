@@ -29,7 +29,7 @@ public class DevicesServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-      response.sendRedirect("/login");
+      response.sendRedirect(LOGIN_URL);
       return;
     }
     final String userId = currentUser.getUserId();
