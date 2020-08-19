@@ -18,6 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.NotAuthorizedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +33,10 @@ public class AggregationServlet extends HttpServlet {
 
   private UserService userService = UserServiceFactory.getUserService();
   private Util utilObj = new Util();
+  public final String LOGIN_URL = "/login";
+  public final String HOME_URL = "/index.html";
+  public final String AUTHORIZE_URL = "/authorize";
+  public final String REQUEST_PARAM_KEY_CODE = "code";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -51,18 +56,18 @@ public class AggregationServlet extends HttpServlet {
       MultiKeyMap<String, List<String>> data = processData(devices, fields);
       response.setStatus(HttpServletResponse.SC_OK);
       response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
-    } catch (IOException e) {//TODO: Return
-        response.sendRedirect("/authorize.html");
+    } catch (NotAuthorizedException e) {//TODO: Return more specific error message
+        response.sendRedirect(AUTHORIZE_URL);
     } catch (TooManyResultsException e) {
-        response.sendRedirect("/login.html");
+        response.sendRedirect(LOGIN_URL);
     } 
   }
 
-  public List<ChromeOSDevice> amassDevices() throws IOException {
+  public List<ChromeOSDevice> amassDevices() throws NotAuthorizedException, IOException {
     List<ChromeOSDevice> devices = new ArrayList<>();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-      throw new IOException("user is not logged in");
+      throw new NotAuthorizedException("user is not logged in");
     }
     final String userId = currentUser.getUserId();
     final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);

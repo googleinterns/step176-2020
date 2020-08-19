@@ -43,22 +43,26 @@ public class AuthorizeServlet extends HttpServlet {
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   private UserService userService = UserServiceFactory.getUserService();
   private Util utilObj = new Util();
-
+  public final String LOGIN_URL = "/login";
+  public final String HOME_URL = "/index.html";
+  public final String AUTHORIZE_URL = "/authorize";
+  public final String REQUEST_PARAM_KEY_CODE = "code";
+  
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final User currentUser = userService.getCurrentUser();
     final String authCode = (String) request.getParameter("code");
     if ((!userService.isUserLoggedIn()) || (currentUser == null) || (authCode == null)) {
-      response.sendRedirect("/login");
+      response.sendRedirect(LOGIN_URL);
       return;
     }
     final String userId = currentUser.getUserId();
     try {
       final String refreshToken = utilObj.getNewRefreshToken(authCode);
       utilObj.associateRefreshToken(userId, refreshToken);
-      response.sendRedirect("/index.html");
+      response.sendRedirect(HOME_URL);
     } catch (IOException e) {
-      response.sendRedirect("/authorize");
+      response.sendRedirect(AUTHORIZE_URL);
     }
   }
 

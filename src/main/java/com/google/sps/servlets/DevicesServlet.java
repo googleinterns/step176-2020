@@ -22,6 +22,8 @@ public class DevicesServlet extends HttpServlet {
 
   private UserService userService = UserServiceFactory.getUserService();
   private Util utilObj = new Util();
+  public final String LOGIN_URL = "/login";
+  public final String AUTHORIZE_URL = "/authorize.html";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -37,9 +39,9 @@ public class DevicesServlet extends HttpServlet {
       final String json = Json.toJson(allDevices);
       response.getWriter().println(json);
     } catch (IOException e) {//something went wrong during getting the devices
-        response.sendRedirect("/authorize.html");
+        response.sendRedirect(AUTHORIZE_URL);
     } catch (TooManyResultsException e) {
-        response.sendRedirect("/login.html");//TODO: Return proper error message
+        response.sendRedirect(LOGIN_URL);//TODO: Return proper error message
     }
   }
 

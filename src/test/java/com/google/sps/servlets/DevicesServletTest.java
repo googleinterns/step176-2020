@@ -38,8 +38,6 @@ public final class DevicesServletTest {
   private DevicesServlet servlet = new DevicesServlet();
   private HttpServletRequest request = mock(HttpServletRequest.class);
   private HttpServletResponse response = mock(HttpServletResponse.class);
-  private final String LOGIN_URL = "/login";
-  private final String AUTHORIZE_URL = "/authorize.html";
 
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";
@@ -78,7 +76,7 @@ public final class DevicesServletTest {
     servlet.setUserService(mockedUserService);
     servlet.doGet(request, response);
 
-    verify(response).sendRedirect(LOGIN_URL);
+    verify(response).sendRedirect(servlet.LOGIN_URL);
     verify(mockedUserService, times(1)).isUserLoggedIn();
   }
 
@@ -122,7 +120,7 @@ public final class DevicesServletTest {
     servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
   
-    verify(response).sendRedirect(AUTHORIZE_URL);  
+    verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);

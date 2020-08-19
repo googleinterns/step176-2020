@@ -37,9 +37,6 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnit4.class)
 public final class AggregationServletTest {
 
-  private final String LOGIN_URL = "/login";
-  private final String HOME_URL = "/index.html";
-  private final String AUTHORIZE_URL = "/authorize";
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
