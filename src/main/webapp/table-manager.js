@@ -56,6 +56,7 @@ class TableManager {
     currOptions['page'] = 'disable';
 
     this.table.setOptions(currOptions);
+    this.setTableView(dataTable.getNumberOfColumns());
     this.setDataTable(dataTable);
   }
 
@@ -65,6 +66,7 @@ class TableManager {
 
     this.table.setOption('page', 'event');
     this.table.setOption('pageSize', this.pageSize);
+    this.setTableView(dataTable.getNumberOfColumns());
     this.setDataTable(dataTable);
   }
 
@@ -84,6 +86,21 @@ class TableManager {
       view.setRows(startIndex, endIndex);
       this.table.setDataTable(view);
     }
+  }
+
+  setTableView(numOfCols) {
+    /*
+     * Aggregation table has Field 1 | ... | Field n | deviceCount | deviceIds | Button
+     * Normal view has Field 1 | ... | Field n
+     * In the first case we want to hide only deviceIds; in the second case we show everything
+     */
+    let viewableCols = [...Array(numOfCols - 2).keys()];
+    if (!this.aggregating) {
+      viewableCols.push(numOfCols - 2);
+    }
+    viewableCols.push(numOfCols - 1);
+
+    this.table.setView({'columns': viewableCols});
   }
 
   hasNextPage() {

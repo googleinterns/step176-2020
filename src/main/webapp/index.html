@@ -1,24 +1,29 @@
+
 <!DOCTYPE html>
-<html>
+<html itemscope itemtype="http://schema.org/Article">
   <head>
     <meta charset="UTF-8">
     <title>ChromeOS Annotated Field Manager</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="chart-util.js"></script>
     <script type="text/javascript" src="modal.js"></script>
+    <script type="text/javascript" src="bulk-update-modal.js"></script>
+    <script type="text/javascript" src="loading.js"></script>
     <script type="text/javascript" src="fields.js"></script>
     <script type="text/javascript" src="table-manager.js"></script>
+    <script type="text/javascript" src="piechart-manager.js"></script>
     <script type="text/javascript" src="dashboard-manager.js"></script>
     <script type="text/javascript" src="table.js"></script>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body>
+  <body onload="handleLogin();">
     <div id="container">
       <div class="header">
         <div id="branding">
           <p>ChromeOS Annotated Field Manager</p>
         </div>
         <div id="logout">
-          <a href="">Logout</a>
+          <a href="document.location.href='/login';">Logout</a>
         </div>
       </div>
       <div id="dashboard">
@@ -46,6 +51,5 @@
         </div>
       </div>
     </div>
-    <div id="update-modal" class="modal hidden"></div>
   </body>
 </html>
