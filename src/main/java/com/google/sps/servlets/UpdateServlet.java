@@ -33,12 +33,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/update")
 public class UpdateServlet extends HttpServlet {
 
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final Gson GSON_OBJECT = new Gson();
+  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+  public static final Gson GSON_OBJECT = new Gson();
+  final private static List<String> relevantFields = Arrays.asList("annotatedLocation", "annotatedAssetId", "annotatedUser");
+  private UserService userService = UserServiceFactory.getUserService();
+  private OkHttpClient client = new OkHttpClient();
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
       response.sendRedirect("/login");
@@ -57,12 +59,8 @@ public class UpdateServlet extends HttpServlet {
     final String rawDeviceIds = (String) request.getParameter("deviceIds");
     Type listType = new TypeToken<List<String>>() {}.getType();
     final List<String> deviceIds = GSON_OBJECT.fromJson(rawDeviceIds, listType);
-    System.out.println(deviceIds);
-    System.out.println(mp);
     final String userId = currentUser.getUserId();
     final String accessToken = Util.getAccessToken(userId);
-    List<String> locations = Arrays.asList("NYC", "SF", "LA", "BOS", "DC");
-    List<String> users = Arrays.asList("Bob", "Alice", "Eve", "george", "michael", "blab", "name");
     for (int i = 0; i < deviceIds.size(); i++) {
         updateDevice(accessToken, (String) deviceIds.get(i), mp);
     }
@@ -72,13 +70,11 @@ public class UpdateServlet extends HttpServlet {
 
   private void updateDevice(String accessToken, String deviceId, Map<String, String> mp) throws IOException {
     final String myUrl = getUpdateUrl(deviceId);
-    OkHttpClient client = new OkHttpClient();
     String json = getJsonFromMap(mp);
     RequestBody body = RequestBody.create(JSON, json);
     Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response myResponse = client.newCall(req).execute();
     myResponse.body().close();
-    System.out.println("finished updating " + deviceId);
   }
 
   private String getJsonFromMap(Map<String, String> mp) {
