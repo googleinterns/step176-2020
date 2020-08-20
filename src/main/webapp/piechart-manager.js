@@ -50,7 +50,7 @@ class PieChartManager {
         pieChart,
         'select',
         this.onSliceSelect.bind(this, pieChart, filtered, selectorState, depth + 1));
-    }else {
+    } else {
       ChartUtil.addOverwriteableEvent(
         pieChart,
         'select',

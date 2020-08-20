@@ -6,7 +6,7 @@ import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
 
 class DashboardManager {
   constructor() {
-    this.data = this.initData();
+    this.data = new google.visualization.DataTable();
 
     // Updated as the table changes
     this.COLS = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
@@ -15,8 +15,6 @@ class DashboardManager {
     this.aggregationSelector = createNewAggregationSelector();
     this.tableManager = new TableManager();
     this.pieChartManager = new PieChartManager(/*ContainerId:*/ 'chart', this.COLS);
-
-    this.tableManager.setDataTable(this.data);
 
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
@@ -44,20 +42,28 @@ class DashboardManager {
   }
 
   /* Get the initial data to be shown to the user and populate the main datatable*/
-  initData() {
+  async initData() {
     let data = new google.visualization.DataTable();
-    data.addColumn('string', 'Serial Number');//this is fake data
-    data.addColumn('string', 'Status');//TODO: integrate in real data
+    data.addColumn('string', 'Serial Number');
+    data.addColumn('string', 'Status');
     data.addColumn('string', 'Asset ID');
     data.addColumn('string', 'User');
     data.addColumn('string', 'Location');
 
-    // TODO: Use real data pulled from server.
-    data.addRow(['SN12345', 'Provisioned', '1e76c3', 'James', 'Texas']);
-    data.addRow(['SN54321', 'Provisioned', 'a9f27d', 'Justin', 'Alaska']);
-    data.addRow(['SNABCDE', 'Provisioned', '71ec9a', 'Jake', 'Missouri']);
+    await (fetch('/devices')
+          .then(response => response.json())
+          .then(deviceJsons => {
+              for (let device of deviceJsons) {
+                data.addRow([
+                    device.serialNumber,
+                    device.status,
+                    device.annotatedAssetId,
+                    device.annotatedUser,
+                    device.annotatedLocation]);
+              }
+      }));
 
-    return data;
+    this.data = data;
   }
 
   async updateAndDrawData() {
@@ -129,8 +135,7 @@ class DashboardManager {
 
   /* Setup data for standard table view */
   async updateNormal() {
-    // TODO: use real data
-    this.data = this.initData();
+    await this.initData();
     this.tableManager.updateNormal(this.data);
   }
 
@@ -173,6 +178,34 @@ function createNewAggregationSelector() {
             }
         }
   });
+}
+
+
+async function handleLogin() {
+  fetch('/status').then(response => response.json()).then((isLoggedIn) => {
+    if (!isLoggedIn) {
+      window.location.replace("/login");
+    }
+  });
+}
+
+function authorizeCallback(authResult) {
+  if (authResult['code']) {
+    $('#signinButton').attr('style', 'display: none');
+
+    const codeMsg = "code=" + authResult['code'];
+    const request = new Request('/authorize', {
+                                                method: 'POST', 
+                                                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', },
+                                                body: codeMsg});
+    fetch(request).then(response => {
+        console.log("auth code sent"); //TODO: handle failure case
+        document.location.href = "/index.html";
+    });
+  } else {
+    console.log("user is not authorized");
+    window.location.href = "/authorize.html";
+  }
 }
 
 export {DashboardManager};
