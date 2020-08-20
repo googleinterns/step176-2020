@@ -21,7 +21,7 @@ public final class ListDeviceResponse {
     this.nextPageToken = nextPageToken;
     this.etag = etag;
   }
-  
+
   public boolean hasNextPageToken() {
       return nextPageToken != null;
   }
@@ -32,6 +32,9 @@ public final class ListDeviceResponse {
 
   public List<ChromeOSDevice> getDeviceListCopy(List<ChromeOSDevice> original) {
     final List<ChromeOSDevice> devices = new ArrayList<>();
+    if (original == null) {
+      return devices;
+    }
     for (final ChromeOSDevice device : original) {
       devices.add(device.copy());
     }

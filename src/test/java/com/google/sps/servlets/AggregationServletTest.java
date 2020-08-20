@@ -1,5 +1,9 @@
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
 import java.io.IOException;
@@ -12,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.keyvalue.MultiKey;
@@ -31,6 +36,10 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(JUnit4.class)
 public final class AggregationServletTest {
+
+  private final String TEST_USER_ID = "testUserId";
+  private final String TEST_USER_EMAIL = "testEmail";
+  private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
 
   private final String LOCATION_ONE = "New Jersey";
   private final String LOCATION_TWO = "California";
@@ -61,44 +70,56 @@ public final class AggregationServletTest {
 
   @Test
   public void onlyOneUniqueField() {
-    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
-    expected.put(new MultiKey(new String[] {ASSET_ID_ONE}), 5);
+    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE}),
+        allDevices.stream().map(device -> device.getDeviceId()).collect(Collectors.toList()));
 
-    MultiKeyMap<String, Integer> actual = processData(allDevices, AnnotatedField.ASSET_ID);
+    MultiKeyMap<String, List<String>> actual = processData(allDevices, AnnotatedField.ASSET_ID);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void multipleResultEntries() {
-    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
-    expected.put(new MultiKey(new String[] {USER_ONE}), 2);
-    expected.put(new MultiKey(new String[] {USER_TWO}), 1);
-    expected.put(new MultiKey(new String[] {USER_THREE}), 2);
+    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(
+        new String[] {USER_ONE}), Arrays.asList(DEVICE_ONE.getDeviceId(), DEVICE_FOUR.getDeviceId()));
+    expected.put(new MultiKey(
+        new String[] {USER_TWO}), Arrays.asList(DEVICE_TWO.getDeviceId()));
+    expected.put(new MultiKey(
+        new String[] {USER_THREE}), Arrays.asList(DEVICE_THREE.getDeviceId(), DEVICE_FIVE.getDeviceId()));
 
-    MultiKeyMap<String, Integer> actual = processData(allDevices, AnnotatedField.USER);
+    MultiKeyMap<String, List<String>> actual = processData(allDevices, AnnotatedField.USER);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void annotatedLocation() {
-    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
-    expected.put(new MultiKey(new String[] {LOCATION_ONE}), 3);
-    expected.put(new MultiKey(new String[] {LOCATION_TWO}), 2);
+    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(
+        new String[] {LOCATION_ONE}),
+        Arrays.asList(DEVICE_ONE.getDeviceId(), DEVICE_TWO.getDeviceId(), DEVICE_FIVE.getDeviceId()));
+    expected.put(new MultiKey(
+        new String[] {LOCATION_TWO}),
+        Arrays.asList(DEVICE_THREE.getDeviceId(), DEVICE_FOUR.getDeviceId()));
 
-    MultiKeyMap<String, Integer> actual = processData(allDevices, AnnotatedField.LOCATION);
+    MultiKeyMap<String, List<String>> actual = processData(allDevices, AnnotatedField.LOCATION);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void multipleAggregationFields() {
-    MultiKeyMap<String, Integer> expected = new MultiKeyMap<>();
-    expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_ONE}), 3);
-    expected.put(new MultiKey(new String[] {ASSET_ID_ONE, LOCATION_TWO}), 2);
+    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(
+        new String[] {ASSET_ID_ONE, LOCATION_ONE}),
+        Arrays.asList(DEVICE_ONE.getDeviceId(), DEVICE_TWO.getDeviceId(), DEVICE_FIVE.getDeviceId()));
+    expected.put(new MultiKey(
+        new String[] {ASSET_ID_ONE, LOCATION_TWO}),
+        Arrays.asList(DEVICE_THREE.getDeviceId(), DEVICE_FOUR.getDeviceId()));
 
-    MultiKeyMap<String, Integer> actual = AggregationServlet.processData(allDevices,
+    MultiKeyMap<String, List<String>> actual = AggregationServlet.processData(allDevices,
         new LinkedHashSet<>(Arrays.asList(AnnotatedField.ASSET_ID, AnnotatedField.LOCATION)));
 
     Assert.assertEquals(expected, actual);
@@ -138,7 +159,16 @@ public final class AggregationServletTest {
   public void validArgumentReceivesSuccess() throws IOException{
     when(request.getParameter("aggregationField")).thenReturn("annotatedLocation");
     setNewResponseWriter(response);
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    DatastoreService mockedDataObj = mock(DatastoreService.class);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
 
     verify(response).setStatus(HttpServletResponse.SC_OK);
@@ -148,7 +178,16 @@ public final class AggregationServletTest {
   public void validMultiFieldArgumentReceivesSuccess() throws IOException{
     when(request.getParameter("aggregationField")).thenReturn("annotatedLocation,annotatedAssetId");
     setNewResponseWriter(response);
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    DatastoreService mockedDataObj = mock(DatastoreService.class);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
 
     verify(response).setStatus(HttpServletResponse.SC_OK);
@@ -161,10 +200,11 @@ public final class AggregationServletTest {
   }
 
   /** Used for convenience in tests when only aggregating by one field*/
-  private MultiKeyMap<String, Integer> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
+  private MultiKeyMap<String, List<String>> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
     LinkedHashSet<AnnotatedField> fields = new LinkedHashSet<>();
     fields.add(field);
 
     return servlet.processData(devices, fields);
   }
+
 }

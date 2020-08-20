@@ -1,5 +1,7 @@
 package com.google.sps.servlets;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -18,25 +20,37 @@ import java.util.List;
 @WebServlet("/devices")
 public class DevicesServlet extends HttpServlet {
 
+  private UserService userService = UserServiceFactory.getUserService();
+  private Util utilObj = new Util();
+  public final String LOGIN_URL = "/login";
+  public final String AUTHORIZE_URL = "/authorize.html";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final UserService userService = UserServiceFactory.getUserService();
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-      response.sendRedirect("/login");
+      response.sendRedirect(LOGIN_URL);
       return;
     }
     final String userId = currentUser.getUserId();
-    final List<ChromeOSDevice> allDevices = Util.getAllDevices(userId);
-    response.setContentType("application/json");
-    final String json = Json.toJson(allDevices);
-    response.getWriter().println(json);
+    try {
+      final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
+      response.setContentType("application/json");
+      final String json = Json.toJson(allDevices);
+      response.getWriter().println(json);
+    } catch (IOException e) {//something went wrong during getting the devices
+        response.sendRedirect(AUTHORIZE_URL);
+    } catch (TooManyResultsException e) {
+        response.sendRedirect(LOGIN_URL);//TODO: Return proper error message
+    }
   }
 
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
+  }
+  
+  public void setUtilObj(Util util) {
+    this.utilObj = util;
   }
 
 }

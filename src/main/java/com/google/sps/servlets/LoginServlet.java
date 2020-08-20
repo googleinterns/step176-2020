@@ -25,19 +25,25 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
+  private UserService userService = UserServiceFactory.getUserService();
+  public final String urlToRedirectToAfterUserLogsOut = "/index.html";
+  public final String urlToRedirectToAfterUserLogsIn = "/index.html";
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("text/html");
-    final UserService userService = UserServiceFactory.getUserService();
     if (userService.isUserLoggedIn()) {
-      final String userEmail = userService.getCurrentUser().getEmail();
-      final String urlToRedirectToAfterUserLogsOut = "/index.html";
+      
       final String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
       response.sendRedirect(logoutUrl);
     } else {
-      final String urlToRedirectToAfterUserLogsIn = "/index.html";
       final String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
       response.sendRedirect(loginUrl);
     }
   }
+
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
+  }
+  
 }

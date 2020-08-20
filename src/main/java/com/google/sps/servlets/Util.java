@@ -53,6 +53,9 @@ import java.util.List;
 
 class Util {
 
+  //This class only works locally [endpoints will not function if deployed]
+  private final String TOKEN_END_POINT = "https://oauth2.googleapis.com/token";
+  private final String REROUTE_LINK = "http://localhost:8080";
   private static final String CLIENT_SECRET_FILE = "/client_info.json";
   private static final String API_KEY_FILE = "/api_key.txt";
   private static final OkHttpClient client = new OkHttpClient();
@@ -65,71 +68,56 @@ class Util {
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  private static final String API_KEY = getAPIKey(); 
 
-  public static List<ChromeOSDevice> getAllDevices(String userId) throws IOException {
+  public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
+    final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
-    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
       final String pageToken = (String) resp.getNextPageToken();
-      resp = getDevicesResponse(pageToken, accessToken);
+      resp = getDevicesResponse(pageToken, accessToken, apiKey);
       allDevices.addAll(resp.getDevices());
     }
     return allDevices;
   }
 
-  public static String getAPIKey() {
-    try {
-      File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
-      String str = FileUtils.readFileToString(file);
-      return str;
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
-    return EMPTY_API_KEY;
+  public static String getAPIKey() throws IOException {
+    File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
+    String str = FileUtils.readFileToString(file);
+    return str;
   }
 
-  private static String getRefreshToken(String userId) throws IOException {
+  private static String getRefreshToken(String userId) throws IOException, TooManyResultsException {
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
     System.out.println(results.countEntities());
-    try {
-      Entity entity = results.asSingleEntity();
-      String refreshToken = (String) entity.getProperty("refreshToken");
-      return refreshToken;
-    } catch (PreparedQuery.TooManyResultsException e) {
-      throw new IOException("Error while getting refresh token");
-    }
+    Entity entity = results.asSingleEntity();
+    String refreshToken = (String) entity.getProperty("refreshToken");
+    return refreshToken;
   }
 
-  public static String getAccessToken(String userId) throws IOException {
-    try {
-      final String refreshToken = getRefreshToken(userId);
-      File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
-      final GoogleClientSecrets clientSecrets =
-      GoogleClientSecrets.load(
+  public static String getAccessToken(String userId) throws IOException, TokenResponseException, TooManyResultsException {
+    final String refreshToken = getRefreshToken(userId);
+    File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
+    final GoogleClientSecrets clientSecrets =
+    GoogleClientSecrets.load(
         JacksonFactory.getDefaultInstance(), new FileReader(file));
-      final String clientId = clientSecrets.getDetails().getClientId();
-      final String clientSecret = clientSecrets.getDetails().getClientSecret();
-      GoogleTokenResponse response =
-      new GoogleRefreshTokenRequest(new NetHttpTransport(), new JacksonFactory(),
-        refreshToken, clientId, clientSecret).execute();
-      return response.getAccessToken();
-    } catch (TokenResponseException e) {
-      if (e.getDetails() != null) {
-        System.out.println(e.getMessage());
-      }
-    }
-    return INVALID_ACCESS_TOKEN;
+    final String clientId = clientSecrets.getDetails().getClientId();
+    final String clientSecret = clientSecrets.getDetails().getClientSecret();
+    GoogleTokenResponse response =
+    new GoogleRefreshTokenRequest(
+        new NetHttpTransport(), new JacksonFactory(), refreshToken, clientId, clientSecret)
+        .execute();
+    return response.getAccessToken();
   }
 
-  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken) throws IOException {
+  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
     urlBuilder.addQueryParameter("maxResults", DEFAULT_MAX_DEVICES);
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
-    urlBuilder.addQueryParameter("key", API_KEY);
+    urlBuilder.addQueryParameter("key", apiKey);
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
       urlBuilder.addQueryParameter("pageToken", pageToken);
     }
@@ -139,6 +127,47 @@ class Util {
     final String content = myResponse.body().string();
     ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
     return resp;
+  }
+
+  public void deleteStaleTokens(String userId) {
+    Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
+    PreparedQuery results = datastore.prepare(query);
+    List<Key> keysToDelete = new ArrayList<>();
+    for (final Entity entity : results.asIterable()) {
+      final long id = entity.getKey().getId();
+      final Key key = KeyFactory.createKey("RefreshToken", id);
+      keysToDelete.add(key);
+    }
+    datastore.delete(keysToDelete);
+  }
+
+  public String getNewRefreshToken(String authCode) throws IOException {
+    File file = new File(this.getClass().getResource(CLIENT_SECRET_FILE).getFile());
+    final GoogleClientSecrets clientSecrets =
+    GoogleClientSecrets.load(
+      JacksonFactory.getDefaultInstance(), new FileReader(file));
+    final String clientId = clientSecrets.getDetails().getClientId();
+    final String clientSecret = clientSecrets.getDetails().getClientSecret();
+    final GoogleTokenResponse tokenResponse =
+      new GoogleAuthorizationCodeTokenRequest(
+        new NetHttpTransport(),
+        JacksonFactory.getDefaultInstance(),
+        TOKEN_END_POINT,
+        clientSecrets.getDetails().getClientId(),
+        clientSecrets.getDetails().getClientSecret(),
+        authCode,
+        REROUTE_LINK) 
+        .execute();
+    final String refreshToken = tokenResponse.getRefreshToken();
+    return refreshToken;
+  }
+
+  public void associateRefreshToken(String userId, String refreshToken) {
+    Entity tokenEntity = new Entity("RefreshToken");
+    tokenEntity.setProperty("userId", userId);
+    tokenEntity.setProperty("refreshToken", refreshToken);
+    deleteStaleTokens(userId);
+    datastore.put(tokenEntity);
   }
 
 }
