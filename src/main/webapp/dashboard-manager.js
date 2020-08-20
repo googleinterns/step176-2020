@@ -172,6 +172,7 @@ function createNewAggregationSelector() {
       'options': {
             'filterColumnIndex': '0',
             'ui': {
+                'caption': 'Select a field by which to aggregate',
                 'label': 'Aggregate By...',
                 'selectedValuesLayout': 'aside',
                 'sortValues': false
@@ -195,7 +196,7 @@ function authorizeCallback(authResult) {
 
     const codeMsg = "code=" + authResult['code'];
     const request = new Request('/authorize', {
-                                                method: 'POST', 
+                                                method: 'POST',
                                                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', },
                                                 body: codeMsg});
     fetch(request).then(response => {
