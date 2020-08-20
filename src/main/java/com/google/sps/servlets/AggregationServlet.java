@@ -1,25 +1,24 @@
-// Copyright 2019 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package com.google.sps.servlets;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.AggregationResponse;
 import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
 import com.google.sps.data.ListDeviceResponse;
 import com.google.sps.gson.Json;
+import com.google.sps.servlets.Util;
 import java.io.IOException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.NotAuthorizedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,16 +26,17 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.keyvalue.MultiKey;
-import org.apache.commons.collections4.map.MultiKeyMap;
 
 /** Servlet that aggregates chrome devices by a given field */
 @WebServlet("/aggregate")
 public class AggregationServlet extends HttpServlet {
+
+  private UserService userService = UserServiceFactory.getUserService();
+  private Util utilObj = new Util();
+  public final String LOGIN_URL = "/login";
+  public final String HOME_URL = "/index.html";
+  public final String AUTHORIZE_URL = "/authorize";
+  public final String REQUEST_PARAM_KEY_CODE = "code";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -51,24 +51,28 @@ public class AggregationServlet extends HttpServlet {
       return;
     }
 
-    List<ChromeOSDevice> devices = amassDevices();
-    MultiKeyMap<String, List<String>> data = processData(devices, fields);
-
-    response.setStatus(HttpServletResponse.SC_OK);
-    response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
+    try {
+      List<ChromeOSDevice> devices = amassDevices();
+      MultiKeyMap<String, List<String>> data = processData(devices, fields);
+      response.setStatus(HttpServletResponse.SC_OK);
+      response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
+    } catch (NotAuthorizedException e) {//TODO: Return more specific error message
+        response.sendRedirect(AUTHORIZE_URL);
+    } catch (TooManyResultsException e) {
+        response.sendRedirect(LOGIN_URL);
+    } 
   }
 
-  public List<ChromeOSDevice> amassDevices() {
+  public List<ChromeOSDevice> amassDevices() throws NotAuthorizedException, IOException {
     List<ChromeOSDevice> devices = new ArrayList<>();
+    final User currentUser = userService.getCurrentUser();
+    if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
+      throw new NotAuthorizedException("user is not logged in");
+    }
+    final String userId = currentUser.getUserId();
+    final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
 
-    // TODO: Send requests to API to get all devices; requires OAuth
-
-    // Some mock devices so we have data in the interim
-    devices.add(new ChromeOSDevice("assetId", "location", "user", "deviceId", "serialNumber"));
-    devices.add(new ChromeOSDevice("12345", "California", "Jane", "ae25f1-91ce6a", "SN54321"));
-    devices.add(new ChromeOSDevice("12345", "New Jersey", "Jane", "<deviceId>", "SN12345"));
-
-    return devices;
+    return allDevices;
   }
 
   public static MultiKeyMap<String, List<String>> processData(
@@ -109,4 +113,13 @@ public class AggregationServlet extends HttpServlet {
 
     return aggregationFields;
   }
+
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
+  }
+  
+  public void setUtilObj(Util util) {
+    this.utilObj = util;
+  }
+
 }

@@ -1,5 +1,9 @@
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
 import java.io.IOException;
@@ -32,6 +36,10 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(JUnit4.class)
 public final class AggregationServletTest {
+
+  private final String TEST_USER_ID = "testUserId";
+  private final String TEST_USER_EMAIL = "testEmail";
+  private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
 
   private final String LOCATION_ONE = "New Jersey";
   private final String LOCATION_TWO = "California";
@@ -151,7 +159,16 @@ public final class AggregationServletTest {
   public void validArgumentReceivesSuccess() throws IOException{
     when(request.getParameter("aggregationField")).thenReturn("annotatedLocation");
     setNewResponseWriter(response);
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    DatastoreService mockedDataObj = mock(DatastoreService.class);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
 
     verify(response).setStatus(HttpServletResponse.SC_OK);
@@ -161,7 +178,16 @@ public final class AggregationServletTest {
   public void validMultiFieldArgumentReceivesSuccess() throws IOException{
     when(request.getParameter("aggregationField")).thenReturn("annotatedLocation,annotatedAssetId");
     setNewResponseWriter(response);
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    DatastoreService mockedDataObj = mock(DatastoreService.class);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
 
     verify(response).setStatus(HttpServletResponse.SC_OK);

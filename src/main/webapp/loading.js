@@ -78,7 +78,7 @@ class Loading {
     await this.doTask();
 
     if (!this.isShort) {
-      // add a done button
+      // TODO: add a done button and stop auto-hiding on long loading bars.
       this.container.hide();
     } else {
       this.container.hide();
