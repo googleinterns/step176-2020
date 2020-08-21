@@ -182,12 +182,16 @@ class Util {
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
     for (final String deviceId : deviceIds) {
-      final String myUrl = getUpdateUrl(deviceId);
-      RequestBody body = RequestBody.create(JSON, updatesInJson);
-      Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-      Response myResponse = client.newCall(req).execute();
-      myResponse.body().close();
+      updateSingleDevice(accessToken, deviceId, updatesInJson);
     }
+  }
+
+  private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
+    final String myUrl = getUpdateUrl(deviceId);
+    RequestBody body = RequestBody.create(JSON, updatesInJson);
+    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+    Response myResponse = client.newCall(req).execute();
+    myResponse.body().close();
   }
   
   private String getUpdateUrl(String deviceId) {
