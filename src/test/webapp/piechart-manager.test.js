@@ -30,7 +30,7 @@ test('Constructor adds piechart to DOM with appropriate settings', () => {
 
 test('Constructor fails if target container does not exist', () => {
   const cols = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
-  expect( () => {new PieChartManager('doesnt-exist', cols)}).toThrowError();
+  expect(() => {new PieChartManager('doesnt-exist', cols)}).toThrowError();
 });
 
 test('Configures deepest aggregation pie chart correctly', () => {

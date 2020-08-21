@@ -42,7 +42,6 @@ test('Constructor registers appropriate event listeners', () => {
   expect(aggregationListener.mock.calls.length).toBe(1);
   expect(aggregationListener.mock.calls[0][0]).toBe(dashboard.aggregationSelector);
   expect(aggregationListener.mock.calls[0][1]).toBe('statechange');
-
 });
 
 test('Only draws aggregation selector once', () => {
@@ -109,6 +108,7 @@ function createAndAddToDOM(elem, id) {
   document.body.appendChild(element);
   return element;
 }
+
 function createElementWithId(elem, id) {
   let element = document.createElement(elem);
   element.setAttribute('id', id);
