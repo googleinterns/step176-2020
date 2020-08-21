@@ -53,11 +53,10 @@ public class UpdateServlet extends HttpServlet {
     for (final String fieldToUpdate : relevantFields) {
       final String fieldContent = request.getParameter(fieldToUpdate);
       if (fieldContent != null) {
-          updatesToMake.put(fieldToUpdate, (String) fieldContent);
+        updatesToMake.put(fieldToUpdate, (String) fieldContent);
       }
     }
     final String updatesInJson = getJsonFromMap(updatesToMake);
-    System.out.println(updatesInJson);
     final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
     utilObj.updateDevices(userId, deviceIds, updatesInJson);
