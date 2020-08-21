@@ -187,8 +187,10 @@ class Util {
         deviceId -> {
           try {
             updateSingleDevice(accessToken, deviceId, updatesInJson);
+            System.out.println(deviceId);
           } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(deviceId);
+            System.out.println("had an error");
           }
         }
       );
