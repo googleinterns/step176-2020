@@ -33,11 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/update")
 public class UpdateServlet extends HttpServlet {
 
-  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
   public static final Gson GSON_OBJECT = new Gson();
   final private static List<String> relevantFields = Arrays.asList("annotatedLocation", "annotatedAssetId", "annotatedUser");
   private UserService userService = UserServiceFactory.getUserService();
-  private OkHttpClient client = new OkHttpClient();
+  private Util utilObj = new Util();
   public String LOGIN_URL = "/login";
   public String INDEX_URL = "/index";
   public String DEVICE_IDS_PARAMETER_NAME = "deviceIds";
@@ -49,42 +48,35 @@ public class UpdateServlet extends HttpServlet {
       response.sendRedirect(LOGIN_URL);
       return;
     }
-    Map<String, String> updatesToMake = new HashMap<>();
+    final String userId = currentUser.getUserId();
+    final Map<String, String> updatesToMake = new HashMap<>();
     for (final String fieldToUpdate : relevantFields) {
       final String fieldContent = request.getParameter(fieldToUpdate);
       if (fieldContent != null) {
           updatesToMake.put(fieldToUpdate, (String) fieldContent);
       }
     }
-    System.out.println(updatesToMake);
+    final String updatesInJson = getJsonFromMap(updatesToMake);
+    System.out.println(updatesInJson);
     final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
-    Type listType = new TypeToken<List<String>>() {}.getType();
-    final List<String> deviceIds = GSON_OBJECT.fromJson(relevantDeviceIds, listType);
-    final String userId = currentUser.getUserId();
-    final String accessToken = Util.getAccessToken(userId);
-    for (int i = 0; i < deviceIds.size(); i++) {
-      updateDevice(accessToken, (String) deviceIds.get(i), updatesToMake);
+    final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
+    final String accessToken = utilObj.getAccessToken(userId);
+    for (final String deviceId : deviceIds) {
+      utilObj.updateDevice(accessToken, deviceId, updatesInJson);
     }
     response.sendRedirect(INDEX_URL);
     return;
   }
 
-  private void updateDevice(String accessToken, String deviceId, Map<String, String> mp) throws IOException {
-    final String myUrl = getUpdateUrl(deviceId);
-    String json = getJsonFromMap(mp);
-    RequestBody body = RequestBody.create(JSON, json);
-    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-    Response myResponse = client.newCall(req).execute();
-    myResponse.body().close();
-  }
+  private List<String> getDeviceIds(String relevantDeviceIds) {
+    final Type listType = new TypeToken<List<String>>() {}.getType();
+    final List<String> deviceIds = GSON_OBJECT.fromJson(relevantDeviceIds, listType);
+    return deviceIds;
+  } 
 
   private String getJsonFromMap(Map<String, String> mp) {
     final String json = GSON_OBJECT.toJson(mp);
     return json;
-  }
-
-  private String getUpdateUrl(String deviceId) {
-      return "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos/" + deviceId + "?projection=BASIC";
   }
 
 }
