@@ -38,12 +38,15 @@ public class UpdateServlet extends HttpServlet {
   final private static List<String> relevantFields = Arrays.asList("annotatedLocation", "annotatedAssetId", "annotatedUser");
   private UserService userService = UserServiceFactory.getUserService();
   private OkHttpClient client = new OkHttpClient();
+  public String LOGIN_URL = "/login";
+  public String INDEX_URL = "/index";
+  public String DEVICE_IDS_PARAMETER_NAME = "deviceIds";
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     final User currentUser = userService.getCurrentUser();
     if ((!userService.isUserLoggedIn()) || (currentUser == null)) {
-      response.sendRedirect("/login");
+      response.sendRedirect(LOGIN_URL);
       return;
     }
     Map<String, String> updatesToMake = new HashMap<>();
@@ -54,15 +57,15 @@ public class UpdateServlet extends HttpServlet {
       }
     }
     System.out.println(updatesToMake);
-    final String relevantDeviceIds = (String) request.getParameter("deviceIds");
+    final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     Type listType = new TypeToken<List<String>>() {}.getType();
     final List<String> deviceIds = GSON_OBJECT.fromJson(relevantDeviceIds, listType);
     final String userId = currentUser.getUserId();
     final String accessToken = Util.getAccessToken(userId);
     for (int i = 0; i < deviceIds.size(); i++) {
-        updateDevice(accessToken, (String) deviceIds.get(i), updatesToMake);
+      updateDevice(accessToken, (String) deviceIds.get(i), updatesToMake);
     }
-    response.sendRedirect("/index.html");
+    response.sendRedirect(INDEX_URL);
     return;
   }
 
@@ -76,8 +79,8 @@ public class UpdateServlet extends HttpServlet {
   }
 
   private String getJsonFromMap(Map<String, String> mp) {
-        final String json = GSON_OBJECT.toJson(mp);
-        return json;
+    final String json = GSON_OBJECT.toJson(mp);
+    return json;
   }
 
   private String getUpdateUrl(String deviceId) {
