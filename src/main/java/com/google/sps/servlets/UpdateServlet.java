@@ -60,10 +60,7 @@ public class UpdateServlet extends HttpServlet {
     System.out.println(updatesInJson);
     final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
-    final String accessToken = utilObj.getAccessToken(userId);
-    for (final String deviceId : deviceIds) {
-      utilObj.updateDevice(accessToken, deviceId, updatesInJson);
-    }
+    utilObj.updateDevices(userId, deviceIds, updatesInJson);
     response.sendRedirect(INDEX_URL);
     return;
   }

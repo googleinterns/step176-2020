@@ -53,6 +53,7 @@ public final class UpdateServletTest {
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
+  private final String TEST_ACCESS_TOKEN = "testAccessToken";
 
   private UserService mockedUserService;
   private Util mockedUtil;
@@ -75,6 +76,102 @@ public final class UpdateServletTest {
 
     verify(response).sendRedirect(servlet.LOGIN_URL);
     verify(mockedUserService, times(1)).isUserLoggedIn();
+  }
+
+  @Test
+  public void noFieldsToUpdate() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn(null);
+    when(request.getParameter("annotatedAssetId")).thenReturn(null);
+    when(request.getParameter("annotatedUser")).thenReturn(null);
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1,device2,device3]");
+
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+
+    servlet.doPost(request, response);
+
+    verify(response).sendRedirect(servlet.INDEX_URL);
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(request, times(1)).getParameter("annotatedLocation");
+    verify(request, times(1)).getParameter("annotatedAssetId");
+    verify(request, times(1)).getParameter("annotatedUser");
+    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2", "device3"), "{}");
+  }
+
+  @Test
+  public void noDevicesToUpdate() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn("Chicago");
+    when(request.getParameter("annotatedAssetId")).thenReturn(null);
+    when(request.getParameter("annotatedUser")).thenReturn(null);
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[]");
+
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+
+    servlet.doPost(request, response);
+
+    verify(response).sendRedirect(servlet.INDEX_URL);
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(request, times(1)).getParameter("annotatedLocation");
+    verify(request, times(1)).getParameter("annotatedAssetId");
+    verify(request, times(1)).getParameter("annotatedUser");
+    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList(), "{\"annotatedLocation\":\"Chicago\"}");
+  }
+
+  @Test
+  public void oneDeviceToUpdate() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn(null);
+    when(request.getParameter("annotatedAssetId")).thenReturn(null);
+    when(request.getParameter("annotatedUser")).thenReturn("bob");
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1]");
+
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+
+    servlet.doPost(request, response);
+
+    verify(response).sendRedirect(servlet.INDEX_URL);
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(request, times(1)).getParameter("annotatedLocation");
+    verify(request, times(1)).getParameter("annotatedAssetId");
+    verify(request, times(1)).getParameter("annotatedUser");
+    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1"), "{\"annotatedUser\":\"bob\"}");
+  }
+
+  @Test
+  public void testSeveralDevices() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn(null);
+    when(request.getParameter("annotatedAssetId")).thenReturn("ABC123");
+    when(request.getParameter("annotatedUser")).thenReturn(null);
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1, device2]");
+
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+
+    servlet.doPost(request, response);
+
+    verify(response).sendRedirect(servlet.INDEX_URL);
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(request, times(1)).getParameter("annotatedLocation");
+    verify(request, times(1)).getParameter("annotatedAssetId");
+    verify(request, times(1)).getParameter("annotatedUser");
+    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
   }
 
 }
