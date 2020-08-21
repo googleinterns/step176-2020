@@ -68,6 +68,16 @@ class Util {
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+  public String getNextResponse(String userId, int maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
+    final String apiKey = getAPIKey(); 
+    final String accessToken = getAccessToken(userId);
+    final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey);
+    final String responseJson = Json.toJson(resp);//THIS MIGHT NOT ACTUALLY WORK
+    System.out.println(responseJson);
+    return responseJson;
+  }
 
   public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
@@ -168,6 +178,21 @@ class Util {
     tokenEntity.setProperty("refreshToken", refreshToken);
     deleteStaleTokens(userId);
     datastore.put(tokenEntity);
+  }
+
+  public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
+    final String accessToken = getAccessToken(userId);
+    for (final String deviceId : deviceIds) {
+      final String myUrl = getUpdateUrl(deviceId);
+      RequestBody body = RequestBody.create(JSON, updatesInJson);
+      Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+      Response myResponse = client.newCall(req).execute();
+      myResponse.body().close();
+    }
+  }
+  
+  private String getUpdateUrl(String deviceId) {
+      return "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos/" + deviceId + "?projection=BASIC";
   }
 
 }
