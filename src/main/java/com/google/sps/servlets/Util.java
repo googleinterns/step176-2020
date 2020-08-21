@@ -64,13 +64,13 @@ class Util {
   private static final String EMPTY_API_KEY = "";
   private static final String EMPTY_PAGE_TOKEN = "";
   private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
-  private static final int DEFAULT_MAX_DEVICES = 200; //is limited to effectively 200
+  private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-  public String getNextResponse(String userId, int maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
+  public String getNextResponse(String userId, String maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
     final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey, maxDeviceCount);
@@ -121,9 +121,9 @@ class Util {
     return response.getAccessToken();
   }
 
-  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey, int maxDeviceCount) throws IOException {
+  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey, String maxDeviceCount) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
-    urlBuilder.addQueryParameter("maxResults", String.valueOf(maxDeviceCount));
+    urlBuilder.addQueryParameter("maxResults", maxDeviceCount);
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
     urlBuilder.addQueryParameter("key", apiKey);
