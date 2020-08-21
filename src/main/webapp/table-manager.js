@@ -72,15 +72,11 @@ class TableManager {
     this.table.setOption('pageSize', this.pageSize);
 
     await this.resetNormalData();
-    this.setTableView(dataTable.getNumberOfColumns());
-    this.setDataTable(dataTable);
+    this.setTableView(this.baseDataTable.getNumberOfColumns());
+    this.setDataTable();
   }
 
-  setDataTable(dataTable) {
-    if (dataTable != null) {
-      this.baseDataTable = dataTable;
-    }
-
+  setDataTable() {
     if (this.aggregating) {
       this.table.setDataTable(this.baseDataTable);
     } else {
@@ -152,12 +148,12 @@ class TableManager {
     this.curr_page = 0;
     this.nextPageToken = BLANK_PAGE_TOKEN;
 
-    this.data = new google.visualization.DataTable();
-    data.addColumn('string', 'Serial Number');
-    data.addColumn('string', 'Status');
-    data.addColumn('string', 'Asset ID');
-    data.addColumn('string', 'User');
-    data.addColumn('string', 'Location');
+    this.baseDataTable = new google.visualization.DataTable();
+    this.baseDataTable.addColumn('string', 'Serial Number');
+    this.baseDataTable.addColumn('string', 'Status');
+    this.baseDataTable.addColumn('string', 'Asset ID');
+    this.baseDataTable.addColumn('string', 'User');
+    this.baseDataTable.addColumn('string', 'Location');
 
     let loader = new Loading(this.addDataToTable.bind(this), true);
     await loader.load();
@@ -169,12 +165,13 @@ class TableManager {
     }
 
     let url = this.buildRequestURL();
-    fetch(url)
+    await fetch(url)
         .then(response => response.json())
         .then(json => {
           this.nextPageToken = json.nextPageToken == null ? BLANK_PAGE_TOKEN : json.nextPageToken;
-          for (let device of json.devices) {
-            this.data.addRow([
+          console.log(json);
+          for (let device of json.chromeosdevices) {
+            this.baseDataTable.addRow([
                 device.serialNumber,
                 device.status,
                 device.annotatedAssetId,
@@ -188,10 +185,8 @@ class TableManager {
     let url = new URL(PAGINATION_ENDPOINT, window.location.href);
 
     let params = new URLSearchParams();
-    params.append('pageSize', this.pageSize);
-    if (this.nextPageToken != BLANK_PAGE_TOKEN) {
-      params.append('nextPageToken', this.nextPageToken);
-    }
+    params.append('maxDeviceCount', this.pageSize);
+    params.append('pageToken', this.nextPageToken);
 
     url.search = params;
 

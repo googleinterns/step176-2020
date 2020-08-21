@@ -20,7 +20,6 @@
             scope: 'https://www.googleapis.com/auth/admin.directory.device.chromeos'
           });
         });
-      });
       $('#signinButton').click(function() {
         auth2.grantOfflineAccess().then(authorizeCallback);
       });
