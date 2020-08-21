@@ -79,4 +79,12 @@ public class UpdateServlet extends HttpServlet {
     return json;
   }
 
+  public void setUserService(UserService newUserService) {
+    this.userService = newUserService;
+  }
+  
+  public void setUtilObj(Util util) {
+    this.utilObj = util;
+  }
+
 }
