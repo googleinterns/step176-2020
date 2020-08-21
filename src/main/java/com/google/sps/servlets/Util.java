@@ -64,7 +64,7 @@ class Util {
   private static final String EMPTY_API_KEY = "";
   private static final String EMPTY_PAGE_TOKEN = "";
   private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
-  private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
+  private static final int DEFAULT_MAX_DEVICES = 200; //is limited to effectively 200
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -73,20 +73,19 @@ class Util {
   public String getNextResponse(String userId, int maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
-    final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey);
+    final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey, maxDeviceCount);
     final String responseJson = Json.toJson(resp);//THIS MIGHT NOT ACTUALLY WORK
-    System.out.println(responseJson);
     return responseJson;
   }
 
   public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
-    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey, DEFAULT_MAX_DEVICES);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
       final String pageToken = (String) resp.getNextPageToken();
-      resp = getDevicesResponse(pageToken, accessToken, apiKey);
+      resp = getDevicesResponse(pageToken, accessToken, apiKey, DEFAULT_MAX_DEVICES);
       allDevices.addAll(resp.getDevices());
     }
     return allDevices;
@@ -122,9 +121,9 @@ class Util {
     return response.getAccessToken();
   }
 
-  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey) throws IOException {
+  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey, int maxDeviceCount) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
-    urlBuilder.addQueryParameter("maxResults", DEFAULT_MAX_DEVICES);
+    urlBuilder.addQueryParameter("maxResults", String.valueOf(maxDeviceCount));
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
     urlBuilder.addQueryParameter("key", apiKey);
