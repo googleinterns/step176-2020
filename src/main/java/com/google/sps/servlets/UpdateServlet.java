@@ -38,7 +38,7 @@ public class UpdateServlet extends HttpServlet {
   private UserService userService = UserServiceFactory.getUserService();
   private Util utilObj = new Util();
   public String LOGIN_URL = "/login";
-  public String INDEX_URL = "/index";
+  public String INDEX_URL = "/index.html";
   public String DEVICE_IDS_PARAMETER_NAME = "deviceIds";
 
   @Override
