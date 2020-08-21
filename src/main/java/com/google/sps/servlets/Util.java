@@ -70,6 +70,15 @@ class Util {
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
+  public String getNextResponse(String userId, int maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
+    final String apiKey = getAPIKey(); 
+    final String accessToken = getAccessToken(userId);
+    final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey);
+    final String responseJson = Json.toJson(resp);//THIS MIGHT NOT ACTUALLY WORK
+    System.out.println(responseJson);
+    return responseJson;
+  }
+
   public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
