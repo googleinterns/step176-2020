@@ -76,7 +76,11 @@ class TableManager {
     this.setDataTable();
   }
 
-  setDataTable() {
+  setDataTable(dataTable) {
+    if (dataTable != null) {
+      this.baseDataTable = dataTable;
+    }
+
     if (this.aggregating) {
       this.table.setDataTable(this.baseDataTable);
     } else {
@@ -125,8 +129,8 @@ class TableManager {
     }
 
     // Check if we have the necessary data to change the page.  If we dont, get it.
-    if (!this.hasNextPageCached()) {
-      await this.addDataToTable();
+    if (pageDelta > 0 && !this.hasNextPageCached()) {
+      await new Loading(this.addDataToTable.bind(this), true).load();
     }
     this.currPage = newPage;
     this.setDataTable();
@@ -138,14 +142,13 @@ class TableManager {
     this.pageSize = newPageSize;
     this.table.setOption('pageSize', newPageSize);
 
-    await this.resetNormalData();
-    this.setDataTable();
+    await this.updateNormal();
 
     this.draw();
   }
 
   async resetNormalData() {
-    this.curr_page = 0;
+    this.currPage = 0;
     this.nextPageToken = BLANK_PAGE_TOKEN;
 
     this.baseDataTable = new google.visualization.DataTable();
