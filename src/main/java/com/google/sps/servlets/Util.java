@@ -181,9 +181,20 @@ class Util {
 
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
-    for (final String deviceId : deviceIds) {
-      updateSingleDevice(accessToken, deviceId, updatesInJson);
-    }
+    deviceIds
+      .parallelStream()
+      .forEach(
+        deviceId -> {
+          try {
+            updateSingleDevice(accessToken, deviceId, updatesInJson);
+          } catch (IOException e) {
+            System.out.println(e);
+          }
+        }
+      );
+    // for (final String deviceId : deviceIds) {
+    //   updateSingleDevice(accessToken, deviceId, updatesInJson);
+    // }
   }
 
   private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
