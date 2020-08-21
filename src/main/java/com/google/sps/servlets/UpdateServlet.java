@@ -46,23 +46,21 @@ public class UpdateServlet extends HttpServlet {
       response.sendRedirect("/login");
       return;
     }
-    Map<String, String> mp = new HashMap<>();
-    if (request.getParameterMap().containsKey("annotatedLocation")) {
-        mp.put("annotatedLocation", (String) request.getParameter("annotatedLocation"));
+    Map<String, String> updatesToMake = new HashMap<>();
+    for (final String fieldToUpdate : relevantFields) {
+      final String fieldContent = request.getParameter(fieldToUpdate);
+      if (fieldContent != null) {
+          updatesToMake.put(fieldToUpdate, (String) fieldContent);
+      }
     }
-    if (request.getParameterMap().containsKey("annotatedAssetId")) {
-        mp.put("annotatedAssetId", (String) request.getParameter("annotatedAssetId"));
-    }
-    if (request.getParameterMap().containsKey("annotatedUser")) {
-        mp.put("annotatedUser", (String) request.getParameter("annotatedUser"));
-    }
-    final String rawDeviceIds = (String) request.getParameter("deviceIds");
+    System.out.println(updatesToMake);
+    final String relevantDeviceIds = (String) request.getParameter("deviceIds");
     Type listType = new TypeToken<List<String>>() {}.getType();
-    final List<String> deviceIds = GSON_OBJECT.fromJson(rawDeviceIds, listType);
+    final List<String> deviceIds = GSON_OBJECT.fromJson(relevantDeviceIds, listType);
     final String userId = currentUser.getUserId();
     final String accessToken = Util.getAccessToken(userId);
     for (int i = 0; i < deviceIds.size(); i++) {
-        updateDevice(accessToken, (String) deviceIds.get(i), mp);
+        updateDevice(accessToken, (String) deviceIds.get(i), updatesToMake);
     }
     response.sendRedirect("/index.html");
     return;
