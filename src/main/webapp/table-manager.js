@@ -52,7 +52,8 @@ class TableManager {
 
         th.setAttribute('aria-labelledby', idPrefix + (2 * index));
         th.removeAttribute('aria-label');
-        
+        th.removeAttribute('tabindex');
+
         th.setAttribute('role', 'columnheader');
 
         // TODO: add aria-sort
