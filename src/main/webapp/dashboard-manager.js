@@ -13,7 +13,7 @@ class DashboardManager {
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
-    this.tableManager = new TableManager();
+    this.tableManager = new TableManager('table-container');
     this.pieChartManager = new PieChartManager(/*ContainerId:*/ 'chart', this.COLS);
 
     google.visualization.events.addListener(
@@ -125,7 +125,7 @@ class DashboardManager {
               }
               row.push(JSON.stringify(entry.deviceIds));
 
-              row.push(`<button onclick="document.dispatchEvent(
+              row.push(`<button aria-label="Activate to bulk update devices in row." onclick="document.dispatchEvent(
                   new CustomEvent( \'bulkUpdate\', {detail: ${index} }))">Update Devices</button>`);
 
               this.data.addRow(row);
