@@ -68,7 +68,7 @@ class Util {
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+  public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
 
   public String getNextResponse(String userId, String maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
@@ -130,10 +130,10 @@ class Util {
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
       urlBuilder.addQueryParameter("pageToken", pageToken);
     }
-    final String myUrl = urlBuilder.build().toString();
-    Request req = new Request.Builder().url(myUrl).addHeader("Authorization", "Bearer " + accessToken).build();
-    Response myResponse = client.newCall(req).execute();
-    final String content = myResponse.body().string();
+    final String deviceResponseURL = urlBuilder.build().toString();
+    Request req = new Request.Builder().url(deviceResponseURL).addHeader("Authorization", "Bearer " + accessToken).build();
+    Response deviceResponse = client.newCall(req).execute();
+    final String content = deviceResponse.body().string();
     ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
     return resp;
   }
@@ -178,16 +178,29 @@ class Util {
     deleteStaleTokens(userId);
     datastore.put(tokenEntity);
   }
-
+ 
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
-    for (final String deviceId : deviceIds) {
-      final String myUrl = getUpdateUrl(deviceId);
-      RequestBody body = RequestBody.create(JSON, updatesInJson);
-      Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-      Response myResponse = client.newCall(req).execute();
-      myResponse.body().close();
-    }
+    deviceIds
+      .parallelStream()
+      .forEach(
+        deviceId -> {
+          try {
+            updateSingleDevice(accessToken, deviceId, updatesInJson);
+          } catch (IOException e) {
+            System.out.println(deviceId);
+            System.out.println("had an error");//TODO: handle and return failed devices
+          }
+        }
+      );
+  }
+
+  private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
+    final String myUrl = getUpdateUrl(deviceId);
+    RequestBody body = RequestBody.create(JSON, updatesInJson);
+    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+    Response myResponse = client.newCall(req).execute();
+    myResponse.body().close();
   }
   
   private String getUpdateUrl(String deviceId) {
