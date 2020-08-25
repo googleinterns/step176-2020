@@ -63,6 +63,8 @@ class Modal {
     this.body = this.createAndAddDiv('modal-body');
     this.footer = this.createAndAddDiv('modal-footer');
 
+    this.setHeader('');
+
     this.onResize = () => {
       this.center();
     };
