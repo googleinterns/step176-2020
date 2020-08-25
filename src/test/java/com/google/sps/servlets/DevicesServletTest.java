@@ -66,14 +66,25 @@ public final class DevicesServletTest {
   private final List<ChromeOSDevice> allDevices = new ArrayList<>(
       Arrays.asList(DEVICE_ONE, DEVICE_TWO, DEVICE_THREE, DEVICE_FOUR, DEVICE_FIVE));
 
-  @Test
-  public void userNotLoggedIn() throws IOException {
-    User userStub = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    UserService mockedUserService = mock(UserService.class);
-    when(mockedUserService.isUserLoggedIn()).thenReturn(false);
-    when(mockedUserService.getCurrentUser()).thenReturn(userStub);
+  private UserService mockedUserService;
+  private Util mockedUtil;
+  private User userFake;
+
+  @Before
+  public void setUp() {
+    mockedUserService = mock(UserService.class);
+    mockedUtil = mock(Util.class);
+    userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
 
     servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+  }
+
+  @Test
+  public void userNotLoggedIn() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(false);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
     servlet.doGet(request, response);
 
     verify(response).sendRedirect(servlet.LOGIN_URL);
@@ -107,23 +118,23 @@ public final class DevicesServletTest {
 //     verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
 //   }
 
-//   @Test
-//   public void userLoggedInDevicesFailure() throws IOException {
-//     Util mockedUtil = mock(Util.class);
-//     User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-//     UserService mockedUserService = mock(UserService.class);
-//     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-//     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-//     when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
+  // @Test
+  // public void userLoggedInDevicesFailure() throws IOException {
+  //   Util mockedUtil = mock(Util.class);
+  //   User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+  //   UserService mockedUserService = mock(UserService.class);
+  //   when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+  //   when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+  //   when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
 
-//     servlet.setUserService(mockedUserService);
-//     servlet.setUtilObj(mockedUtil);
-//     servlet.doGet(request, response);
+  //   servlet.setUserService(mockedUserService);
+  //   servlet.setUtilObj(mockedUtil);
+  //   servlet.doGet(request, response);
   
-//     verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
-//     verify(mockedUserService, times(1)).isUserLoggedIn();
-//     verify(mockedUserService, times(1)).getCurrentUser();
-//     verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
-//   }
+  //   verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
+  //   verify(mockedUserService, times(1)).isUserLoggedIn();
+  //   verify(mockedUserService, times(1)).getCurrentUser();
+  //   verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
+  // }
 
 }
