@@ -22,39 +22,39 @@ class TableManager {
       let tableHeaders = table.getElementsByTagName('th');
       for (let [index, th] of Object.entries(tableHeaders)) {
         let idPrefix = 'tableHeaderSpan';
-        let mainSpan = document.createElement('span');
+        let nameId = idPrefix + (2 * index);
+        let instructionsId = idPrefix + (2 * index + 1);
+        let container = document.createElement('span');
 
-        let textLabel = document.createElement('span');
-        textLabel.innerText = th.innerText;
-        textLabel.setAttribute('id', idPrefix + (2 * index));
-        textLabel.classList.add('hidden');
+        let nameSpanAria = document.createElement('span');
+        nameSpanAria.innerText = th.innerText;
+        nameSpanAria.setAttribute('id', nameId);
+        nameSpanAria.classList.add('hidden');
 
-        let otherSpan = document.createElement('span');
-        otherSpan.setAttribute('aria-labelledby', idPrefix + (2 * index + 1));
-        otherSpan.setAttribute('role', 'button');
-        otherSpan.setAttribute('tabindex', 0);
+        let innerContainer = document.createElement('span');
+        innerContainer.setAttribute('aria-labelledby', instructionsId);
+        innerContainer.setAttribute('role', 'button');
+        innerContainer.setAttribute('tabindex', 0);
 
-        let displayTextLabel = document.createElement('span');
-        displayTextLabel.setAttribute('aria-hidden', 'true');
-        displayTextLabel.innerText = th.innerText;
+        let nameSpanDisplay = document.createElement('span');
+        nameSpanDisplay.setAttribute('aria-hidden', 'true');
+        nameSpanDisplay.innerText = th.innerText;
 
-        let purposeLabel = document.createElement('span');
-        purposeLabel.innerText = 'Activate to sort by column.';
-        purposeLabel.classList.add('hidden');
-        purposeLabel.setAttribute('id', idPrefix + (2 * index + 1));
+        let instructionsSpan = document.createElement('span');
+        instructionsSpan.innerText = 'Activate to sort by column.';
+        instructionsSpan.classList.add('hidden');
+        instructionsSpan.setAttribute('id', instructionsId);
 
         th.innerHTML = '';
 
-        otherSpan.append(displayTextLabel, purposeLabel);
-        mainSpan.append(textLabel, otherSpan);
+        innerContainer.append(nameSpanDisplay, instructionsSpan);
+        container.append(nameSpanAria, innerContainer);
+        th.appendChild(container);
 
-        th.appendChild(mainSpan);
-
-        th.setAttribute('aria-labelledby', idPrefix + (2 * index));
+        th.setAttribute('aria-labelledby', nameId);
+        th.setAttribute('role', 'columnheader');
         th.removeAttribute('aria-label');
         th.removeAttribute('tabindex');
-
-        th.setAttribute('role', 'columnheader');
 
         // TODO: add aria-sort
       }
