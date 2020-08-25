@@ -59,7 +59,7 @@ public class UpdateServlet extends HttpServlet {
     final String updatesInJson = getJsonFromMap(updatesToMake);
     final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
-    if (!deviceIds.empty() && !updatesToMake.empty()) {
+    if (!deviceIds.isEmpty() && !updatesToMake.isEmpty()) {
       utilObj.updateDevices(userId, deviceIds, updatesInJson);
     }
     response.sendRedirect(INDEX_URL);
