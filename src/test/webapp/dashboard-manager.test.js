@@ -4,6 +4,7 @@ import {ChartUtil} from '../../main/webapp/chart-util.js';
 import {Loading} from '../../main/webapp/loading.js';
 import {PieChartManager} from '../../main/webapp/piechart-manager.js';
 import {TableManager} from '../../main/webapp/table-manager.js';
+import {createAndAddToDOM, createElementWithId} from './testutils.js'
 jest.mock('../../main/webapp/loading.js');
 jest.mock('../../main/webapp/piechart-manager.js');
 jest.mock('../../main/webapp/table-manager.js');
@@ -101,19 +102,6 @@ test('Fetching and Populating Aggregation Data', async () => {
 // TODO: add tests for initData, updateNormal, etc. after oauth gets merged in
 // because they will likely undergo significant changes
 
-
-
-function createAndAddToDOM(elem, id) {
-  let element = createElementWithId(elem, id);
-  document.body.appendChild(element);
-  return element;
-}
-
-function createElementWithId(elem, id) {
-  let element = document.createElement(elem);
-  element.setAttribute('id', id);
-  return element;
-}
 
 // Corresponds to the data given for aggregation in global.fetch mock.
 function testAggregationAddRow(addRow, row, user, count, ids) {
