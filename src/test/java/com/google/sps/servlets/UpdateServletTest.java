@@ -67,7 +67,6 @@ public final class UpdateServletTest {
 
     servlet.setUserService(mockedUserService);
     servlet.setUtilObj(mockedUtil);
-
   }
 
   @Test

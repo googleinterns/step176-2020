@@ -64,7 +64,7 @@ class Util {
   private static final String EMPTY_API_KEY = "";
   private static final String EMPTY_PAGE_TOKEN = "";
   private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
-  private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
+  private static final int DEFAULT_MAX_DEVICES = 200; //is limited to effectively 200
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -201,6 +201,21 @@ class Util {
     Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response myResponse = client.newCall(req).execute();
     myResponse.body().close();
+  }
+  
+  private String getUpdateUrl(String deviceId) {
+      return "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos/" + deviceId + "?projection=BASIC";
+  }
+
+  public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
+    final String accessToken = getAccessToken(userId);
+    for (final String deviceId : deviceIds) {
+      final String myUrl = getUpdateUrl(deviceId);
+      RequestBody body = RequestBody.create(JSON, updatesInJson);
+      Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+      Response myResponse = client.newCall(req).execute();
+      myResponse.body().close();
+    }
   }
   
   private String getUpdateUrl(String deviceId) {

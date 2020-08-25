@@ -1,3 +1,5 @@
+import {Loading} from './loading.js';
+
 const PAGINATION_ENDPOINT = '/devices';
 const BLANK_PAGE_TOKEN = '';
 
@@ -172,7 +174,6 @@ class TableManager {
         .then(response => response.json())
         .then(json => {
           this.nextPageToken = json.nextPageToken == null ? BLANK_PAGE_TOKEN : json.nextPageToken;
-          console.log(json);
           for (let device of json.chromeosdevices) {
             this.baseDataTable.addRow([
                 device.serialNumber,
