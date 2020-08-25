@@ -39,6 +39,7 @@ class BulkUpdateModal {
 
       let label = document.createElement('label');
       label.innerHTML = aggregationField;
+      label.setAttribute('for', getAnnotatedFieldFromDisplay(aggregationField).API);
       label.classList.add('update-label');
 
       let input = document.createElement('input');
