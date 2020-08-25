@@ -3,6 +3,7 @@ package com.google.sps.servlets;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.data.ChromeOSDevice;
 import com.google.sps.gson.Json;
 import com.google.sps.servlets.Util;
