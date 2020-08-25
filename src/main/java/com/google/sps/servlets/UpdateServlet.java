@@ -4,36 +4,25 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.ChromeOSDevice;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.google.sps.gson.Json;
 import com.google.sps.servlets.Util;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import org.json.simple.JSONArray;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/update")
 public class UpdateServlet extends HttpServlet {
 
-  public static final Gson GSON_OBJECT = new Gson();
+  // public static final Gson GSON_OBJECT = new Gson();
   private static final List<String> relevantFields = Arrays.asList("annotatedLocation", "annotatedAssetId", "annotatedUser");
   private UserService userService = UserServiceFactory.getUserService();
   private Util utilObj = new Util();
@@ -68,12 +57,12 @@ public class UpdateServlet extends HttpServlet {
 
   private List<String> getDeviceIds(String relevantDeviceIds) {
     final Type listType = new TypeToken<List<String>>() {}.getType();
-    final List<String> deviceIds = GSON_OBJECT.fromJson(relevantDeviceIds, listType);
+    final List<String> deviceIds = Json.fromJson(relevantDeviceIds, listType);
     return deviceIds;
   } 
 
   private String getJsonFromMap(Map<String, String> mp) {
-    final String json = GSON_OBJECT.toJson(mp);
+    final String json = Json.toJson(mp);
     return json;
   }
 
