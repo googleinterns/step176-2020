@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 public class UpdateServlet extends HttpServlet {
 
   public static final Gson GSON_OBJECT = new Gson();
-  final private static List<String> relevantFields = Arrays.asList("annotatedLocation", "annotatedAssetId", "annotatedUser");
+  private static final List<String> relevantFields = Arrays.asList("annotatedLocation", "annotatedAssetId", "annotatedUser");
   private UserService userService = UserServiceFactory.getUserService();
   private Util utilObj = new Util();
   public String LOGIN_URL = "/login";
@@ -53,13 +53,15 @@ public class UpdateServlet extends HttpServlet {
     for (final String fieldToUpdate : relevantFields) {
       final String fieldContent = request.getParameter(fieldToUpdate);
       if (fieldContent != null) {
-        updatesToMake.put(fieldToUpdate, (String) fieldContent);
+        updatesToMake.put(fieldToUpdate, fieldContent);
       }
     }
     final String updatesInJson = getJsonFromMap(updatesToMake);
     final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
-    utilObj.updateDevices(userId, deviceIds, updatesInJson);
+    if (!deviceIds.empty() && !updatesToMake.empty()) {
+      utilObj.updateDevices(userId, deviceIds, updatesInJson);
+    }
     response.sendRedirect(INDEX_URL);
     return;
   }
