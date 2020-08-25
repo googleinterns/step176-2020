@@ -19,6 +19,16 @@ class DashboardManager {
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
 
+    google.visualization.events.addListener(this.aggregationSelector, 'statechange', () => {
+      let containerDiv = document.getElementById('aggregation-input');
+
+      let selectedTags = containerDiv.getElementsByTagName('li');
+      for (let selectedTag of selectedTags) {
+        let divs = selectedTag.getElementsByTagName('div');
+        divs[0].setAttribute('aria-label', 'Activate to undo aggregation by ' + divs[1].innerText);
+      }
+    });
+
     document.addEventListener('bulkUpdate', (e) => {
       let row = e.detail;
       let deviceIds = this.data.getValue(row, this.COLS.DEVICE_ID);
@@ -172,6 +182,7 @@ function createNewAggregationSelector() {
       'options': {
             'filterColumnIndex': '0',
             'ui': {
+                'allowTyping': false,
                 'caption': 'Select a field by which to aggregate',
                 'label': 'Aggregate By...',
                 'selectedValuesLayout': 'aside',

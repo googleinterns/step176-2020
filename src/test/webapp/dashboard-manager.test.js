@@ -4,6 +4,7 @@ import {ChartUtil} from '../../main/webapp/chart-util.js';
 import {Loading} from '../../main/webapp/loading.js';
 import {PieChartManager} from '../../main/webapp/piechart-manager.js';
 import {TableManager} from '../../main/webapp/table-manager.js';
+import {createAndAddToDOM, createElementWithId} from './testutils.js'
 jest.mock('../../main/webapp/loading.js');
 jest.mock('../../main/webapp/piechart-manager.js');
 jest.mock('../../main/webapp/table-manager.js');
@@ -39,7 +40,7 @@ test('Constructor registers appropriate event listeners', () => {
 
   expect(bulkUpdateListener.mock.calls[0][0]).toBe('bulkUpdate');
 
-  expect(aggregationListener.mock.calls.length).toBe(1);
+  expect(aggregationListener.mock.calls.length).toBe(2);
   expect(aggregationListener.mock.calls[0][0]).toBe(dashboard.aggregationSelector);
   expect(aggregationListener.mock.calls[0][1]).toBe('statechange');
 
@@ -104,16 +105,6 @@ test('Fetching and Populating Aggregation Data', async () => {
 
 
 
-function createAndAddToDOM(elem, id) {
-  let element = createElementWithId(elem, id);
-  document.body.appendChild(element);
-  return element;
-}
-function createElementWithId(elem, id) {
-  let element = document.createElement(elem);
-  element.setAttribute('id', id);
-  return element;
-}
 
 // Corresponds to the data given for aggregation in global.fetch mock.
 function testAggregationAddRow(addRow, row, user, count, ids) {
