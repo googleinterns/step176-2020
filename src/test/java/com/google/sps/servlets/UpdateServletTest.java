@@ -64,6 +64,10 @@ public final class UpdateServletTest {
     mockedUserService = mock(UserService.class);
     mockedUtil = mock(Util.class);
     userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+
   }
 
   @Test
@@ -88,9 +92,6 @@ public final class UpdateServletTest {
     when(request.getParameter("annotatedUser")).thenReturn(null);
     when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1,device2,device3]");
 
-    servlet.setUserService(mockedUserService);
-    servlet.setUtilObj(mockedUtil);
-
     servlet.doPost(request, response);
 
     verify(response).sendRedirect(servlet.INDEX_URL);
@@ -111,9 +112,6 @@ public final class UpdateServletTest {
     when(request.getParameter("annotatedAssetId")).thenReturn(null);
     when(request.getParameter("annotatedUser")).thenReturn(null);
     when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[]");
-
-    servlet.setUserService(mockedUserService);
-    servlet.setUtilObj(mockedUtil);
 
     servlet.doPost(request, response);
 
@@ -136,9 +134,6 @@ public final class UpdateServletTest {
     when(request.getParameter("annotatedUser")).thenReturn("bob");
     when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1]");
 
-    servlet.setUserService(mockedUserService);
-    servlet.setUtilObj(mockedUtil);
-
     servlet.doPost(request, response);
 
     verify(response).sendRedirect(servlet.INDEX_URL);
@@ -159,9 +154,6 @@ public final class UpdateServletTest {
     when(request.getParameter("annotatedAssetId")).thenReturn("ABC123");
     when(request.getParameter("annotatedUser")).thenReturn(null);
     when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1, device2]");
-
-    servlet.setUserService(mockedUserService);
-    servlet.setUtilObj(mockedUtil);
 
     servlet.doPost(request, response);
 
