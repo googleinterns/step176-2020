@@ -47,6 +47,8 @@ public final class DevicesServletTest {
   private final String TEST_MAX_COUNT = "maxCount";
   private final String TEST_PAGE_TOKEN = "pageToken";
 
+  private final String FAKE_DEVICE_RESPONSE = "deviceResponse";
+
   private final String LOCATION_ONE = "New Jersey";
   private final String LOCATION_TWO = "California";
 
@@ -95,27 +97,29 @@ public final class DevicesServletTest {
     verify(mockedUserService, times(1)).isUserLoggedIn();
   }
 
-  // @Test
-  // public void userLoggedInDevicesSuccess() throws IOException {
-  //   when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-  //   when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-  //   when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
+  @Test
+  public void userLoggedInDevicesSuccess() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(request.getParameter(servlet.MAX_DEVICES_COUNT_PARAMETER_NAME)).thenReturn(TEST_MAX_COUNT);
+    when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
+    when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenReturn(FAKE_DEVICE_RESPONSE);
 
-  //   StringWriter stringWriter = new StringWriter();
-  //   PrintWriter writer = new PrintWriter(stringWriter);
-  //   when(response.getWriter()).thenReturn(writer);
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
 
-  //   servlet.doGet(request, response);
+    servlet.doGet(request, response);
 
-  //   verify(response).setContentType("application/json");
-  //   String result = stringWriter.getBuffer().toString().trim();
-  //   String expected = Json.toJson(allDevices);
-  //   Assert.assertEquals(result, expected);
+    verify(response).setContentType("application/json");
+    String result = stringWriter.getBuffer().toString().trim();
+    String expected = FAKE_DEVICE_RESPONSE;
+    Assert.assertEquals(result, expected);
     
-  //   verify(mockedUserService, times(1)).isUserLoggedIn();
-  //   verify(mockedUserService, times(1)).getCurrentUser();
-  //   verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
-  // }
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(mockedUserService, times(1)).getCurrentUser();
+    verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
+  }
 
   @Test
   public void userLoggedInDevicesFailure() throws IOException {
@@ -130,7 +134,7 @@ public final class DevicesServletTest {
     verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
-    verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
+    verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
   }
 
 }
