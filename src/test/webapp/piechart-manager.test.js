@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 test('Constructor adds piechart to DOM with appropriate settings', () => {
-  const containerId = 'piechart-container';
+  const containerId = 'chart-1';
   let container = document.createElement('div');
   container.setAttribute('id', containerId);
   document.body.appendChild(container);
@@ -75,7 +75,7 @@ test('Configures inner aggregation pie chart correctly', () => {
 
 
 function createManagerCorrectly() {
-  const containerId = 'piechart-container';
+  const containerId = 'chart-1';
   let container = document.createElement('div');
   container.setAttribute('id', containerId);
   document.body.appendChild(container);
