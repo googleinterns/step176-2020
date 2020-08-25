@@ -44,6 +44,9 @@ public final class DevicesServletTest {
   private final String TEST_USER_EMAIL = "testEmail";
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
 
+  private final String TEST_MAX_COUNT = "maxCount";
+  private final String TEST_PAGE_TOKEN = "pageToken";
+
   private final String LOCATION_ONE = "New Jersey";
   private final String LOCATION_TWO = "California";
 
@@ -118,7 +121,9 @@ public final class DevicesServletTest {
   public void userLoggedInDevicesFailure() throws IOException {
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
+    when(request.getParameter(servlet.MAX_DEVICES_COUNT_PARAMETER_NAME)).thenReturn(TEST_MAX_COUNT);
+    when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
+    when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenThrow(IOException.class);
 
     servlet.doGet(request, response);
   
