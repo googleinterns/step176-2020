@@ -74,7 +74,7 @@ class Util {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
     final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey, maxDeviceCount);
-    final String responseJson = Json.toJson(resp);//THIS MIGHT NOT ACTUALLY WORK
+    final String responseJson = Json.toJson(resp);
     return responseJson;
   }
 
@@ -197,7 +197,7 @@ class Util {
 
   private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
     final String myUrl = getUpdateUrl(deviceId);
-    RequestBody body = RequestBody.create(JSON, updatesInJson);
+    RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
     Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response myResponse = client.newCall(req).execute();
     myResponse.body().close();
