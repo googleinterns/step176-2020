@@ -16,7 +16,7 @@ class ChartUtil {
       google.visualization.events.removeListener(chart.listener);
     }
 
-    chart.listener  = google.visualization.events.addListener(chart, eventType, func);
+    chart.listener = google.visualization.events.addListener(chart, eventType, func);
   }
 
   static hasSelection(chart) {
@@ -41,3 +41,5 @@ class ChartUtil {
     chart.setOption('childChart', null);
   }
 }
+
+export {ChartUtil};
