@@ -22,5 +22,3 @@ function getAnnotatedFieldFromDisplay(display) {
     }
   }
 }
-
-export {AnnotatedFields, getAnnotatedFieldFromDisplay};

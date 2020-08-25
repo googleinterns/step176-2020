@@ -1,5 +1,3 @@
-import {DashboardManager} from './dashboard-manager.js';
-
 google.charts.load('current', {'packages':['table', 'corechart', 'controls']});
 google.charts.setOnLoadCallback(dashboardInit);
 

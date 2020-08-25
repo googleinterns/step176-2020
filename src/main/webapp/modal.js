@@ -102,14 +102,4 @@ class Modal {
     return div;
   }
 
-  remove() {
-    if (this.blockingDiv != null) {
-      this.blockingDiv.remove();
-    } else {
-      this.container.remove();
-    }
-  }
-
 }
-
-export {Modal};

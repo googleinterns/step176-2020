@@ -80,50 +80,50 @@ public final class DevicesServletTest {
     verify(mockedUserService, times(1)).isUserLoggedIn();
   }
 
-//   @Test
-//   public void userLoggedInDevicesSuccess() throws IOException {
-//     Util mockedUtil = mock(Util.class);
-//     User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-//     UserService mockedUserService = mock(UserService.class);
-//     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-//     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-//     when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
+  @Test
+  public void userLoggedInDevicesSuccess() throws IOException {
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
-//     StringWriter stringWriter = new StringWriter();
-//     PrintWriter writer = new PrintWriter(stringWriter);
-//     when(response.getWriter()).thenReturn(writer);
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
 
-//     servlet.setUserService(mockedUserService);
-//     servlet.setUtilObj(mockedUtil);
-//     servlet.doGet(request, response);
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+    servlet.doGet(request, response);
 
-//     verify(response).setContentType("application/json");
-//     String result = stringWriter.getBuffer().toString().trim();
-//     String expected = Json.toJson(allDevices);
-//     Assert.assertEquals(result, expected);
+    verify(response).setContentType("application/json");
+    String result = stringWriter.getBuffer().toString().trim();
+    String expected = Json.toJson(allDevices);
+    Assert.assertEquals(result, expected);
     
-//     verify(mockedUserService, times(1)).isUserLoggedIn();
-//     verify(mockedUserService, times(1)).getCurrentUser();
-//     verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
-//   }
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(mockedUserService, times(1)).getCurrentUser();
+    verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
+  }
 
-//   @Test
-//   public void userLoggedInDevicesFailure() throws IOException {
-//     Util mockedUtil = mock(Util.class);
-//     User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-//     UserService mockedUserService = mock(UserService.class);
-//     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-//     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-//     when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
+  @Test
+  public void userLoggedInDevicesFailure() throws IOException {
+    Util mockedUtil = mock(Util.class);
+    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+    UserService mockedUserService = mock(UserService.class);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
 
-//     servlet.setUserService(mockedUserService);
-//     servlet.setUtilObj(mockedUtil);
-//     servlet.doGet(request, response);
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+    servlet.doGet(request, response);
   
-//     verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
-//     verify(mockedUserService, times(1)).isUserLoggedIn();
-//     verify(mockedUserService, times(1)).getCurrentUser();
-//     verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
-//   }
+    verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(mockedUserService, times(1)).getCurrentUser();
+    verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
+  }
 
 }

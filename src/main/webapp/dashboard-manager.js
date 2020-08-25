@@ -1,9 +1,3 @@
-import {BulkUpdateModal} from './bulk-update-modal.js';
-import {Loading} from './loading.js';
-import {PieChartManager} from './piechart-manager.js'
-import {TableManager} from './table-manager.js';
-import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
-
 class DashboardManager {
   constructor() {
     this.data = new google.visualization.DataTable();
@@ -39,6 +33,31 @@ class DashboardManager {
     this.updateModal = new BulkUpdateModal('update-modal');
 
     this.drawnControls = false;
+  }
+
+  /* Get the initial data to be shown to the user and populate the main datatable*/
+  async initData() {
+    let data = new google.visualization.DataTable();
+    data.addColumn('string', 'Serial Number');
+    data.addColumn('string', 'Status');
+    data.addColumn('string', 'Asset ID');
+    data.addColumn('string', 'User');
+    data.addColumn('string', 'Location');
+
+    await (fetch('/devices')
+          .then(response => response.json())
+          .then(deviceJsons => {
+              for (let device of deviceJsons) {
+                data.addRow([
+                    device.serialNumber,
+                    device.status,
+                    device.annotatedAssetId,
+                    device.annotatedUser,
+                    device.annotatedLocation]);
+              }
+      }));
+
+    this.data = data;
   }
 
   async updateAndDrawData() {
@@ -110,7 +129,8 @@ class DashboardManager {
 
   /* Setup data for standard table view */
   async updateNormal() {
-    await this.tableManager.updateNormal();
+    await this.initData();
+    this.tableManager.updateNormal(this.data);
   }
 
   isAggregating() {
@@ -154,7 +174,6 @@ function createNewAggregationSelector() {
   });
 }
 
-
 async function handleLogin() {
   fetch('/status').then(response => response.json()).then((isLoggedIn) => {
     if (!isLoggedIn) {
@@ -169,7 +188,7 @@ function authorizeCallback(authResult) {
 
     const codeMsg = "code=" + authResult['code'];
     const request = new Request('/authorize', {
-                                                method: 'POST',
+                                                method: 'POST', 
                                                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', },
                                                 body: codeMsg});
     fetch(request).then(response => {
@@ -181,5 +200,3 @@ function authorizeCallback(authResult) {
     window.location.href = "/authorize.html";
   }
 }
-
-export {DashboardManager};

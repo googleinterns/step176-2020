@@ -1,11 +1,6 @@
-import {ChartUtil} from './chart-util.js';
-
 class PieChartManager {
   constructor(containerId, COLS) {
     this.container = document.getElementById(containerId);
-    if (this.container == null) {
-      throw new ReferenceError(`Div with ID "${containerId}" could not be found`);
-    }
     this.pieChart = this.createNewPieChart('piechart-container');
 
     // Since this is a reference it will automatically be updated as COLS is updated in dashboard manager.
@@ -138,6 +133,7 @@ class PieChartManager {
         'chartType': 'PieChart',
         'containerId': container,
         'options': {
+            'title': 'Devices by Location',
             'legend': 'none',
             // This needs to be hardcoded because the div moves which causes 100% to be innacurate
             'width': diameter,
@@ -150,5 +146,3 @@ class PieChartManager {
     });
   }
 }
-
-export {PieChartManager};
