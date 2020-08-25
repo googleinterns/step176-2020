@@ -100,7 +100,6 @@ public final class UpdateServletTest {
     verify(request, times(1)).getParameter("annotatedAssetId");
     verify(request, times(1)).getParameter("annotatedUser");
     verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
-    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2", "device3"), "{}");
   }
 
   @Test
