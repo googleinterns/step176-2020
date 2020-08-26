@@ -22,6 +22,7 @@ global.fetch = jest.fn((URL) => {
 
 beforeEach(() => {
   document.body.innerHTML = "";
+  let container = createAndAddToDOM('div', 'table-container');
   let pageLeftButton = createAndAddToDOM('buttton', 'page-left');
   let pageRightButton = createAndAddToDOM('buttton', 'page-right');
   let pageDisplay = createAndAddToDOM('span', 'page-number');
@@ -31,7 +32,7 @@ beforeEach(() => {
 });
 
 test('Builds correct endpoint URL', () => {
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   let url = manager.buildRequestURL();
   let expected = window.location.href +
       `devices?maxDeviceCount=${manager.pageSize}&pageToken=${manager.nextPageToken}`;
@@ -42,7 +43,7 @@ test('Builds correct endpoint URL', () => {
 test('Adding data to table when aggregating throws error', async () => {
   // Make sure the async assertions get called
   expect.assertions(1);
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   manager.aggregating = true;
 
   try {
@@ -53,7 +54,7 @@ test('Adding data to table when aggregating throws error', async () => {
 });
 
 test('Adding data to table does not overwrite previous entries', async () => {
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   manager.aggregating = false;
 
   // By using the managers current data table we can ensure it is not swapped out for a
@@ -66,7 +67,7 @@ test('Adding data to table does not overwrite previous entries', async () => {
 });
 
 test('UI is drawn correctly', () => {
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
 
   // With page set to 1 and hasNext page returning true, we expect both arrows to be enabled
   manager.currPage = 1;
@@ -87,7 +88,7 @@ test('UI is drawn correctly', () => {
 
 test('Resets data correctly', async () => {
   // Create a manager and give it some non-default state;
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   manager.currPage = 7;
   manager.nextPageToken = '123';
 
@@ -102,7 +103,7 @@ test('Resets data correctly', async () => {
 });
 
 test('Page change respects bounds', () => {
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   manager.onPageChange({'page': -1});
 
   // Should ignore the request to go to a lower page and stay on 0.
@@ -110,7 +111,7 @@ test('Page change respects bounds', () => {
 });
 
 test('Sets data table properly in aggregation view', () => {
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   let newTable = new google.visualization.DataTable();
   manager.aggregating = true;
   let tableSetter = jest.spyOn(manager.table, 'setDataTable');
@@ -123,7 +124,7 @@ test('Sets data table properly in aggregation view', () => {
 });
 
 test('Sets data table properly in normal view', () => {
-  let manager = new TableManager();
+  let manager = new TableManager('table-container');
   manager.aggregating = false;
   let tableSetter = jest.spyOn(manager.table, 'setDataTable');
   let view = new google.visualization.DataView();
