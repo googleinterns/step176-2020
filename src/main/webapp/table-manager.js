@@ -17,48 +17,7 @@ class TableManager {
           this.table.getChart(), 'page', this.onPageChange.bind(this));
     });
 
-    google.visualization.events.addListener(this.table, 'ready', () => {
-      let table = this.container.getElementsByTagName('table')[0];
-      let tableHeaders = table.getElementsByTagName('th');
-      for (let [index, th] of Object.entries(tableHeaders)) {
-        let idPrefix = 'tableHeaderSpan';
-        let nameId = idPrefix + (2 * index);
-        let instructionsId = idPrefix + (2 * index + 1);
-        let container = document.createElement('span');
-
-        let nameSpanAria = document.createElement('span');
-        nameSpanAria.innerText = th.innerText;
-        nameSpanAria.setAttribute('id', nameId);
-        nameSpanAria.classList.add('hidden');
-
-        let innerContainer = document.createElement('span');
-        innerContainer.setAttribute('aria-labelledby', instructionsId);
-        innerContainer.setAttribute('role', 'button');
-        innerContainer.setAttribute('tabindex', 0);
-
-        let nameSpanDisplay = document.createElement('span');
-        nameSpanDisplay.setAttribute('aria-hidden', 'true');
-        nameSpanDisplay.innerText = th.innerText;
-
-        let instructionsSpan = document.createElement('span');
-        instructionsSpan.innerText = 'Activate to sort by column.';
-        instructionsSpan.classList.add('hidden');
-        instructionsSpan.setAttribute('id', instructionsId);
-
-        th.innerHTML = '';
-
-        innerContainer.append(nameSpanDisplay, instructionsSpan);
-        container.append(nameSpanAria, innerContainer);
-        th.appendChild(container);
-
-        th.setAttribute('aria-labelledby', nameId);
-        th.setAttribute('role', 'columnheader');
-        th.removeAttribute('aria-label');
-        th.removeAttribute('tabindex');
-
-        // TODO: add aria-sort
-      }
-    });
+    google.visualization.events.addListener(this.table, 'ready', this.makeTableAccessible.bind(this));
 
     this.pageLeft.onclick = () => {
       google.visualization.events.trigger(this.table.getChart(), 'page', {'page': -1});
@@ -175,6 +134,47 @@ class TableManager {
     this.setDataTable();
 
     this.draw();
+  }
+
+  makeTableAccessible() {
+    let table = this.container.getElementsByTagName('table')[0];
+    let tableHeaders = table.getElementsByTagName('th');
+    for (let [index, th] of Object.entries(tableHeaders)) {
+      let idPrefix = 'tableHeaderSpan';
+      let nameId = idPrefix + (2 * index);
+      let instructionsId = idPrefix + (2 * index + 1);
+      let container = document.createElement('span');
+
+      let nameSpanAria = document.createElement('span');
+      nameSpanAria.innerText = th.innerText;
+      nameSpanAria.setAttribute('id', nameId);
+      nameSpanAria.classList.add('hidden');
+
+      let innerContainer = document.createElement('span');
+      innerContainer.setAttribute('aria-labelledby', instructionsId);
+      innerContainer.setAttribute('role', 'button');
+      innerContainer.setAttribute('tabindex', 0);
+
+      let nameSpanDisplay = document.createElement('span');
+      nameSpanDisplay.setAttribute('aria-hidden', 'true');
+      nameSpanDisplay.innerText = th.innerText;
+
+      let instructionsSpan = document.createElement('span');
+      instructionsSpan.innerText = 'Activate to sort by column.';
+      instructionsSpan.classList.add('hidden');
+      instructionsSpan.setAttribute('id', instructionsId);
+
+      th.innerHTML = '';
+
+      innerContainer.append(nameSpanDisplay, instructionsSpan);
+      container.append(nameSpanAria, innerContainer);
+      th.appendChild(container);
+
+      th.setAttribute('aria-labelledby', nameId);
+      th.setAttribute('role', 'columnheader');
+      th.removeAttribute('aria-label');
+      th.removeAttribute('tabindex');
+    }
   }
 
   createNewTable(containerId) {
