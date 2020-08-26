@@ -105,20 +105,24 @@ public final class DevicesServletTest {
     when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
     when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenReturn(FAKE_DEVICE_RESPONSE);
 
+
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
+
 
     servlet.doGet(request, response);
 
     verify(response).setContentType("application/json");
     String result = stringWriter.getBuffer().toString().trim();
     String expected = FAKE_DEVICE_RESPONSE;
+
     Assert.assertEquals(result, expected);
     
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
+
   }
 
   @Test
@@ -129,12 +133,14 @@ public final class DevicesServletTest {
     when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
     when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenThrow(IOException.class);
 
+
     servlet.doGet(request, response);
   
     verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
+
   }
 
 }

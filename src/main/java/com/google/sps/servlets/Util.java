@@ -78,14 +78,15 @@ class Util {
     return responseJson;
   }
 
+
   public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
-    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey, DEFAULT_MAX_DEVICES);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
       final String pageToken = (String) resp.getNextPageToken();
-      resp = getDevicesResponse(pageToken, accessToken, apiKey, DEFAULT_MAX_DEVICES);
+      resp = getDevicesResponse(pageToken, accessToken, apiKey);
       allDevices.addAll(resp.getDevices());
     }
     return allDevices;
@@ -124,6 +125,7 @@ class Util {
   private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey, String maxDeviceCount) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
     urlBuilder.addQueryParameter("maxResults", maxDeviceCount);
+
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
     urlBuilder.addQueryParameter("key", apiKey);
@@ -181,26 +183,13 @@ class Util {
  
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
-    deviceIds
-      .parallelStream()
-      .forEach(
-        deviceId -> {
-          try {
-            updateSingleDevice(accessToken, deviceId, updatesInJson);
-          } catch (IOException e) {
-            System.out.println(deviceId);
-            System.out.println("had an error");//TODO: handle and return failed devices
-          }
-        }
-      );
-  }
-
-  private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
-    final String myUrl = getUpdateUrl(deviceId);
-    RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
-    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-    Response myResponse = client.newCall(req).execute();
-    myResponse.body().close();
+    for (final String deviceId : deviceIds) {
+      final String updateURL = getUpdateUrl(deviceId);
+      RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
+      Request req = new Request.Builder().url(updateURL).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+      Response updateResponse = client.newCall(req).execute();
+      updateResponse.body().close();
+    }
   }
   
   private String getUpdateUrl(String deviceId) {

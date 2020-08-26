@@ -24,8 +24,6 @@ public class DevicesServlet extends HttpServlet {
   private Util utilObj = new Util();
   public final String LOGIN_URL = "/login";
   public final String AUTHORIZE_URL = "/authorize.html";
-  public final String MAX_DEVICES_COUNT_PARAMETER_NAME = "maxDeviceCount"; 
-  public final String PAGE_TOKEN_PARAMETER_NAME = "pageToken"; 
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -38,9 +36,10 @@ public class DevicesServlet extends HttpServlet {
     final String maxDeviceCount = request.getParameter(MAX_DEVICES_COUNT_PARAMETER_NAME);
     final String pageToken = (String) request.getParameter(PAGE_TOKEN_PARAMETER_NAME);
     try {
-      final String nextResponse = utilObj.getNextResponse(userId, maxDeviceCount, pageToken);
+      final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
       response.setContentType("application/json");
-      response.getWriter().println(nextResponse);
+      final String json = Json.toJson(allDevices);
+      response.getWriter().println(json);
     } catch (IOException e) {//something went wrong during getting the devices
         response.sendRedirect(AUTHORIZE_URL);
     } catch (TooManyResultsException e) {
