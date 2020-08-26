@@ -153,3 +153,5 @@ class TableManager {
     });
   }
 }
+
+export {TableManager};
