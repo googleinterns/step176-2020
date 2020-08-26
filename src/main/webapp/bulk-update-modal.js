@@ -1,6 +1,3 @@
-import {Modal} from './modal.js';
-import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
-
 class BulkUpdateModal {
   constructor(modalId) {
     this.modal = new Modal(modalId, /*Blocking*/ true);
@@ -95,5 +92,3 @@ class BulkUpdateModal {
     return div;
   }
 }
-
-export {BulkUpdateModal}

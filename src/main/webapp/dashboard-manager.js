@@ -1,9 +1,3 @@
-import {BulkUpdateModal} from './bulk-update-modal.js';
-import {Loading} from './loading.js';
-import {PieChartManager} from './piechart-manager.js'
-import {TableManager} from './table-manager.js';
-import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
-
 class DashboardManager {
   constructor() {
     this.data = new google.visualization.DataTable();
@@ -180,7 +174,6 @@ function createNewAggregationSelector() {
   });
 }
 
-
 async function handleLogin() {
   fetch('/status').then(response => response.json()).then((isLoggedIn) => {
     if (!isLoggedIn) {
@@ -207,5 +200,3 @@ function authorizeCallback(authResult) {
     window.location.href = "/authorize.html";
   }
 }
-
-export {DashboardManager};
