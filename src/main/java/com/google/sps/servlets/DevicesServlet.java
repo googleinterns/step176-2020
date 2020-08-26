@@ -1,3 +1,4 @@
+ 
 package com.google.sps.servlets;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -36,7 +37,6 @@ public class DevicesServlet extends HttpServlet {
     }
     final String userId = currentUser.getUserId();
     final String maxDeviceCount = request.getParameter(MAX_DEVICES_COUNT_PARAMETER_NAME);
-
     final String pageToken = (String) request.getParameter(PAGE_TOKEN_PARAMETER_NAME);
     try {
       final String nextResponse = utilObj.getNextResponse(userId, maxDeviceCount, pageToken);

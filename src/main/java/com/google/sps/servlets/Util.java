@@ -64,17 +64,17 @@ class Util {
   private static final String EMPTY_API_KEY = "";
   private static final String EMPTY_PAGE_TOKEN = "";
   private static final String ALL_DEVICES_ENDPOINT = "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos";
-  private static final int DEFAULT_MAX_DEVICES = 200; //is limited to effectively 200
+  private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
+  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
   public String getNextResponse(String userId, String maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
     final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey, maxDeviceCount);
-    final String responseJson = Json.toJson(resp);
+    final String responseJson = Json.toJson(resp);//THIS MIGHT NOT ACTUALLY WORK
     return responseJson;
   }
 
@@ -130,10 +130,10 @@ class Util {
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
       urlBuilder.addQueryParameter("pageToken", pageToken);
     }
-    final String deviceResponseURL = urlBuilder.build().toString();
-    Request req = new Request.Builder().url(deviceResponseURL).addHeader("Authorization", "Bearer " + accessToken).build();
-    Response deviceResponse = client.newCall(req).execute();
-    final String content = deviceResponse.body().string();
+    final String myUrl = urlBuilder.build().toString();
+    Request req = new Request.Builder().url(myUrl).addHeader("Authorization", "Bearer " + accessToken).build();
+    Response myResponse = client.newCall(req).execute();
+    final String content = myResponse.body().string();
     ListDeviceResponse resp = (ListDeviceResponse) Json.fromJson(content, ListDeviceResponse.class);
     return resp;
   }
@@ -178,34 +178,6 @@ class Util {
     deleteStaleTokens(userId);
     datastore.put(tokenEntity);
   }
- 
-  public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
-    final String accessToken = getAccessToken(userId);
-    deviceIds
-      .parallelStream()
-      .forEach(
-        deviceId -> {
-          try {
-            updateSingleDevice(accessToken, deviceId, updatesInJson);
-          } catch (IOException e) {
-            System.out.println(deviceId);
-            System.out.println("had an error");//TODO: handle and return failed devices
-          }
-        }
-      );
-  }
-
-  private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
-    final String myUrl = getUpdateUrl(deviceId);
-    RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
-    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-    Response myResponse = client.newCall(req).execute();
-    myResponse.body().close();
-  }
-  
-  private String getUpdateUrl(String deviceId) {
-      return "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos/" + deviceId + "?projection=BASIC";
-  }
 
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
@@ -221,5 +193,5 @@ class Util {
   private String getUpdateUrl(String deviceId) {
       return "https://www.googleapis.com/admin/directory/v1/customer/my_customer/devices/chromeos/" + deviceId + "?projection=BASIC";
   }
-
+ 
 }
