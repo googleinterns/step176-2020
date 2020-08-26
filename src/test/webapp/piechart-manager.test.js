@@ -5,32 +5,30 @@ jest.mock('../../main/webapp/chart-util.js');
 
 stubGoogleAPIs();
 
+// Used to create a PieChartManager
+const MANAGER_CONTAINER_ID = 'chart-1';
+const MANAGER_COLS = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
+
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 test('Constructor adds piechart to DOM with appropriate settings', () => {
-  const containerId = 'chart-1';
-  let container = document.createElement('div');
-  container.setAttribute('id', containerId);
-  document.body.appendChild(container);
-  const cols = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
-
   let wrapperConstructor = jest.spyOn(google.visualization, 'ChartWrapper');
-  let manager = new PieChartManager(containerId, cols);
+  let manager = createManagerCorrectly();
 
   // Store as reference, not value
-  expect(manager.COLS).toBe(cols);
+  expect(manager.COLS).toBe(MANAGER_COLS);
 
   expect(wrapperConstructor.mock.calls.length).toBe(1);
-  expect(wrapperConstructor.mock.calls[0][0].containerId).toBe(containerId);
+  expect(wrapperConstructor.mock.calls[0][0].containerId).toBe(MANAGER_CONTAINER_ID);
   expect(wrapperConstructor.mock.calls[0][0].options.width).toBe(350);
   expect(wrapperConstructor.mock.calls[0][0].chartType).toBe('PieChart');
 });
 
 test('Constructor fails if target container does not exist', () => {
   const cols = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
-  expect( () => {new PieChartManager('doesnt-exist', cols)}).toThrowError();
+  expect(() => {new PieChartManager('doesnt-exist', cols)}).toThrowError();
 });
 
 test('Configures deepest aggregation pie chart correctly', () => {
@@ -75,11 +73,9 @@ test('Configures inner aggregation pie chart correctly', () => {
 
 
 function createManagerCorrectly() {
-  const containerId = 'chart-1';
   let container = document.createElement('div');
-  container.setAttribute('id', containerId);
+  container.setAttribute('id', MANAGER_CONTAINER_ID);
   document.body.appendChild(container);
-  const cols = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
 
-  return new PieChartManager(containerId, cols);
+  return new PieChartManager(MANAGER_CONTAINER_ID, MANAGER_COLS);
 }

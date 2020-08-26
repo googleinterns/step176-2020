@@ -43,7 +43,6 @@ test('Constructor registers appropriate event listeners', () => {
   expect(aggregationListener.mock.calls.length).toBe(2);
   expect(aggregationListener.mock.calls[0][0]).toBe(dashboard.aggregationSelector);
   expect(aggregationListener.mock.calls[0][1]).toBe('statechange');
-
 });
 
 test('Only draws aggregation selector once', () => {
@@ -99,6 +98,7 @@ test('Fetching and Populating Aggregation Data', async () => {
   testAggregationAddRow(addData, 1, 'Jane', 2, "[\"1\",\"2\"]");
 });
 
+<<<<<<< HEAD
 
 // TODO: add tests for initData, updateNormal, etc. after oauth gets merged in
 // because they will likely undergo significant changes
@@ -106,6 +106,8 @@ test('Fetching and Populating Aggregation Data', async () => {
 
 
 
+=======
+>>>>>>> RealPaginationFrontend
 // Corresponds to the data given for aggregation in global.fetch mock.
 function testAggregationAddRow(addRow, row, user, count, ids) {
   expect(addRow.mock.calls.length).toBe(2);

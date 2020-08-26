@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -42,6 +43,11 @@ public final class DevicesServletTest {
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";
   private final String TEST_USER_AUTH_DOMAIN = "testAuthDomain";
+
+  private final String TEST_MAX_COUNT = "maxCount";
+  private final String TEST_PAGE_TOKEN = "pageToken";
+
+  private final String FAKE_DEVICE_RESPONSE = "deviceResponse";
 
   private final String LOCATION_ONE = "New Jersey";
   private final String LOCATION_TWO = "California";
@@ -66,14 +72,25 @@ public final class DevicesServletTest {
   private final List<ChromeOSDevice> allDevices = new ArrayList<>(
       Arrays.asList(DEVICE_ONE, DEVICE_TWO, DEVICE_THREE, DEVICE_FOUR, DEVICE_FIVE));
 
-  @Test
-  public void userNotLoggedIn() throws IOException {
-    User userStub = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    UserService mockedUserService = mock(UserService.class);
-    when(mockedUserService.isUserLoggedIn()).thenReturn(false);
-    when(mockedUserService.getCurrentUser()).thenReturn(userStub);
+  private UserService mockedUserService;
+  private Util mockedUtil;
+  private User userFake;
+
+  @Before
+  public void setUp() {
+    mockedUserService = mock(UserService.class);
+    mockedUtil = mock(Util.class);
+    userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
 
     servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+  }
+
+  @Test
+  public void userNotLoggedIn() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(false);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
     servlet.doGet(request, response);
 
     verify(response).sendRedirect(servlet.LOGIN_URL);
@@ -82,48 +99,42 @@ public final class DevicesServletTest {
 
   @Test
   public void userLoggedInDevicesSuccess() throws IOException {
-    Util mockedUtil = mock(Util.class);
-    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
+    when(request.getParameter(servlet.MAX_DEVICES_COUNT_PARAMETER_NAME)).thenReturn(TEST_MAX_COUNT);
+    when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
+    when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenReturn(FAKE_DEVICE_RESPONSE);
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
     when(response.getWriter()).thenReturn(writer);
 
-    servlet.setUserService(mockedUserService);
-    servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
 
     verify(response).setContentType("application/json");
     String result = stringWriter.getBuffer().toString().trim();
-    String expected = Json.toJson(allDevices);
+    String expected = FAKE_DEVICE_RESPONSE;
     Assert.assertEquals(result, expected);
     
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
-    verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
+    verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
   }
 
   @Test
   public void userLoggedInDevicesFailure() throws IOException {
-    Util mockedUtil = mock(Util.class);
-    User userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
-    UserService mockedUserService = mock(UserService.class);
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
-    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
+    when(request.getParameter(servlet.MAX_DEVICES_COUNT_PARAMETER_NAME)).thenReturn(TEST_MAX_COUNT);
+    when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
+    when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenThrow(IOException.class);
 
-    servlet.setUserService(mockedUserService);
-    servlet.setUtilObj(mockedUtil);
     servlet.doGet(request, response);
   
     verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
-    verify(mockedUtil, times(1)).getAllDevices(TEST_USER_ID);
+    verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
   }
 
 }
