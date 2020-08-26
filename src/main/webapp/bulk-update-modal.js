@@ -46,6 +46,7 @@ class BulkUpdateModal {
       input.setAttribute('type', 'text');
       input.setAttribute('value', aggregationFieldValue);
       input.setAttribute('name', getAnnotatedFieldFromDisplay(aggregationField).API);
+      input.setAttribute('id', getAnnotatedFieldFromDisplay(aggregationField).API);
       input.classList.add('update-input');
 
       let container = document.createElement('div');
