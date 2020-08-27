@@ -6,7 +6,7 @@ jest.mock('../../main/webapp/chart-util.js');
 stubGoogleAPIs();
 
 // Used to create a PieChartManager
-const MANAGER_CONTAINER_ID = 'piechart-container';
+const MANAGER_CONTAINER_ID = 'chart-1';
 const MANAGER_COLS = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
 
 beforeEach(() => {

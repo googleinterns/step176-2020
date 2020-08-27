@@ -1,6 +1,7 @@
 class TableManager {
-  constructor() {
-    this.table = this.createNewTable();
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.table = this.createNewTable(containerId);
     this.baseDataTable = new google.visualization.DataTable();
     this.currPage = 0;
     this.pageSize = 10;
@@ -16,11 +17,13 @@ class TableManager {
           this.table.getChart(), 'page', this.onPageChange.bind(this));
     });
 
+    google.visualization.events.addListener(this.table, 'ready', this.makeTableAccessible.bind(this));
+
     this.pageLeft.onclick = () => {
-      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': -1});
+      google.visualization.events.trigger(this.table.getChart(), 'page', {'pageDelta': -1});
     };
     this.pageRight.onclick = () => {
-      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': 1});
+      google.visualization.events.trigger(this.table.getChart(), 'page', {'pageDelta': 1});
     };
     this.pageSizeSelect.onchange = () => {
       this.onPageSizeChange(parseInt(this.pageSizeSelect.value));
@@ -108,7 +111,7 @@ class TableManager {
   }
 
   onPageChange(properties) {
-    const pageDelta = properties['page']; // 1 or -1
+    const pageDelta = properties['pageDelta']; // 1 or -1
     const newPage = this.currPage + pageDelta;
 
     if (newPage < 0) {
@@ -133,10 +136,51 @@ class TableManager {
     this.draw();
   }
 
-  createNewTable() {
+  makeTableAccessible() {
+    let table = this.container.getElementsByTagName('table')[0];
+    let tableHeaders = table.getElementsByTagName('th');
+    let idPrefix = 'tableHeaderSpan';
+    for (let [index, th] of Object.entries(tableHeaders)) {
+      let nameId = idPrefix + (2 * index);
+      let instructionsId = idPrefix + (2 * index + 1);
+      let container = document.createElement('span');
+
+      let nameSpanAria = document.createElement('span');
+      nameSpanAria.innerText = th.innerText;
+      nameSpanAria.setAttribute('id', nameId);
+      nameSpanAria.classList.add('hidden');
+
+      let innerContainer = document.createElement('span');
+      innerContainer.setAttribute('aria-labelledby', instructionsId);
+      innerContainer.setAttribute('role', 'button');
+      innerContainer.setAttribute('tabindex', 0);
+
+      let nameSpanDisplay = document.createElement('span');
+      nameSpanDisplay.setAttribute('aria-hidden', 'true');
+      nameSpanDisplay.innerText = th.innerText;
+
+      let instructionsSpan = document.createElement('span');
+      instructionsSpan.innerText = 'Activate to sort by column.';
+      instructionsSpan.classList.add('hidden');
+      instructionsSpan.setAttribute('id', instructionsId);
+
+      th.innerHTML = '';
+
+      innerContainer.append(nameSpanDisplay, instructionsSpan);
+      container.append(nameSpanAria, innerContainer);
+      th.appendChild(container);
+
+      th.setAttribute('aria-labelledby', nameId);
+      th.setAttribute('role', 'columnheader');
+      th.removeAttribute('aria-label');
+      th.removeAttribute('tabindex');
+    }
+  }
+
+  createNewTable(containerId) {
     return new google.visualization.ChartWrapper({
         'chartType': 'Table',
-        'containerId': 'table-container',
+        'containerId': containerId,
         'options': {
             'title': 'Sample Table',
             'page': 'event',
