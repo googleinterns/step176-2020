@@ -163,23 +163,28 @@ class Util {
     return refreshToken;
   }
 
-  public void associateRefreshToken(String userId, String refreshToken) {
-    Entity tokenEntity = new Entity("RefreshToken");
-    tokenEntity.setProperty("userId", userId);
-    tokenEntity.setProperty("refreshToken", refreshToken);
-    deleteStaleTokens(userId);
-    datastore.put(tokenEntity);
-  }
-
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
-    for (final String deviceId : deviceIds) {
-      final String updateURL = getUpdateUrl(deviceId);
-      RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
-      Request req = new Request.Builder().url(updateURL).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-      Response updateResponse = client.newCall(req).execute();
-      updateResponse.body().close();
-    }
+    deviceIds
+      .parallelStream()
+      .forEach(
+        deviceId -> {
+          try {
+            updateSingleDevice(accessToken, deviceId, updatesInJson);
+          } catch (IOException e) {
+            System.out.println(deviceId);
+            System.out.println("had an error");//TODO: handle and return failed devices
+          }
+        }
+      );
+  }
+
+  private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
+    final String updateUrl = getUpdateUrl(deviceId);
+    RequestBody body = RequestBody.create(JSON, updatesInJson);
+    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+    Response updateResponse = client.newCall(req).execute();
+    updateResponse.body().close();
   }
 
   private String getUpdateUrl(String deviceId) {
