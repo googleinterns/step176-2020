@@ -205,18 +205,18 @@ function authorizeCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
 
-    const codeMsg = "code=" + authResult['code'];
+    const codeMsg = 'code=' + authResult['code'];
     const request = new Request('/authorize', {
                                                 method: 'POST',
                                                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', },
                                                 body: codeMsg});
     fetch(request).then(response => {
-        console.log("auth code sent"); //TODO: handle failure case
-        document.location.href = "/index.html";
+        console.log('auth code sent'); //TODO: handle failure case
+        document.location.href = '/index.html';
     });
   } else {
-    console.log("user is not authorized");
-    window.location.href = "/authorize.html";
+    console.log('user is not authorized');
+    window.location.href = '/authorize.html';
   }
 }
 
