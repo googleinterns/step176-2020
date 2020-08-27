@@ -20,10 +20,10 @@ class TableManager {
     google.visualization.events.addListener(this.table, 'ready', this.makeTableAccessible.bind(this));
 
     this.pageLeft.onclick = () => {
-      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': -1});
+      google.visualization.events.trigger(this.table.getChart(), 'page', {'pageDelta': -1});
     };
     this.pageRight.onclick = () => {
-      google.visualization.events.trigger(this.table.getChart(), 'page', {'page': 1});
+      google.visualization.events.trigger(this.table.getChart(), 'page', {'pageDelta': 1});
     };
     this.pageSizeSelect.onchange = () => {
       this.onPageSizeChange(parseInt(this.pageSizeSelect.value));
@@ -111,7 +111,7 @@ class TableManager {
   }
 
   onPageChange(properties) {
-    const pageDelta = properties['page']; // 1 or -1
+    const pageDelta = properties['pageDelta']; // 1 or -1
     const newPage = this.currPage + pageDelta;
 
     if (newPage < 0) {
@@ -139,8 +139,8 @@ class TableManager {
   makeTableAccessible() {
     let table = this.container.getElementsByTagName('table')[0];
     let tableHeaders = table.getElementsByTagName('th');
+    let idPrefix = 'tableHeaderSpan';
     for (let [index, th] of Object.entries(tableHeaders)) {
-      let idPrefix = 'tableHeaderSpan';
       let nameId = idPrefix + (2 * index);
       let instructionsId = idPrefix + (2 * index + 1);
       let container = document.createElement('span');

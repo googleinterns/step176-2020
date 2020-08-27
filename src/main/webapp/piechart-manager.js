@@ -94,20 +94,17 @@ class PieChartManager {
 
   makeAccessible(chart, depth, isLastChart) {
     google.visualization.events.addOneTimeListener(chart, 'ready', () => {
-      let message = null;
-      if (isLastChart) {
-        message = 'Activate to bulk update.';
-      } else {
-        message = 'Activate to create a sub-aggregation pie chart.';
-      }
+      const message = isLastChart
+          ? 'Activate to bulk update.'
+          : 'Activate to create a sub-aggregation pie chart.';
 
-      let container = document.getElementById('chart-' + depth);
+      const container = document.getElementById('chart-' + depth);
       let slices = [...container.getElementsByTagName('g')];
       slices = slices.slice(1, -1); // The first and last elements are not slices.
       for (let [index, slice] of slices.entries()) {
-        let value = chart.getDataTable().getValue(index, depth - 1);
-        let percentContainer = slice.getElementsByTagName('text')[0];
-        let percent = percentContainer == null ? '< 5%' : percentContainer.innerHTML;
+        const value = chart.getDataTable().getValue(index, depth - 1);
+        const percentContainer = slice.getElementsByTagName('text')[0];
+        const percent = percentContainer == null ? '< 5%' : percentContainer.innerHTML;
         slice.setAttribute('role', 'button');
         slice.setAttribute('aria-label', `${message} ${value}: ${percent}`);
         slice.setAttribute('tabindex', 0);

@@ -36,17 +36,18 @@ class BulkUpdateModal {
     for (let i = 0; i < selectedValues.length; i++) {
       const aggregationField = selectedFields[i];
       const aggregationFieldValue = selectedValues[i];
+      const apiAggregationFieldName = getAnnotatedFieldFromDisplay(aggregationField).API;
 
       let label = document.createElement('label');
       label.innerHTML = aggregationField;
-      label.setAttribute('for', getAnnotatedFieldFromDisplay(aggregationField).API);
+      label.setAttribute('for', apiAggregationFieldName);
       label.classList.add('update-label');
 
       let input = document.createElement('input');
       input.setAttribute('type', 'text');
       input.setAttribute('value', aggregationFieldValue);
-      input.setAttribute('name', getAnnotatedFieldFromDisplay(aggregationField).API);
-      input.setAttribute('id', getAnnotatedFieldFromDisplay(aggregationField).API);
+      input.setAttribute('name', apiAggregationFieldName);
+      input.setAttribute('id', apiAggregationFieldName);
       input.classList.add('update-input');
 
       let container = document.createElement('div');
@@ -67,6 +68,10 @@ class BulkUpdateModal {
     form.appendChild(submit);
 
     return form;
+  }
+
+  onFormSubmit(form) {
+
   }
 
   createModalWarning(devicesCount, selectedValues, selectedFields) {

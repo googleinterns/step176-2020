@@ -1,3 +1,5 @@
+const TAB_KEYCODE = 9;
+
 // Used to decide, if multiple modals are open simultanesouly, which one should receive
 // tab commands for accessibility.  Because relatively few modals should be open at any
 // given time (< 10), we can use a simple list
@@ -26,7 +28,7 @@ document.addEventListener('keydown', function(e) {
     return;
   }
 
-  let isTabPressed = e.keyCode == 9;
+  let isTabPressed = e.keyCode == TAB_KEYCODE;
   if (!isTabPressed) {
     return;
   }
