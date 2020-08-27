@@ -163,6 +163,14 @@ class Util {
     return refreshToken;
   }
 
+  public void associateRefreshToken(String userId, String refreshToken) {
+    Entity tokenEntity = new Entity("RefreshToken");
+    tokenEntity.setProperty("userId", userId);
+    tokenEntity.setProperty("refreshToken", refreshToken);
+    deleteStaleTokens(userId);
+    datastore.put(tokenEntity);
+  }
+
   public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
     deviceIds
@@ -181,8 +189,8 @@ class Util {
 
   private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
     final String updateUrl = getUpdateUrl(deviceId);
-    RequestBody body = RequestBody.create(JSON, updatesInJson);
-    Request req = new Request.Builder().url(myUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+    RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
+    Request req = new Request.Builder().url(updateUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
     Response updateResponse = client.newCall(req).execute();
     updateResponse.body().close();
   }
