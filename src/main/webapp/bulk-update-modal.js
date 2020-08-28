@@ -9,6 +9,7 @@ class BulkUpdateModal {
     // Used to give feedback/alerts to the user
     this.alertDiv = document.createElement('div');
     this.alertDiv.classList.add('alert');
+    this.alertDiv.setAttribute('aria-live', 'aggressive');
   }
 
   populateAndShowModal(deviceIds, selectedValues, selectedFields, devicesCount) {
@@ -35,11 +36,15 @@ class BulkUpdateModal {
       let loader = new Loading(this.submitForm.bind(this, form), false);
       let response = await loader.load();
 
-      // TODO: Display a message to user depending on response
-      this.alertUserSuccess();
+      // Refresh the view to reflect the updates.
+      document.dispatchEvent(new CustomEvent('refreshData'));
 
-      // Refresh the view when they exit
-      this.modal.setRemoveCallback(() => {document.dispatchEvent(new CustomEvent('refreshData'))});
+      if (response.status == 200) {
+        this.alertUserSuccess();
+      } else {
+        let json = await response.json();
+        this.alertUserFailure(json.failedDevices);
+      }
     });
 
     for (let i = 0; i < selectedValues.length; i++) {
@@ -87,7 +92,7 @@ class BulkUpdateModal {
       body.append(pair[0], pair[1]);
     }
 
-    await fetch(form.action, {
+    return await fetch(form.action, {
       method: form.method,
       body: body
     });
