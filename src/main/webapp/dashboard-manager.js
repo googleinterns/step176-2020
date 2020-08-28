@@ -13,11 +13,21 @@ class DashboardManager {
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
-    this.tableManager = new TableManager();
+    this.tableManager = new TableManager('table-container');
     this.pieChartManager = new PieChartManager(/*ContainerId:*/ 'chart', this.COLS);
 
     google.visualization.events.addListener(
         this.aggregationSelector, 'statechange', this.updateAndDrawData.bind(this));
+
+    google.visualization.events.addListener(this.aggregationSelector, 'statechange', () => {
+      let containerDiv = document.getElementById('aggregation-input');
+
+      let selectedTags = containerDiv.getElementsByTagName('li');
+      for (let selectedTag of selectedTags) {
+        let divs = selectedTag.getElementsByTagName('div');
+        divs[0].setAttribute('aria-label', 'Activate to undo aggregation by ' + divs[1].innerText);
+      }
+    });
 
     document.addEventListener('bulkUpdate', (e) => {
       let row = e.detail;
@@ -100,7 +110,7 @@ class DashboardManager {
               }
               row.push(JSON.stringify(entry.deviceIds));
 
-              row.push(`<button onclick="document.dispatchEvent(
+              row.push(`<button aria-label="Activate to bulk update devices in row." onclick="document.dispatchEvent(
                   new CustomEvent( \'bulkUpdate\', {detail: ${index} }))">Update Devices</button>`);
 
               this.data.addRow(row);
@@ -146,6 +156,8 @@ function createNewAggregationSelector() {
       'options': {
             'filterColumnIndex': '0',
             'ui': {
+                'allowTyping': false,
+                'caption': 'Select a field by which to aggregate',
                 'label': 'Aggregate By...',
                 'selectedValuesLayout': 'aside',
                 'sortValues': false
@@ -167,18 +179,18 @@ function authorizeCallback(authResult) {
   if (authResult['code']) {
     $('#signinButton').attr('style', 'display: none');
 
-    const codeMsg = "code=" + authResult['code'];
+    const codeMsg = 'code=' + authResult['code'];
     const request = new Request('/authorize', {
                                                 method: 'POST',
                                                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', },
                                                 body: codeMsg});
     fetch(request).then(response => {
-        console.log("auth code sent"); //TODO: handle failure case
-        document.location.href = "/index.html";
+        console.log('auth code sent'); //TODO: handle failure case
+        document.location.href = '/index.html';
     });
   } else {
-    console.log("user is not authorized");
-    window.location.href = "/authorize.html";
+    console.log('user is not authorized');
+    window.location.href = '/authorize.html';
   }
 }
 

@@ -6,7 +6,7 @@ class PieChartManager {
     if (this.container == null) {
       throw new ReferenceError(`Div with ID "${containerId}" could not be found`);
     }
-    this.pieChart = this.createNewPieChart('piechart-container');
+    this.pieChart = this.createNewPieChart('chart-1');
 
     // Since this is a reference it will automatically be updated as COLS is updated in dashboard manager.
     this.COLS = COLS;
@@ -43,7 +43,7 @@ class PieChartManager {
     pieChart.setView({'columns': [0, 1]});
     pieChart.setDataTable(result);
 
-
+    this.makeAccessible(pieChart, depth, this.isLastAggregation(selectorState.length, depth));
     if (!this.isLastAggregation(selectorState.length, depth)) {
       // We only want one event listener at a time, so we must remove/overwrite the previous one.
       ChartUtil.addOverwriteableEvent(
@@ -90,6 +90,26 @@ class PieChartManager {
     parent.setOption('childChart', pieChart);
 
     this.draw();
+  }
+
+  makeAccessible(chart, depth, isLastChart) {
+    google.visualization.events.addOneTimeListener(chart, 'ready', () => {
+      const message = isLastChart
+          ? 'Activate to bulk update.'
+          : 'Activate to create a sub-aggregation pie chart.';
+
+      const container = document.getElementById('chart-' + depth);
+      let slices = [...container.getElementsByTagName('g')];
+      slices = slices.slice(1, -1); // The first and last elements are not slices.
+      for (let [index, slice] of slices.entries()) {
+        const value = chart.getDataTable().getValue(index, depth - 1);
+        const percentContainer = slice.getElementsByTagName('text')[0];
+        const percent = percentContainer == null ? '< 5%' : percentContainer.innerHTML;
+        slice.setAttribute('role', 'button');
+        slice.setAttribute('aria-label', `${message} ${value}: ${percent}`);
+        slice.setAttribute('tabindex', 0);
+      }
+    });
   }
 
   show() {

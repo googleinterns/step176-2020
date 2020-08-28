@@ -1,8 +1,56 @@
+const TAB_KEYCODE = 9;
+
+// Used to decide, if multiple modals are open simultanesouly, which one should receive
+// tab commands for accessibility.  Because relatively few modals should be open at any
+// given time (< 10), we can use a simple list
+const visibleModals = [];
+const focusableElements = 'button, input, select, textarea';
+let firstElement = null;
+let lastElement = null;
+
+
+function updateFocusableElements() {
+  if (visibleModals.length <= 0) {
+    firstElement = null;
+    lastElement = null;
+    return;
+  }
+
+  let modalToFocus = visibleModals[visibleModals.length - 1];
+  let focusableElements = modalToFocus.container.querySelectorAll('button, input, select, textarea');
+
+  firstElement = focusableElements[0];
+  lastElement = focusableElements[focusableElements.length - 1];
+}
+
+document.addEventListener('keydown', function(e) {
+  if (visibleModals.length <= 0 || firstElement == null || lastElement == null) {
+    return;
+  }
+
+  let isTabPressed = e.keyCode == TAB_KEYCODE;
+  if (!isTabPressed) {
+    return;
+  }
+
+  if (e.shiftKey) {
+    if (document.activeElement == firstElement) {
+      lastElement.focus();
+      e.preventDefault();
+    }
+  } else {
+    if (document.activeElement == lastElement) {
+      firstElement.focus();
+      e.preventDefault();
+    }
+  }
+});
+
+
 class Modal {
   constructor(id, blocking, closeable) {
     this.container = document.createElement('div');
-    this.container.setAttribute('id', id);
-    this.container.classList.add('modal', 'hidden');
+    this.configureContainer(id);
     document.body.appendChild(this.container);
 
     this.blockingDiv = null;
@@ -17,10 +65,13 @@ class Modal {
     this.body = this.createAndAddDiv('modal-body');
     this.footer = this.createAndAddDiv('modal-footer');
 
+    this.setHeader('');
+
     this.onResize = () => {
       this.center();
     };
 
+    this.previouslyFocused = null;
     this.isVisible = false;
     this.hide();
   }
@@ -36,12 +87,21 @@ class Modal {
     return blockingDiv
   }
 
+  configureContainer(id) {
+    this.container.setAttribute('id', id);
+    this.container.setAttribute('role', 'dialog');
+    this.container.setAttribute('aria-modal', 'true');
+    this.container.setAttribute('tabindex', '-1');
+    this.container.classList.add('modal', 'hidden');
+  }
+
   setHeader(text) {
     this.header.innerHTML = '';
 
     if (this.closeable) {
       let closeBtn = document.createElement('button');
       closeBtn.innerText = '✕';
+      closeBtn.setAttribute('aria-label', 'Close modal');
       closeBtn.classList.add('modal-close-btn');
       closeBtn.onclick = () => {this.hide()};
       this.header.appendChild(closeBtn);
@@ -80,8 +140,8 @@ class Modal {
 
     this.center();
 
+    this.setVisibility(true);
     window.addEventListener('resize', this.onResize, true);
-    this.isVisible = true;
   }
 
   hide() {
@@ -90,8 +150,8 @@ class Modal {
     }
     this.container.classList.add('hidden');
 
+    this.setVisibility(false);
     window.removeEventListener('resize', this.onResize), true;
-    this.isVisible = false;
   }
 
   createAndAddDiv(className) {
@@ -102,7 +162,27 @@ class Modal {
     return div;
   }
 
+  setVisibility(visibility) {
+    if (visibility == this.isVisible) {
+      return;
+    }
+
+    if (visibility) {
+      visibleModals.push(this);
+      this.previouslyFocused = document.activeElement;
+      this.container.focus();
+    } else {
+      visibleModals.splice(visibleModals.indexOf(this));
+      if (this.previouslyFocused != null) {
+        this.previouslyFocused.focus();
+      }
+    }
+    this.isVisible = visibility;
+    updateFocusableElements();
+  }
+
   remove() {
+    this.setVisibility(false);
     if (this.blockingDiv != null) {
       this.blockingDiv.remove();
     } else {

@@ -40,7 +40,7 @@ test('Constructor registers appropriate event listeners', () => {
 
   expect(bulkUpdateListener.mock.calls[0][0]).toBe('bulkUpdate');
 
-  expect(aggregationListener.mock.calls.length).toBe(1);
+  expect(aggregationListener.mock.calls.length).toBe(2);
   expect(aggregationListener.mock.calls[0][0]).toBe(dashboard.aggregationSelector);
   expect(aggregationListener.mock.calls[0][1]).toBe('statechange');
 });
@@ -97,6 +97,7 @@ test('Fetching and Populating Aggregation Data', async () => {
   testAggregationAddRow(addData, 0, 'user', 1, "[\"0\"]");
   testAggregationAddRow(addData, 1, 'Jane', 2, "[\"1\",\"2\"]");
 });
+
 
 // Corresponds to the data given for aggregation in global.fetch mock.
 function testAggregationAddRow(addRow, row, user, count, ids) {
