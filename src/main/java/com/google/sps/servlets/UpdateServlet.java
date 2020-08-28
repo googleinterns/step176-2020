@@ -50,12 +50,11 @@ public class UpdateServlet extends HttpServlet {
     final String updatesInJson = getJsonFromMap(updatesToMake);
     final String relevantDeviceIds = request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
-    List<String> failedUpdateDeviceIds = new ArrayList<>(); 
     if (!deviceIds.isEmpty() && !updatesToMake.isEmpty()) {
       List<String> failedUpdateDeviceIds = utilObj.updateDevices(userId, deviceIds, updatesInJson);
       if (!failedUpdateDeviceIds.isEmpty()) {
         response.setContentType("application/json");
-        final String json = GSON_OBJECT.toJson(allDevices);
+        final String json = GSON_OBJECT.toJson(failedUpdateDeviceIds);
         response.getWriter().println(json);
       }
     }
