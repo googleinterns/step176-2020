@@ -231,3 +231,8 @@ body {
   text-align: center;
   width: 100%;
 }
+
+.alert {
+  border-radius: 15px;
+  padding: 5px;
+}

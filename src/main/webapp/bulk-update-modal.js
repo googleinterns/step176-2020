@@ -1,18 +1,14 @@
 import {Modal} from './modal.js';
 import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
+import {Loading} from './loading.js';
 
 class BulkUpdateModal {
   constructor(modalId) {
     this.modal = new Modal(modalId, /*Blocking*/ true);
 
-    document.addEventListener('displayBulkUpdateMenu', (e) => {
-      let detail = e.detail;
-      this.populateAndShowModal(
-          detail.deviceIds,
-          detail.selectedValues,
-          detail.selectedFields,
-          detail.devicesCount);
-    }, false);
+    // Used to give feedback/alerts to the user
+    this.alertDiv = document.createElement('div');
+    this.alertDiv.classList.add('alert');
   }
 
   populateAndShowModal(deviceIds, selectedValues, selectedFields, devicesCount) {
@@ -25,13 +21,26 @@ class BulkUpdateModal {
   createModalBody(deviceIds, selectedValues, selectedFields, devicesCount) {
     let warning = this.createModalWarning(devicesCount, selectedValues, selectedFields);
     let form = this.createModalForm(deviceIds, selectedValues, selectedFields);
-    return [warning, form];
+    return [this.alertDiv, warning, form];
   }
 
   createModalForm(deviceIds, selectedValues, selectedFields) {
     let form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/update');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let loader = new Loading(this.submitForm.bind(this, form), false);
+      let response = await loader.load();
+
+      // TODO: Display a message to user depending on response
+      this.alertUserSuccess();
+
+      // Refresh the view when they exit
+      this.modal.setRemoveCallback(() => {document.dispatchEvent(new CustomEvent('refreshData'))});
+    });
 
     for (let i = 0; i < selectedValues.length; i++) {
       const aggregationField = selectedFields[i];
@@ -70,8 +79,18 @@ class BulkUpdateModal {
     return form;
   }
 
-  onFormSubmit(form) {
+  async submitForm(form) {
+    // Form Data encoding is not accepted by server so we need to convert it
+    const data = new FormData(form);
+    let body = new URLSearchParams();
+    for (let pair of data) {
+      body.append(pair[0], pair[1]);
+    }
 
+    await fetch(form.action, {
+      method: form.method,
+      body: body
+    });
   }
 
   createModalWarning(devicesCount, selectedValues, selectedFields) {
@@ -100,6 +119,31 @@ class BulkUpdateModal {
     div.appendChild(p2);
 
     return div;
+  }
+
+  alertUserSuccess() {
+    this.alertDiv.innerHTML = '';
+
+    this.alertDiv.style['background-color'] = '#2ffb2f'; // light greenish
+    this.alertDiv.innerText = 'Updated devices successfully!';
+  }
+
+  alertUserFailure(failedDevices) {
+    this.alertDiv.innerHTML = '';
+
+    this.alertDiv.style['background-color'] = '#ff4d4d'; // reddish
+
+    let errorMessage = document.createElement('p');
+    errorMessage.innerText = 'ERROR: Failed to update the following devices:';
+
+    let failedDevicesList = document.createElement('ul');
+    for (let device of failedDevices) {
+      let li = document.createElement('li');
+      li.innerText = device.serialNumber;
+      failedDevicesList.appendChild(li);
+    }
+
+    this.alertDiv.append(errorMessage, failedDevicesList);
   }
 }
 

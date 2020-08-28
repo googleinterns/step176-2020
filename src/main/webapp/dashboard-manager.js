@@ -32,21 +32,19 @@ class DashboardManager {
     document.addEventListener('bulkUpdate', (e) => {
       let row = e.detail;
       let deviceIds = this.data.getValue(row, this.COLS.DEVICE_ID);
+      let selectedFields = this.aggregationSelector.getState().selectedValues;
       let selectedValues =
-          [...Array(this.aggregationSelector.getState().selectedValues.length).keys()]
+          [...Array(selectedFields.length).keys()]
           .map(index => this.data.getValue(row, index));
       let devicesCount = this.data.getValue(row, this.COLS.DEVICE_COUNT);
 
-      document.dispatchEvent(new CustomEvent(
-        'displayBulkUpdateMenu',
-        {detail:
-            {deviceIds: deviceIds,
-            selectedValues: selectedValues,
-            selectedFields: this.aggregationSelector.getState().selectedValues,
-            devicesCount: devicesCount}}));
+      let updateModal = new BulkUpdateModal('update-modal');
+      updateModal.populateAndShowModal(deviceIds, selectedValues, selectedFields, devicesCount);
     }, false);
 
-    this.updateModal = new BulkUpdateModal('update-modal');
+    document.addEventListener('refreshData', (e) => {
+      this.updateAndDrawData();
+    });
 
     this.drawnControls = false;
   }
