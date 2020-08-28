@@ -171,8 +171,9 @@ class Util {
     datastore.put(tokenEntity);
   }
 
-  public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
+  public List<String> updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
+    final List<String> failedUpdateDeviceIds = Collections.synchronizedList(new ArrayList<String>());
     deviceIds
       .parallelStream()
       .forEach(
@@ -180,11 +181,11 @@ class Util {
           try {
             updateSingleDevice(accessToken, deviceId, updatesInJson);
           } catch (IOException e) {
-            System.out.println(deviceId);
-            System.out.println("had an error");//TODO: handle and return failed devices
+            failedUpdateDeviceIds.add(deviceId);
           }
         }
       );
+    return failedUpdateDeviceIds;
   }
 
   private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {

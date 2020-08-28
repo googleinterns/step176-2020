@@ -65,6 +65,10 @@ public final class UpdateServletTest {
     mockedUtil = mock(Util.class);
     userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
 
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
+
     servlet.setUserService(mockedUserService);
     servlet.setUtilObj(mockedUtil);
 
@@ -162,6 +166,34 @@ public final class UpdateServletTest {
     verify(request, times(1)).getParameter("annotatedUser");
     verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
     verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
+  }
+
+  @Test
+  public void testOneDeviceFailed() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn(null);
+    when(request.getParameter("annotatedAssetId")).thenReturn("ABC123");
+    when(request.getParameter("annotatedUser")).thenReturn(null);
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1, device2]");
+
+    when(mockedUtil.updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}")).thenReturn(Arrays.asList("device1"));
+
+    servlet.doPost(request, response);
+
+    verify(response).sendRedirect(servlet.INDEX_URL);
+    verify(mockedUserService, times(1)).isUserLoggedIn();
+    verify(request, times(1)).getParameter("annotatedLocation");
+    verify(request, times(1)).getParameter("annotatedAssetId");
+    verify(request, times(1)).getParameter("annotatedUser");
+    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
+    
+    verify(response).setContentType("application/json");
+    String result = stringWriter.getBuffer().toString().trim();
+    String expected = "{}";
+    Assert.assertEquals(expected, result);
   }
 
 }
