@@ -122,7 +122,6 @@ public final class DevicesServletTest {
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
-
   }
 
   @Test
@@ -133,14 +132,12 @@ public final class DevicesServletTest {
     when(request.getParameter(servlet.PAGE_TOKEN_PARAMETER_NAME)).thenReturn(TEST_PAGE_TOKEN);
     when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenThrow(IOException.class);
 
-
     servlet.doGet(request, response);
   
     verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
-
   }
 
 }

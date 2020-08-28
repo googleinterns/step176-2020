@@ -78,15 +78,14 @@ class Util {
     return responseJson;
   }
 
-
   public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey(); 
     final String accessToken = getAccessToken(userId);
-    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey, DEFAULT_MAX_DEVICES);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
       final String pageToken = (String) resp.getNextPageToken();
-      resp = getDevicesResponse(pageToken, accessToken, apiKey);
+      resp = getDevicesResponse(pageToken, accessToken, apiKey, DEFAULT_MAX_DEVICES);
       allDevices.addAll(resp.getDevices());
     }
     return allDevices;
@@ -94,8 +93,8 @@ class Util {
 
   public static String getAPIKey() throws IOException {
     File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
-    String str = FileUtils.readFileToString(file);
-    return str;
+    String APIKey = FileUtils.readFileToString(file);
+    return APIKey;
   }
 
   private static String getRefreshToken(String userId) throws IOException, TooManyResultsException {
