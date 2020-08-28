@@ -80,3 +80,15 @@ test('Progress function updates loading bar', async () => {
   }
 
 });
+
+test('Task result is returned', async () => {
+  let value = 'test string';
+  let loader = new Loading(() => {return Promise.resolve(value)}, true);
+  let resultPromise = loader.load();
+
+  jest.advanceTimersByTime(loader.minimumLoadTime);
+
+  let result = await resultPromise;
+
+  expect(result).toBe(value);
+});
