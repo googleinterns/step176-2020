@@ -92,8 +92,10 @@ class Util {
   private static String getRefreshToken(String userId) throws IOException, TooManyResultsException {
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
-    System.out.println(results.countEntities());
     Entity entity = results.asSingleEntity();
+    if (entity == null) {
+        throw new IOException("could not get refresh token");
+    }
     String refreshToken = (String) entity.getProperty("refreshToken");
     return refreshToken;
   }
