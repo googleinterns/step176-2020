@@ -119,6 +119,7 @@ class TableManager {
   hasNextPageCached() {
     return (this.currPage + 1) * this.pageSize < this.baseDataTable.getNumberOfRows();
   }
+  
   hasNextPageRemote() {
     return this.nextPageToken != BLANK_PAGE_TOKEN;
   }
