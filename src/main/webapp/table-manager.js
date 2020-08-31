@@ -2,6 +2,8 @@ import {Loading} from './loading.js';
 
 const PAGINATION_ENDPOINT = '/devices';
 const BLANK_PAGE_TOKEN = '';
+const MAX_DEVICE_COUNT_PARAMETER_NAME = 'maxDeviceCount';
+const PAGE_TOKEN_PARAMETER_NAME = 'pageToken';
 
 class TableManager {
   constructor(containerId) {
@@ -173,7 +175,7 @@ class TableManager {
       throw new Error('Method addDataToTable should not be called while table is in aggregation mode');
     }
 
-    let url = this.buildRequestURL();
+    let url = this.buildNextPageURL();
     await fetch(url)
         .then(response => response.json())
         .then(json => {
@@ -189,12 +191,12 @@ class TableManager {
         });
   }
 
-  buildRequestURL() {
+  buildNextPageURL() {
     let url = new URL(PAGINATION_ENDPOINT, window.location.href);
 
     let params = new URLSearchParams();
-    params.append('maxDeviceCount', this.pageSize);
-    params.append('pageToken', this.nextPageToken);
+    params.append(MAX_DEVICE_COUNT_PARAMETER_NAME, this.pageSize);
+    params.append(PAGE_TOKEN_PARAMETER_NAME, this.nextPageToken);
 
     url.search = params;
 

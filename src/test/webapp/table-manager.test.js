@@ -35,7 +35,7 @@ beforeEach(() => {
 
 test('Builds correct endpoint URL', () => {
   let manager = new TableManager(CONTAINER_ID);
-  let url = manager.buildRequestURL();
+  let url = manager.buildNextPageURL();
   let expected = window.location.href +
       `devices?maxDeviceCount=${manager.pageSize}&pageToken=${manager.nextPageToken}`;
 
