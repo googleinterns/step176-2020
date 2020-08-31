@@ -62,7 +62,7 @@ public class AuthorizeServlet extends HttpServlet {
       utilObj.associateRefreshToken(userId, refreshToken);
       response.sendRedirect(HOME_URL);
     } catch (IOException e) {
-      response.sendRedirect(AUTHORIZE_URL);
+      response.sendRedirect(LOGIN_URL);
     }
   }
 
