@@ -93,15 +93,17 @@ class TableManager {
 
   setTableView(numOfCols) {
     /*
-     * Aggregation table has Field 1 | ... | Field n | deviceCount | deviceIds | Button
+     * Aggregation table has Field 1 | ... | Field n | deviceCount | Button | deviceIds | serialNumbers | Row #
      * Normal view has Field 1 | ... | Field n
      * In the first case we want to hide only deviceIds; in the second case we show everything
      */
-    let viewableCols = [...Array(numOfCols - 2).keys()];
+    let viewableCols;
     if (!this.aggregating) {
-      viewableCols.push(numOfCols - 2);
+      viewableCols = [...Array(numOfCols).keys()];
+    } else {
+      // Skip over deviceIds, serialNumbers, and Row #
+      viewableCols = [...Array(numOfCols - 3).keys()];
     }
-    viewableCols.push(numOfCols - 1);
 
     this.table.setView({'columns': viewableCols});
   }

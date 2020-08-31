@@ -40,10 +40,11 @@ function createAndShowBulkUpdateModal() {
   let updateModal = new BulkUpdateModal('bulk-update');
 
   let deviceIds = '[\'id1\', \'id2\']';
+  let serialNumbers = '[\'SN1\', \'SN2\']';
   let selectedFields = ['User'];
   let selectedValues = ['Andrew'];
   let devicesCount = 2;
-  updateModal.populateAndShowModal(deviceIds, selectedValues, selectedFields, devicesCount);
+  updateModal.populateAndShowModal(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount);
 
   return updateModal
 }

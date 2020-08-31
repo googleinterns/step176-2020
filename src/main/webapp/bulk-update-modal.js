@@ -12,20 +12,20 @@ class BulkUpdateModal {
     this.alertDiv.setAttribute('aria-live', 'aggressive');
   }
 
-  populateAndShowModal(deviceIds, selectedValues, selectedFields, devicesCount) {
-    let bodyElements = this.createModalBody(deviceIds, selectedValues, selectedFields, devicesCount);
+  populateAndShowModal(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount) {
+    let bodyElements = this.createModalBody(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount);
     this.modal.setHeader('Perform Bulk Update');
     this.modal.setBody(bodyElements);
     this.modal.show();
   }
 
-  createModalBody(deviceIds, selectedValues, selectedFields, devicesCount) {
+  createModalBody(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount) {
     let warning = this.createModalWarning(devicesCount, selectedValues, selectedFields);
-    let form = this.createModalForm(deviceIds, selectedValues, selectedFields);
+    let form = this.createModalForm(deviceIds, serialNumbers, selectedValues, selectedFields);
     return [this.alertDiv, warning, form];
   }
 
-  createModalForm(deviceIds, selectedValues, selectedFields) {
+  createModalForm(deviceIds, serialNumbers, selectedValues, selectedFields) {
     let form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/update');
@@ -76,6 +76,12 @@ class BulkUpdateModal {
     devicesInput.setAttribute('value', deviceIds);
     devicesInput.setAttribute('name', 'deviceIds');
     form.appendChild(devicesInput);
+
+    let serialNumbersInput = document.createElement('input');
+    serialNumbersInput.setAttribute('type', 'hidden');
+    serialNumbersInput.setAttribute('value', serialNumbers);
+    serialNumbersInput.setAttribute('name', 'serialNumbers');
+    form.appendChild(serialNumbersInput);
 
     let submit = document.createElement('input');
     submit.setAttribute('type', 'submit');

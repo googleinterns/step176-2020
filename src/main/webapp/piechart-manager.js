@@ -56,20 +56,11 @@ class PieChartManager {
         'select',
         () => {
           let selectedRow = ChartUtil.filterDataFromParent(filtered, depth - 1, pieChart);
-
-          let selectedValues =
-              [...Array(selectorState.length).keys()].map(index => selectedRow.getValue(0, index));
-          let deviceIds = selectedRow.getValue(0, this.COLS.DEVICE_ID);
-          // deviceIds is a serialized string so we can't directly get number of devices from it
-          let devicesCount = selectedRow.getValue(0, this.COLS.DEVICE_COUNT);
-
+          
           document.dispatchEvent(new CustomEvent(
-            'displayBulkUpdateMenu',
-            {detail:
-                {deviceIds: deviceIds,
-                selectedValues: selectedValues,
-                selectedFields: selectorState,
-                devicesCount: devicesCount}}));
+            'bulkUpdate',
+            {detail: selectedRow.getValue(0, this.COLS.ROW_NUMBER)}
+          ));
         });
     }
   }
