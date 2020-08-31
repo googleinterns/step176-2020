@@ -34,7 +34,7 @@ public class CSVServlet extends HttpServlet {
     }
     final String userId = currentUser.getUserId();
     response.setContentType("text/csv");
-    response.setHeader("Content-Disposition", "attachment; filename=\"userDirectory.csv\"");
+    response.setHeader("Content-Disposition", "attachment; filename=\"my_devices.csv\"");
     try {
       OutputStream outputStream = response.getOutputStream();
       String outputResult = "xxxx, yyyy, zzzz, aaaa, bbbb, ccccc, dddd, eeee, ffff, gggg\n";
@@ -43,6 +43,7 @@ public class CSVServlet extends HttpServlet {
       outputStream.close();
     } catch(Exception e) {
       System.out.println(e.toString());
+      response.sendRedirect(LOGIN_URL);
     }
   }
 
