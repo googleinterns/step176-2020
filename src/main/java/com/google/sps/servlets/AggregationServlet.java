@@ -53,14 +53,14 @@ public class AggregationServlet extends HttpServlet {
 
     try {
       List<ChromeOSDevice> devices = amassDevices();
-      MultiKeyMap<String, List<String>> data = processData(devices, fields);
+      MultiKeyMap<String, List<ChromeOSDevice>> data = processData(devices, fields);
       response.setStatus(HttpServletResponse.SC_OK);
       response.getWriter().println(Json.toJson(new AggregationResponse(data, fields)));
     } catch (NotAuthorizedException e) {//TODO: Return more specific error message
         response.sendRedirect(AUTHORIZE_URL);
     } catch (TooManyResultsException e) {
         response.sendRedirect(LOGIN_URL);
-    } 
+    }
   }
 
   public List<ChromeOSDevice> amassDevices() throws NotAuthorizedException, IOException {
@@ -75,10 +75,10 @@ public class AggregationServlet extends HttpServlet {
     return allDevices;
   }
 
-  public static MultiKeyMap<String, List<String>> processData(
+  public static MultiKeyMap<String, List<ChromeOSDevice>> processData(
       List<ChromeOSDevice> devices,
       LinkedHashSet<AnnotatedField> fields) {
-    MultiKeyMap<String, List<String>> counts = new MultiKeyMap<>();
+    MultiKeyMap<String, List<ChromeOSDevice>> aggregationEntries = new MultiKeyMap<>();
 
     for (ChromeOSDevice device : devices) {
       String keyParts[] = new String[fields.size()];
@@ -90,13 +90,13 @@ public class AggregationServlet extends HttpServlet {
       }
 
       MultiKey key = new MultiKey(keyParts);
-      List<String> newVal = counts.getOrDefault(key, new ArrayList<String>());
-      newVal.add(device.getDeviceId());
+      List<ChromeOSDevice> newVal = aggregationEntries.getOrDefault(key, new ArrayList<ChromeOSDevice>());
+      newVal.add(device);
 
-      counts.put(key, newVal);
+      aggregationEntries.put(key, newVal);
     }
 
-    return counts;
+    return aggregationEntries;
   }
 
   public static LinkedHashSet<AnnotatedField> getAggregationFields(HttpServletRequest request) {
@@ -117,7 +117,7 @@ public class AggregationServlet extends HttpServlet {
   public void setUserService(UserService newUserService) {
     this.userService = newUserService;
   }
-  
+
   public void setUtilObj(Util util) {
     this.utilObj = util;
   }
