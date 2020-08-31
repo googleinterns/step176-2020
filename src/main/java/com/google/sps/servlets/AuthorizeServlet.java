@@ -53,7 +53,8 @@ public class AuthorizeServlet extends HttpServlet {
     final User currentUser = userService.getCurrentUser();
     final String authCode = (String) request.getParameter("code");
     if ((!userService.isUserLoggedIn()) || (currentUser == null) || (authCode == null)) {
-      response.sendRedirect(LOGIN_URL);
+      response.sendRedirect(LOGIN_URL); 
+      System.out.println("rejected bc not logged in");
       return;
     }
     final String userId = currentUser.getUserId();
