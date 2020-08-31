@@ -1,4 +1,8 @@
+import {handleLogin} from './auth-flow.js';
+
 async function getCsv() {
+  await handleLogin();
+  
   await (fetch('/csv')
     .then(response => {
       var encodedUri = encodeURI(response);
@@ -11,3 +15,5 @@ async function getCsv() {
     })
   );
 }
+
+export {getCsv};

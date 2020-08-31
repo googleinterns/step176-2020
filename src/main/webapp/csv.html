@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/Article">
+  <head>
+    <meta charset="UTF-8">
+    <title>Download Devices CSV</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <button type="button" id="csv">Download CSV</button>
+    <script type="module">
+      import {getCsv} from './csv-exporter.js';
+      document.querySelector('#csv').addEventListener('click', hello);
+    </script>
+  </body>
+</html>
