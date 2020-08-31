@@ -25,4 +25,4 @@ function authorizeCallback(authResult) {
   }
 }
 
-export {handleLogin};
+export {handleLogin, authorizeCallback};

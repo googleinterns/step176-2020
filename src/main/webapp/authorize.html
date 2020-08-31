@@ -9,12 +9,11 @@
     <meta charset="UTF-8">
     <title>Please Authorize!</title>
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="auth-flow.js"></script>
   </head>
   <body>
     <button id="signinButton">You must first authorize or reauthorize!!</button>
-    <script>
-      handleLogin();
+    <script type="module">
+      import {handleLogin, authorizeCallback} from './auth-flow.js';
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
           client_id: '934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com',
