@@ -70,14 +70,22 @@ class Util {
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
 
+  public String getNextResponse(String userId, String maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
+    final String apiKey = getAPIKey(); 
+    final String accessToken = getAccessToken(userId);
+    final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey, maxDeviceCount);
+    final String responseJson = Json.toJson(resp);
+    return responseJson;
+  }
+
   public List<ChromeOSDevice> getAllDevices(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final String apiKey = getAPIKey();
     final String accessToken = getAccessToken(userId);
-    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey);
+    ListDeviceResponse resp = getDevicesResponse(EMPTY_PAGE_TOKEN, accessToken, apiKey, DEFAULT_MAX_DEVICES);
     final List<ChromeOSDevice> allDevices = new ArrayList<>(resp.getDevices());
     while (resp.hasNextPageToken()) {
       final String pageToken = (String) resp.getNextPageToken();
-      resp = getDevicesResponse(pageToken, accessToken, apiKey);
+      resp = getDevicesResponse(pageToken, accessToken, apiKey, DEFAULT_MAX_DEVICES);
       allDevices.addAll(resp.getDevices());
     }
     return allDevices;
@@ -85,8 +93,8 @@ class Util {
 
   public static String getAPIKey() throws IOException {
     File file = new File(Util.class.getResource(API_KEY_FILE).getFile());
-    String str = FileUtils.readFileToString(file);
-    return str;
+    String APIKey = FileUtils.readFileToString(file);
+    return APIKey;
   }
 
   private static String getRefreshToken(String userId) throws IOException, TooManyResultsException {
@@ -113,9 +121,10 @@ class Util {
     return response.getAccessToken();
   }
 
-  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey) throws IOException {
+  private static ListDeviceResponse getDevicesResponse(String pageToken, String accessToken, String apiKey, String maxDeviceCount) throws IOException {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(ALL_DEVICES_ENDPOINT).newBuilder();
-    urlBuilder.addQueryParameter("maxResults", DEFAULT_MAX_DEVICES);
+    urlBuilder.addQueryParameter("maxResults", maxDeviceCount);
+
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
     urlBuilder.addQueryParameter("key", apiKey);
