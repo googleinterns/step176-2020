@@ -24,7 +24,7 @@ public class DevicesServlet extends HttpServlet {
   private Util utilObj = new Util();
   public final String LOGIN_URL = "/login";
   public final String AUTHORIZE_URL = "/authorize.html";
-  public final String MAX_DEVICES_COUNT_PARAMETER_NAME = "maxDeviceCount"; 
+  public final String MAX_DEVICES_COUNT_PARAMETER_NAME = "maxDeviceCount";
   public final String PAGE_TOKEN_PARAMETER_NAME = "pageToken";
 
   @Override
@@ -51,7 +51,7 @@ public class DevicesServlet extends HttpServlet {
   public void setUserService(UserService newUserService) {
     this.userService = newUserService;
   }
-  
+
   public void setUtilObj(Util util) {
     this.utilObj = util;
   }

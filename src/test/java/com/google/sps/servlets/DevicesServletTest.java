@@ -116,7 +116,7 @@ public final class DevicesServletTest {
     String expected = FAKE_DEVICE_RESPONSE;
 
     Assert.assertEquals(result, expected);
-    
+
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);
@@ -131,8 +131,8 @@ public final class DevicesServletTest {
     when(mockedUtil.getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN)).thenThrow(IOException.class);
 
     servlet.doGet(request, response);
-  
-    verify(response).sendRedirect(servlet.AUTHORIZE_URL);  
+
+    verify(response).sendRedirect(servlet.AUTHORIZE_URL);
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(mockedUserService, times(1)).getCurrentUser();
     verify(mockedUtil, times(1)).getNextResponse(TEST_USER_ID, TEST_MAX_COUNT, TEST_PAGE_TOKEN);

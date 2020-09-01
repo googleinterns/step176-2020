@@ -71,7 +71,7 @@ class Util {
   public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
 
   public String getNextResponse(String userId, String maxDeviceCount, String pageToken) throws IOException, TokenResponseException, TooManyResultsException {
-    final String apiKey = getAPIKey(); 
+    final String apiKey = getAPIKey();
     final String accessToken = getAccessToken(userId);
     final ListDeviceResponse resp = getDevicesResponse(pageToken, accessToken, apiKey, maxDeviceCount);
     final String responseJson = Json.toJson(resp);

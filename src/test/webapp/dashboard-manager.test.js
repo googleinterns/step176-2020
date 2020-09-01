@@ -99,10 +99,6 @@ test('Fetching and Populating Aggregation Data', async () => {
 });
 
 
-// TODO: add tests for initData, updateNormal, etc. after oauth gets merged in
-// because they will likely undergo significant changes
-
-
 // Corresponds to the data given for aggregation in global.fetch mock.
 function testAggregationAddRow(addRow, row, user, count, ids) {
   expect(addRow.mock.calls.length).toBe(2);
