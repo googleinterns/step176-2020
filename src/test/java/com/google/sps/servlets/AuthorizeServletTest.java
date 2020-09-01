@@ -63,7 +63,6 @@ public final class AuthorizeServletTest {
     mockedUtil = mock(Util.class);
     userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
     mockedDataObj = mock(DatastoreService.class);
-    mockedUserService = mock(UserService.class);
   }
 
   @Test
