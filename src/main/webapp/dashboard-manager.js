@@ -108,6 +108,7 @@ class DashboardManager {
     let aggregationLoader = new Loading(this.fetchAndPopulateAggregation.bind(this), false);
     await aggregationLoader.load();
 
+    // Based on how we decided to organize the table-- see top of table-manager.js for details
     this.COLS.ROW_NUMBER = this.data.getNumberOfColumns() - 1;
     this.COLS.SERIAL_NUMBERS = this.data.getNumberOfColumns() - 2;
     this.COLS.DEVICE_IDS = this.data.getNumberOfColumns() - 3;
