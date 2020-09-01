@@ -27,7 +27,7 @@ public class LoginServlet extends HttpServlet {
 
   private UserService userService = UserServiceFactory.getUserService();
   public final String urlToRedirectToAfterUserLogsOut = "/index.html";
-  public final String urlToRedirectToAfterUserLogsIn = "/index.html";
+  public final String urlToRedirectToAfterUserLogsIn = "/authorize.html";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
