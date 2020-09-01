@@ -1,9 +1,9 @@
 package com.google.sps.data;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 
 /*
@@ -43,11 +43,12 @@ public final class AggregationResponseEntry {
     }
 
     this.count = devices.size();
-    this.deviceIds = devices.stream()
-        .map(device -> device.getDeviceId())
-        .collect(Collectors.toList());
-    this.serialNumbers = devices.stream()
-        .map(device -> device.getSerialNumber())
-        .collect(Collectors.toList());
+
+    this.deviceIds = new ArrayList<String>();
+    this.serialNumbers = new ArrayList<String>();
+    for (ChromeOSDevice device : devices) {
+      this.deviceIds.add(device.getDeviceId());
+      this.serialNumbers.add(device.getSerialNumber());
+    }
   }
 }
