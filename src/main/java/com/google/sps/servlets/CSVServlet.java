@@ -45,7 +45,9 @@ public class CSVServlet extends HttpServlet {
       outputStream.write(outputResult.getBytes());
       outputStream.flush();
       outputStream.close();
+      response.setStatus(HttpServletResponse.SC_OK);
     } catch(Exception e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
   }
  
