@@ -45,10 +45,7 @@ public class CSVServlet extends HttpServlet {
       outputStream.write(outputResult.getBytes());
       outputStream.flush();
       outputStream.close();
-      response.sendRedirect(HOME_URL);
     } catch(Exception e) {
-    //   System.out.println(e.toString());
-      response.sendRedirect(LOGIN_URL);
     }
   }
  
