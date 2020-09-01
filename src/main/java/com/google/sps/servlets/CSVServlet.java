@@ -41,12 +41,13 @@ public class CSVServlet extends HttpServlet {
       OutputStream outputStream = response.getOutputStream();
       final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
       final String outputResult = stringifyDevicesList(allDevices);
+      System.out.println(outputResult);
       outputStream.write(outputResult.getBytes());
       outputStream.flush();
       outputStream.close();
       response.sendRedirect(HOME_URL);
     } catch(Exception e) {
-      System.out.println(e.toString());
+    //   System.out.println(e.toString());
       response.sendRedirect(LOGIN_URL);
     }
   }
