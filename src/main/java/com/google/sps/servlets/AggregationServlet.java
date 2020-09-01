@@ -76,8 +76,8 @@ public class AggregationServlet extends HttpServlet {
   }
 
   public static MultiKeyMap<String, List<ChromeOSDevice>> processData(
-      List<ChromeOSDevice> devices,
-      LinkedHashSet<AnnotatedField> fields) {
+      final List<ChromeOSDevice> devices,
+      final LinkedHashSet<AnnotatedField> fields) {
     MultiKeyMap<String, List<ChromeOSDevice>> aggregationEntries = new MultiKeyMap<>();
 
     for (ChromeOSDevice device : devices) {
