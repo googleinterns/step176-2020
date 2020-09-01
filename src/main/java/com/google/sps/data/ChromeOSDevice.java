@@ -102,4 +102,8 @@ public class ChromeOSDevice {
     return "[Device with ID: " + deviceId + "]";  
   }
 
+  public String getCSVLine() {
+    return deviceId + "," + serialNumber + "," + annotatedAssetId + ","  + annotatedLocation + ","  + annotatedUser + "\n";  
+  }
+
 }
