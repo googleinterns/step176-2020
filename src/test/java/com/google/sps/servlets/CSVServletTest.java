@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletOutputStream;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.Assert;
@@ -107,8 +108,8 @@ public final class CSVServletTest {
   }
 
   private void setNewOutputStream(HttpServletResponse response) throws IOException{
-    OutputStream outputStream = new OutputStream();
-    when(response.getOutputStream()).thenReturn(outputStream);
+    ServletOutputStream outputStream = new ServletOutputStream();
+    when(response.getOutputStream()).thenReturn(ServletOutputStream);
   }
 
 }
