@@ -172,6 +172,7 @@ class Util {
     datastore.put(tokenEntity);
   }
 
+  //Returns a list of failed device Ids that failed to update, empty if all devices were successfully updated
   public List<String> updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
     final List<String> failedUpdateDeviceIds = Collections.synchronizedList(new ArrayList<String>());
