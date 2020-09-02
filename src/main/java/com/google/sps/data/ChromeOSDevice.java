@@ -107,5 +107,4 @@ public class ChromeOSDevice {
   public String getCSVLine() {
     return deviceId + "," + serialNumber + "," + annotatedAssetId + ","  + annotatedLocation + ","  + annotatedUser + "\n";  
   }
-
 }
