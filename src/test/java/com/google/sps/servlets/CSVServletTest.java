@@ -110,7 +110,7 @@ public final class CSVServletTest {
   }
 
   @Test
-  public void runsToSuccess() {
+  public void runsToSuccess() throws IOException {
     when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
     when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
