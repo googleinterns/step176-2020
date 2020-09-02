@@ -107,7 +107,7 @@ public final class CSVServletTest {
   }
 
   private void setNewOutputStream(HttpServletResponse response) throws IOException{
-    OutputStream outputStream = new ByteArrayOutputStream();
+    OutputStream outputStream = new OutputStream();
     when(response.getOutputStream()).thenReturn(outputStream);
   }
 
