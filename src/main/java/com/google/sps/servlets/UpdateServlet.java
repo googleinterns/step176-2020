@@ -56,7 +56,10 @@ public class UpdateServlet extends HttpServlet {
         response.setContentType("application/json");
         final String json = GSON_OBJECT.toJson(failedUpdateDeviceIds);
         response.getWriter().println(json);
-      }
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      } else {
+        response.setStatus(HttpServletResponse.SC_OK);
+      } 
     }
     response.sendRedirect(INDEX_URL);
     return;
