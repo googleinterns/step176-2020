@@ -116,10 +116,15 @@ public final class CSVServletTest {
     when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
     ServletOutputStream outputStream = mock(ServletOutputStream.class);
+    String expected = "DEVICE ID,SERIAL NUMBER,ANNOTATED ASSET ID,ANNOTATED LOCATION,ANNOTATED USER\ndeviceId,serialNumber,12345,New Jersey,James\n"
+                      + "deviceId,serialNumber,12345,New Jersey,Josiah\n"
+                      + "deviceId,serialNumber,12345,California,Jeremy\n"
+                      + "deviceId,serialNumber,12345,California,James\n"
+                      + "deviceId,serialNumber,12345,New Jersey,Jeremy\n";
 
     when(response.getOutputStream()).thenReturn(outputStream);
     servlet.doGet(request, response);
-    verify(outputStream, times(1)).println("foo");
+    verify(outputStream, times(1)).write(expected.getBytes());
     verify(response).setStatus(HttpServletResponse.SC_OK);
 
   }
