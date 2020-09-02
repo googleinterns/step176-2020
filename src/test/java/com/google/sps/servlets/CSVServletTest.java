@@ -34,11 +34,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
-/*
- * Test the aggregation functionality to ensure it reports accurate counts and
- * throws errors when appropriate.  Eventually will need to add tests for
- * aggregating by multiple fields at once.
- */
 @RunWith(JUnit4.class)
 public final class CSVServletTest {
 
