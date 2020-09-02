@@ -98,13 +98,13 @@ public final class CSVServletTest {
     verify(mockedUserService, times(1)).isUserLoggedIn();
   }
 
-  @Test
-  public void exceptionWhileGettingDevices() {
-    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+  // @Test
+  // public void exceptionWhileGettingDevices() {
+  //   when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+  //   when(mockedUserService.getCurrentUser()).thenReturn(userFake);
 
-    servlet.doGet(request, response);
-  }
+  //   servlet.doGet(request, response);
+  // }
 
   @Test
   public void runsToSuccess() {
