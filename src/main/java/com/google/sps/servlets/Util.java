@@ -103,10 +103,10 @@ class Util {
 
   public static String getAccessToken(String userId) throws IOException, TokenResponseException, TooManyResultsException {
     final Optional<String> possibleRefreshToken = getRefreshToken(userId);
-    final String refreshToken = possibleRefreshToken.get();
-    if (!refreshToken.isPresent()) {
+    if (!possibleRefreshToken.isPresent()) {
         throw new IOException("no refresh token found");
     }
+    final String refreshToken = possibleRefreshToken.get();
     File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
     GoogleClientSecrets.load(
