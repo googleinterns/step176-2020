@@ -41,7 +41,6 @@ public class CSVServlet extends HttpServlet {
       OutputStream outputStream = response.getOutputStream();
       final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
       final String outputResult = stringifyDevicesList(allDevices);
-      System.out.println(outputResult);
       outputStream.write(outputResult.getBytes());
       outputStream.flush();
       outputStream.close();
@@ -50,7 +49,7 @@ public class CSVServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
   }
- 
+
   private String stringifyDevicesList(final List<ChromeOSDevice> allDevices) {
     final String heading = "DEVICE ID,SERIAL NUMBER,ANNOTATED ASSET ID,ANNOTATED LOCATION,ANNOTATED USER\n";
     final StringBuilder devicesStringBuilder = new StringBuilder(heading);
