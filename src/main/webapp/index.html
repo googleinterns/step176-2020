@@ -14,16 +14,17 @@
     <script type="module" src="piechart-manager.js"></script>
     <script type="module" src="dashboard-manager.js"></script>
     <script type="module" src="table.js"></script>
+    <script type="module" src="auth-flow.js"></script>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body onload="handleLogin();">
+  <body>
     <div id="container">
       <div class="header">
         <div id="branding">
           <p>ChromeOS Annotated Field Manager</p>
         </div>
         <div id="logout">
-          <a href="document.location.href='/login';">Logout</a>
+          <a href="/login">Logout</a>
         </div>
       </div>
       <div id="dashboard">

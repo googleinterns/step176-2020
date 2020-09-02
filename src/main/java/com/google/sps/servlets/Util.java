@@ -51,6 +51,7 @@ import com.squareup.okhttp.Response;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 class Util {
 
@@ -98,17 +99,23 @@ class Util {
     return APIKey;
   }
 
-  private static String getRefreshToken(String userId) throws IOException, TooManyResultsException {
+  private static Optional<String> getRefreshToken(String userId) throws IOException, TooManyResultsException {
     Query query = new Query("RefreshToken").setFilter(FilterOperator.EQUAL.of("userId", userId));
     PreparedQuery results = datastore.prepare(query);
-    System.out.println(results.countEntities());
     Entity entity = results.asSingleEntity();
+    if (entity == null) {
+        return Optional.empty();
+    }
     String refreshToken = (String) entity.getProperty("refreshToken");
-    return refreshToken;
+    return Optional.of(refreshToken);
   }
 
   public static String getAccessToken(String userId) throws IOException, TokenResponseException, TooManyResultsException {
-    final String refreshToken = getRefreshToken(userId);
+    final Optional<String> possibleRefreshToken = getRefreshToken(userId);
+    if (!possibleRefreshToken.isPresent()) {
+        throw new IOException("no refresh token found");
+    }
+    final String refreshToken = possibleRefreshToken.get();
     File file = new File(Util.class.getResource(CLIENT_SECRET_FILE).getFile());
     final GoogleClientSecrets clientSecrets =
     GoogleClientSecrets.load(
