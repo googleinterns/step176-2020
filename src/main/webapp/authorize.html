@@ -14,7 +14,7 @@
     <button id="signinButton">You must first authorize or reauthorize!!</button>
     <script type="module">
       import {handleLogin, authorizeCallback} from './auth-flow.js';      
-      var auth2;
+      let auth2;
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
           client_id: '934172118901-btsopome05u5a6ma1rfkde5p12015th1.apps.googleusercontent.com',
