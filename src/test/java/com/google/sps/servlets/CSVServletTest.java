@@ -6,6 +6,7 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.sps.data.AnnotatedField;
 import com.google.sps.data.ChromeOSDevice;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.when;
  * aggregating by multiple fields at once.
  */
 @RunWith(JUnit4.class)
-public final class AggregationServletTest {
+public final class CSVServletTest {
 
   private final String TEST_USER_ID = "testUserId";
   private final String TEST_USER_EMAIL = "testEmail";
@@ -69,9 +70,29 @@ public final class AggregationServletTest {
   private HttpServletRequest request = mock(HttpServletRequest.class);
   private HttpServletResponse response = mock(HttpServletResponse.class);
 
-  @Test
-  public void notLoggedIn() {
+  private UserService mockedUserService;
+  private Util mockedUtil;
+  private User userFake;
 
+  @Before
+  public void setUp() {
+    mockedUserService = mock(UserService.class);
+    mockedUtil = mock(Util.class);
+    userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+
+    servlet.setUserService(mockedUserService);
+    servlet.setUtilObj(mockedUtil);
+  }
+
+  @Test
+  public void userNotLoggedIn() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(false);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    servlet.doGet(request, response);
+
+    verify(response).sendRedirect(servlet.LOGIN_URL);
+    verify(mockedUserService, times(1)).isUserLoggedIn();
   }
 
   @Test
@@ -79,15 +100,14 @@ public final class AggregationServletTest {
 
   }
 
-    @Test
+  @Test
   public void runsToSuccess() {
 
   }
 
-  private void setNewResponseWriter(HttpServletResponse response) throws IOException{
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringWriter);
-    when(response.getWriter()).thenReturn(writer);
+  private void setNewOutputStream(HttpServletResponse response) throws IOException{
+    OutputStream outputStream = new ByteArrayOutputStream();
+    when(response.getOutputStream()).thenReturn(outputStream);
   }
 
 }
