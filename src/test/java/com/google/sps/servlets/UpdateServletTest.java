@@ -224,7 +224,7 @@ public final class UpdateServletTest {
     Assert.assertEquals(expected, result);
   }
 
-  private void verifyUniversalUpdateExecution() {
+  private void verifyUniversalUpdateExecution() throws IOException {
     verify(response).sendRedirect(servlet.INDEX_URL);
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(request, times(1)).getParameter("annotatedLocation");
