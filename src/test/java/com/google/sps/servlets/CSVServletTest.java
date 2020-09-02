@@ -111,6 +111,15 @@ public final class CSVServletTest {
 
   @Test
   public void runsToSuccess() {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
+
+    ServletOutputStream outputStream = mock(ServletOutputStream.class)
+
+    when(response.getOutputStream()).thenReturn(outputStream);
+    verify(outputStream, atLeastOnce()).println("foo");
+    servlet.doGet(request, response);
 
   }
 
