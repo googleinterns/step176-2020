@@ -102,7 +102,8 @@ class Util {
   }
 
   public static String getAccessToken(String userId) throws IOException, TokenResponseException, TooManyResultsException {
-    final Optional<String> refreshToken = getRefreshToken(userId);
+    final Optional<String> possibleRefreshToken = getRefreshToken(userId);
+    final String refreshToken = possibleRefreshToken.get();
     if (!refreshToken.isPresent()) {
         throw new IOException("no refresh token found");
     }
