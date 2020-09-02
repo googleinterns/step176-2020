@@ -49,6 +49,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class Util {
@@ -180,15 +181,31 @@ class Util {
     datastore.put(tokenEntity);
   }
 
-  public void updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
+  //Returns a list of failed device Ids that failed to update, empty if all devices were successfully updated
+  public List<String> updateDevices(String userId, List<String> deviceIds, String updatesInJson) throws IOException {
     final String accessToken = getAccessToken(userId);
-    for (final String deviceId : deviceIds) {
-      final String updateURL = getUpdateUrl(deviceId);
-      RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
-      Request req = new Request.Builder().url(updateURL).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
-      Response updateResponse = client.newCall(req).execute();
-      updateResponse.body().close();
-    }
+    final List<String> failedUpdateDeviceIds = Collections.synchronizedList(new ArrayList<String>());
+    deviceIds
+      .parallelStream()
+      .forEach(
+        deviceId -> {
+          try {
+            updateSingleDevice(accessToken, deviceId, updatesInJson);
+          } catch (IOException e) {
+            failedUpdateDeviceIds.add(deviceId);
+            System.out.println("Device failed to update: " + deviceId);
+          }
+        }
+      );
+    return failedUpdateDeviceIds;
+  }
+
+  private void updateSingleDevice(String accessToken, String deviceId, String updatesInJson) throws IOException {
+    final String updateUrl = getUpdateUrl(deviceId);
+    RequestBody body = RequestBody.create(JSON_TYPE, updatesInJson);
+    Request req = new Request.Builder().url(updateUrl).put(body).addHeader("Authorization", "Bearer " + accessToken).build();
+    Response updateResponse = client.newCall(req).execute();
+    updateResponse.body().close();
   }
 
   private String getUpdateUrl(String deviceId) {

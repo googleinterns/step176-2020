@@ -16,11 +16,14 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import org.json.simple.JSONArray;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,12 +61,18 @@ public final class UpdateServletTest {
   private UserService mockedUserService;
   private Util mockedUtil;
   private User userFake;
+  private StringWriter stringWriter;
+  private PrintWriter writer;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     mockedUserService = mock(UserService.class);
     mockedUtil = mock(Util.class);
     userFake = new User(TEST_USER_EMAIL, TEST_USER_AUTH_DOMAIN, TEST_USER_ID);
+
+    stringWriter = new StringWriter();
+    writer = new PrintWriter(stringWriter);
+    when(response.getWriter()).thenReturn(writer);
 
     servlet.setUserService(mockedUserService);
     servlet.setUtilObj(mockedUtil);
@@ -94,12 +103,7 @@ public final class UpdateServletTest {
 
     servlet.doPost(request, response);
 
-    verify(response).sendRedirect(servlet.INDEX_URL);
-    verify(mockedUserService, times(1)).isUserLoggedIn();
-    verify(request, times(1)).getParameter("annotatedLocation");
-    verify(request, times(1)).getParameter("annotatedAssetId");
-    verify(request, times(1)).getParameter("annotatedUser");
-    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verifyUniversalUpdateExecution();
   }
 
   @Test
@@ -114,12 +118,7 @@ public final class UpdateServletTest {
 
     servlet.doPost(request, response);
 
-    verify(response).sendRedirect(servlet.INDEX_URL);
-    verify(mockedUserService, times(1)).isUserLoggedIn();
-    verify(request, times(1)).getParameter("annotatedLocation");
-    verify(request, times(1)).getParameter("annotatedAssetId");
-    verify(request, times(1)).getParameter("annotatedUser");
-    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verifyUniversalUpdateExecution();
   }
 
   @Test
@@ -134,12 +133,7 @@ public final class UpdateServletTest {
 
     servlet.doPost(request, response);
 
-    verify(response).sendRedirect(servlet.INDEX_URL);
-    verify(mockedUserService, times(1)).isUserLoggedIn();
-    verify(request, times(1)).getParameter("annotatedLocation");
-    verify(request, times(1)).getParameter("annotatedAssetId");
-    verify(request, times(1)).getParameter("annotatedUser");
-    verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
+    verifyUniversalUpdateExecution();
     verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1"), "{\"annotatedUser\":\"bob\"}");
   }
 
@@ -155,13 +149,63 @@ public final class UpdateServletTest {
 
     servlet.doPost(request, response);
 
+    verifyUniversalUpdateExecution();
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
+  }
+
+  @Test
+  public void testOneDeviceFailed() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn(null);
+    when(request.getParameter("annotatedAssetId")).thenReturn("ABC123");
+    when(request.getParameter("annotatedUser")).thenReturn(null);
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1, device2]");
+
+    when(mockedUtil.updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}")).thenReturn(Arrays.asList("device1"));
+
+    servlet.doPost(request, response);
+
+    verifyUniversalUpdateExecution();
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
+    
+    verify(response).setContentType("application/json");
+    String result = stringWriter.getBuffer().toString().trim();
+    String expected = "[\"device1\"]";
+    Assert.assertEquals(expected, result);
+  }
+
+  @Test
+  public void testOnAllDeviceFailed() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+
+    when(request.getParameter("annotatedLocation")).thenReturn(null);
+    when(request.getParameter("annotatedAssetId")).thenReturn("ABC123");
+    when(request.getParameter("annotatedUser")).thenReturn(null);
+    when(request.getParameter(servlet.DEVICE_IDS_PARAMETER_NAME)).thenReturn("[device1, device2]");
+
+    when(mockedUtil.updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}")).thenReturn(Arrays.asList("device1","device2"));
+
+    servlet.doPost(request, response);
+
+    verifyUniversalUpdateExecution();
+    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
+    
+    verify(response).setContentType("application/json");
+    String result = stringWriter.getBuffer().toString().trim();
+    String expected = "[\"device1\",\"device2\"]";
+    Assert.assertEquals(expected, result);
+  }
+
+  private void verifyUniversalUpdateExecution() throws IOException {
     verify(response).sendRedirect(servlet.INDEX_URL);
     verify(mockedUserService, times(1)).isUserLoggedIn();
     verify(request, times(1)).getParameter("annotatedLocation");
     verify(request, times(1)).getParameter("annotatedAssetId");
     verify(request, times(1)).getParameter("annotatedUser");
     verify(request, times(1)).getParameter(servlet.DEVICE_IDS_PARAMETER_NAME);
-    verify(mockedUtil, times(1)).updateDevices(TEST_USER_ID, Arrays.asList("device1", "device2"), "{\"annotatedAssetId\":\"ABC123\"}");
   }
 
 }

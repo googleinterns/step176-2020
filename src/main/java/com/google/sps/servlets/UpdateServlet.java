@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +48,18 @@ public class UpdateServlet extends HttpServlet {
       }
     }
     final String updatesInJson = getJsonFromMap(updatesToMake);
-    final String relevantDeviceIds = (String) request.getParameter(DEVICE_IDS_PARAMETER_NAME);
+    final String relevantDeviceIds = request.getParameter(DEVICE_IDS_PARAMETER_NAME);
     final List<String> deviceIds = getDeviceIds(relevantDeviceIds);
     if (!deviceIds.isEmpty() && !updatesToMake.isEmpty()) {
-      utilObj.updateDevices(userId, deviceIds, updatesInJson);
+      List<String> failedUpdateDeviceIds = utilObj.updateDevices(userId, deviceIds, updatesInJson);
+      if (!failedUpdateDeviceIds.isEmpty()) {
+        response.setContentType("application/json");
+        final String json = GSON_OBJECT.toJson(failedUpdateDeviceIds);
+        response.getWriter().println(json);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      } else {
+        response.setStatus(HttpServletResponse.SC_OK);
+      } 
     }
     response.sendRedirect(INDEX_URL);
     return;
