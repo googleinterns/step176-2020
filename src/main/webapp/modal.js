@@ -71,6 +71,7 @@ class Modal {
       this.center();
     };
 
+    this.onRemove = null;
     this.previouslyFocused = null;
     this.isVisible = false;
     this.hide();
@@ -103,7 +104,7 @@ class Modal {
       closeBtn.innerText = '✕';
       closeBtn.setAttribute('aria-label', 'Close modal');
       closeBtn.classList.add('modal-close-btn');
-      closeBtn.onclick = () => {this.hide()};
+      closeBtn.onclick = () => {this.remove()};
       this.header.appendChild(closeBtn);
     }
 
@@ -188,6 +189,17 @@ class Modal {
     } else {
       this.container.remove();
     }
+
+    if (this.onRemove != null) {
+      this.onRemove();
+    }
+  }
+
+  setRemoveCallback(func) {
+    if (typeof(func) != 'function') {
+      return;
+    }
+    this.onRemove = func;
   }
 
 }

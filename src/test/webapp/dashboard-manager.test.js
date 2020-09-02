@@ -15,7 +15,12 @@ global.fetch = jest.fn((URL) => {
   if (URL == '/aggregate?aggregationField=annotatedUser') {
     return Promise.resolve({
       json: () => {return Promise.resolve(
-        {"response":[{"annotatedUser":"user","count":1,"deviceIds":["0"]}, {"annotatedUser":"Jane","count":2,"deviceIds":["1","2"]}]}
+        {"response":
+          [
+            {"annotatedUser":"user","count":1,"deviceIds":["0"], "serialNumbers":["SN0"]},
+            {"annotatedUser":"Jane","count":2,"deviceIds":["1","2"], "serialNumbers":["SN1", "SN2"]}
+          ]
+        }
       )}
     });
   }
@@ -58,9 +63,9 @@ test('Only draws aggregation selector once', () => {
 
 test('Updating aggregation view', async () => {
   let dashboard = new DashboardManager();
-  // 1 selected value + device count, ids, button columns
-  let numOfCols = 4;
   let selectedValues = ['User'];
+  // device count, button, ids, serial numbers, and row number columns are always present
+  let numOfCols = selectedValues.length + 5;
 
   jest.spyOn(dashboard.aggregationSelector, 'getState')
       .mockImplementation(() => {return {selectedValues: selectedValues}});
@@ -77,8 +82,10 @@ test('Updating aggregation view', async () => {
   // JSON.stringify workaround to solve this issue: https://github.com/facebook/jest/issues/8475
   expect(JSON.stringify(Loading.mock.calls[0][0])).toEqual(JSON.stringify(dashboard.fetchAndPopulateAggregation.bind(dashboard)));
 
-  expect(dashboard.COLS.DEVICE_ID).toBe(numOfCols - 2);
-  expect(dashboard.COLS.DEVICE_COUNT).toBe(numOfCols - 3);
+  expect(dashboard.COLS.ROW_NUMBER).toBe(numOfCols - 1);
+  expect(dashboard.COLS.SERIAL_NUMBERS).toBe(numOfCols - 2);
+  expect(dashboard.COLS.DEVICE_IDS).toBe(numOfCols - 3);
+  expect(dashboard.COLS.DEVICE_COUNT).toBe(numOfCols - 5);
 
   expect(PieChartManager.mock.instances[0].update.mock.calls[0]).toEqual([dashboard.data, selectedValues]);
   expect(TableManager.mock.instances[0].updateAggregation.mock.calls[0]).toEqual([dashboard.data]);
@@ -94,16 +101,16 @@ test('Fetching and Populating Aggregation Data', async () => {
   await dashboard.fetchAndPopulateAggregation();
 
   expect(addData.mock.calls.length).toBe(2);
-  testAggregationAddRow(addData, 0, 'user', 1, "[\"0\"]");
-  testAggregationAddRow(addData, 1, 'Jane', 2, "[\"1\",\"2\"]");
+  testAggregationAddRow(addData, 0, 'user', 1, "[\"0\"]", "[\"SN0\"]");
+  testAggregationAddRow(addData, 1, 'Jane', 2, "[\"1\",\"2\"]", "[\"SN1\",\"SN2\"]");
 });
 
 
 // Corresponds to the data given for aggregation in global.fetch mock.
-function testAggregationAddRow(addRow, row, user, count, ids) {
-  expect(addRow.mock.calls.length).toBe(2);
+function testAggregationAddRow(addRow, row, user, count, ids, serialNumbers) {
   expect(addRow.mock.calls[row][0][0]).toBe(user);
   expect(addRow.mock.calls[row][0][1]).toBe(count);
-  expect(addRow.mock.calls[row][0][2]).toBe(ids);
-  expect(addRow.mock.calls[row][0][3]).toContain('button');
+  expect(addRow.mock.calls[row][0][2]).toContain('button');
+  expect(addRow.mock.calls[row][0][3]).toBe(ids);
+  expect(addRow.mock.calls[row][0][4]).toContain(serialNumbers);
 }

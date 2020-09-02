@@ -1,37 +1,51 @@
 import {Modal} from './modal.js';
 import {AnnotatedFields, getAnnotatedFieldFromDisplay} from './fields.js';
+import {Loading} from './loading.js';
 
 class BulkUpdateModal {
   constructor(modalId) {
     this.modal = new Modal(modalId, /*Blocking*/ true);
 
-    document.addEventListener('displayBulkUpdateMenu', (e) => {
-      let detail = e.detail;
-      this.populateAndShowModal(
-          detail.deviceIds,
-          detail.selectedValues,
-          detail.selectedFields,
-          detail.devicesCount);
-    }, false);
+    // Used to give feedback/alerts to the user
+    this.alertDiv = document.createElement('div');
+    this.alertDiv.classList.add('alert');
+    this.alertDiv.setAttribute('aria-live', 'aggressive');
   }
 
-  populateAndShowModal(deviceIds, selectedValues, selectedFields, devicesCount) {
-    let bodyElements = this.createModalBody(deviceIds, selectedValues, selectedFields, devicesCount);
+  populateAndShowModal(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount) {
+    let bodyElements = this.createModalBody(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount);
     this.modal.setHeader('Perform Bulk Update');
     this.modal.setBody(bodyElements);
     this.modal.show();
   }
 
-  createModalBody(deviceIds, selectedValues, selectedFields, devicesCount) {
+  createModalBody(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount) {
     let warning = this.createModalWarning(devicesCount, selectedValues, selectedFields);
-    let form = this.createModalForm(deviceIds, selectedValues, selectedFields);
-    return [warning, form];
+    let form = this.createModalForm(deviceIds, serialNumbers, selectedValues, selectedFields);
+    return [this.alertDiv, warning, form];
   }
 
-  createModalForm(deviceIds, selectedValues, selectedFields) {
+  createModalForm(deviceIds, serialNumbers, selectedValues, selectedFields) {
     let form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/update');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let loader = new Loading(this.submitForm.bind(this, form), false);
+      let response = await loader.load();
+
+      // Refresh the view to reflect the updates.
+      document.dispatchEvent(new CustomEvent('refreshData'));
+
+      if (response.status == 200) {
+        this.alertUserSuccess();
+      } else {
+        let json = await response.json();
+        this.alertUserFailure(json.failedDevices);
+      }
+    });
 
     for (let i = 0; i < selectedValues.length; i++) {
       const aggregationField = selectedFields[i];
@@ -63,6 +77,12 @@ class BulkUpdateModal {
     devicesInput.setAttribute('name', 'deviceIds');
     form.appendChild(devicesInput);
 
+    let serialNumbersInput = document.createElement('input');
+    serialNumbersInput.setAttribute('type', 'hidden');
+    serialNumbersInput.setAttribute('value', serialNumbers);
+    serialNumbersInput.setAttribute('name', 'serialNumbers');
+    form.appendChild(serialNumbersInput);
+
     let submit = document.createElement('input');
     submit.setAttribute('type', 'submit');
     form.appendChild(submit);
@@ -70,8 +90,18 @@ class BulkUpdateModal {
     return form;
   }
 
-  onFormSubmit(form) {
+  async submitForm(form) {
+    // Form Data encoding is not accepted by server so we need to convert it
+    const data = new FormData(form);
+    let body = new URLSearchParams();
+    for (let pair of data) {
+      body.append(pair[0], pair[1]);
+    }
 
+    return await fetch(form.action, {
+      method: form.method,
+      body: body
+    });
   }
 
   createModalWarning(devicesCount, selectedValues, selectedFields) {
@@ -100,6 +130,31 @@ class BulkUpdateModal {
     div.appendChild(p2);
 
     return div;
+  }
+
+  alertUserSuccess() {
+    this.alertDiv.innerHTML = '';
+
+    this.alertDiv.style['background-color'] = '#2ffb2f'; // light greenish
+    this.alertDiv.innerText = 'Updated devices successfully!';
+  }
+
+  alertUserFailure(failedDevices) {
+    this.alertDiv.innerHTML = '';
+
+    this.alertDiv.style['background-color'] = '#ff4d4d'; // reddish
+
+    let errorMessage = document.createElement('p');
+    errorMessage.innerText = 'ERROR: Failed to update the following devices:';
+
+    let failedDevicesList = document.createElement('ul');
+    for (let device of failedDevices) {
+      let li = document.createElement('li');
+      li.innerText = device.serialNumber;
+      failedDevicesList.appendChild(li);
+    }
+
+    this.alertDiv.append(errorMessage, failedDevicesList);
   }
 }
 

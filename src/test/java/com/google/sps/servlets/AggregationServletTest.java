@@ -70,56 +70,55 @@ public final class AggregationServletTest {
 
   @Test
   public void onlyOneUniqueField() {
-    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
-    expected.put(new MultiKey(new String[] {ASSET_ID_ONE}),
-        allDevices.stream().map(device -> device.getDeviceId()).collect(Collectors.toList()));
+    MultiKeyMap<String, List<ChromeOSDevice>> expected = new MultiKeyMap<>();
+    expected.put(new MultiKey(new String[] {ASSET_ID_ONE}), allDevices);
 
-    MultiKeyMap<String, List<String>> actual = processData(allDevices, AnnotatedField.ASSET_ID);
+    MultiKeyMap<String, List<ChromeOSDevice>> actual = processData(allDevices, AnnotatedField.ASSET_ID);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void multipleResultEntries() {
-    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    MultiKeyMap<String, List<ChromeOSDevice>> expected = new MultiKeyMap<>();
     expected.put(new MultiKey(
-        new String[] {USER_ONE}), Arrays.asList(DEVICE_ONE.getDeviceId(), DEVICE_FOUR.getDeviceId()));
+        new String[] {USER_ONE}), Arrays.asList(DEVICE_ONE, DEVICE_FOUR));
     expected.put(new MultiKey(
-        new String[] {USER_TWO}), Arrays.asList(DEVICE_TWO.getDeviceId()));
+        new String[] {USER_TWO}), Arrays.asList(DEVICE_TWO));
     expected.put(new MultiKey(
-        new String[] {USER_THREE}), Arrays.asList(DEVICE_THREE.getDeviceId(), DEVICE_FIVE.getDeviceId()));
+        new String[] {USER_THREE}), Arrays.asList(DEVICE_THREE, DEVICE_FIVE));
 
-    MultiKeyMap<String, List<String>> actual = processData(allDevices, AnnotatedField.USER);
+    MultiKeyMap<String, List<ChromeOSDevice>> actual = processData(allDevices, AnnotatedField.USER);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void annotatedLocation() {
-    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    MultiKeyMap<String, List<ChromeOSDevice>> expected = new MultiKeyMap<>();
     expected.put(new MultiKey(
         new String[] {LOCATION_ONE}),
-        Arrays.asList(DEVICE_ONE.getDeviceId(), DEVICE_TWO.getDeviceId(), DEVICE_FIVE.getDeviceId()));
+        Arrays.asList(DEVICE_ONE, DEVICE_TWO, DEVICE_FIVE));
     expected.put(new MultiKey(
         new String[] {LOCATION_TWO}),
-        Arrays.asList(DEVICE_THREE.getDeviceId(), DEVICE_FOUR.getDeviceId()));
+        Arrays.asList(DEVICE_THREE, DEVICE_FOUR));
 
-    MultiKeyMap<String, List<String>> actual = processData(allDevices, AnnotatedField.LOCATION);
+    MultiKeyMap<String, List<ChromeOSDevice>> actual = processData(allDevices, AnnotatedField.LOCATION);
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void multipleAggregationFields() {
-    MultiKeyMap<String, List<String>> expected = new MultiKeyMap<>();
+    MultiKeyMap<String, List<ChromeOSDevice>> expected = new MultiKeyMap<>();
     expected.put(new MultiKey(
         new String[] {ASSET_ID_ONE, LOCATION_ONE}),
-        Arrays.asList(DEVICE_ONE.getDeviceId(), DEVICE_TWO.getDeviceId(), DEVICE_FIVE.getDeviceId()));
+        Arrays.asList(DEVICE_ONE, DEVICE_TWO, DEVICE_FIVE));
     expected.put(new MultiKey(
         new String[] {ASSET_ID_ONE, LOCATION_TWO}),
-        Arrays.asList(DEVICE_THREE.getDeviceId(), DEVICE_FOUR.getDeviceId()));
+        Arrays.asList(DEVICE_THREE, DEVICE_FOUR));
 
-    MultiKeyMap<String, List<String>> actual = AggregationServlet.processData(allDevices,
+    MultiKeyMap<String, List<ChromeOSDevice>> actual = AggregationServlet.processData(allDevices,
         new LinkedHashSet<>(Arrays.asList(AnnotatedField.ASSET_ID, AnnotatedField.LOCATION)));
 
     Assert.assertEquals(expected, actual);
@@ -200,7 +199,7 @@ public final class AggregationServletTest {
   }
 
   /** Used for convenience in tests when only aggregating by one field*/
-  private MultiKeyMap<String, List<String>> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
+  private MultiKeyMap<String, List<ChromeOSDevice>> processData(List<ChromeOSDevice> devices, AnnotatedField field) {
     LinkedHashSet<AnnotatedField> fields = new LinkedHashSet<>();
     fields.add(field);
 

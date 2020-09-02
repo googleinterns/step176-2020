@@ -9,7 +9,7 @@ class DashboardManager {
     this.data = new google.visualization.DataTable();
 
     // Updated as the table changes
-    this.COLS = {'DEVICE_ID': 0, 'DEVICE_COUNT': 0};
+    this.COLS = {'DEVICE_IDS': 0, 'DEVICE_COUNT': 0, 'SERIAL_NUMBERS': 0, 'ROW_NUMBER': 0};
 
     this.dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
     this.aggregationSelector = createNewAggregationSelector();
@@ -31,22 +31,21 @@ class DashboardManager {
 
     document.addEventListener('bulkUpdate', (e) => {
       let row = e.detail;
-      let deviceIds = this.data.getValue(row, this.COLS.DEVICE_ID);
+      let deviceIds = this.data.getValue(row, this.COLS.DEVICE_IDS);
+      let serialNumbers = this.data.getValue(row, this.COLS.SERIAL_NUMBERS);
+      let selectedFields = this.aggregationSelector.getState().selectedValues;
       let selectedValues =
-          [...Array(this.aggregationSelector.getState().selectedValues.length).keys()]
+          [...Array(selectedFields.length).keys()]
           .map(index => this.data.getValue(row, index));
       let devicesCount = this.data.getValue(row, this.COLS.DEVICE_COUNT);
 
-      document.dispatchEvent(new CustomEvent(
-        'displayBulkUpdateMenu',
-        {detail:
-            {deviceIds: deviceIds,
-            selectedValues: selectedValues,
-            selectedFields: this.aggregationSelector.getState().selectedValues,
-            devicesCount: devicesCount}}));
+      let updateModal = new BulkUpdateModal('update-modal');
+      updateModal.populateAndShowModal(deviceIds, serialNumbers, selectedValues, selectedFields, devicesCount);
     }, false);
 
-    this.updateModal = new BulkUpdateModal('update-modal');
+    document.addEventListener('refreshData', (e) => {
+      this.updateAndDrawData();
+    });
 
     this.drawnControls = false;
   }
@@ -76,14 +75,19 @@ class DashboardManager {
       this.data.addColumn('string', value);
     }
     this.data.addColumn('number', 'Devices');
-    this.data.addColumn('string', 'deviceIds');
     this.data.addColumn('string', '');
+    this.data.addColumn('string', 'deviceIds');
+    this.data.addColumn('string', 'serialNumbers');
+    this.data.addColumn('number', 'row');
 
     let aggregationLoader = new Loading(this.fetchAndPopulateAggregation.bind(this), false);
     await aggregationLoader.load();
 
-    this.COLS.DEVICE_ID = this.data.getNumberOfColumns() - 2;
-    this.COLS.DEVICE_COUNT = this.data.getNumberOfColumns() - 3;
+    // Based on how we decided to organize the table-- see top of table-manager.js for details
+    this.COLS.ROW_NUMBER = this.data.getNumberOfColumns() - 1;
+    this.COLS.SERIAL_NUMBERS = this.data.getNumberOfColumns() - 2;
+    this.COLS.DEVICE_IDS = this.data.getNumberOfColumns() - 3;
+    this.COLS.DEVICE_COUNT = this.data.getNumberOfColumns() - 5;
 
     this.tableManager.updateAggregation(this.data);
     this.pieChartManager.update(this.data, selectorState);
@@ -104,14 +108,12 @@ class DashboardManager {
                   selectorState.map(displayName => entry[getAnnotatedFieldFromDisplay(displayName).API]);
               row.push(entry.count);
 
-              // TODO: remove fake data after the server-side is updated to provide real data.
-              if (entry.deviceIds == null) {
-                entry.deviceIds = ['abc', 'def', 'ghi', 'jkl', 'mno'];
-              }
-              row.push(JSON.stringify(entry.deviceIds));
-
               row.push(`<button aria-label="Activate to bulk update devices in row." onclick="document.dispatchEvent(
                   new CustomEvent( \'bulkUpdate\', {detail: ${index} }))">Update Devices</button>`);
+
+              row.push(JSON.stringify(entry.deviceIds));
+              row.push(JSON.stringify(entry.serialNumbers));
+              row.push(index);
 
               this.data.addRow(row);
             }

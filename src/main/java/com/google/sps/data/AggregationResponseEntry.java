@@ -1,5 +1,6 @@
 package com.google.sps.data;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,10 +17,11 @@ public final class AggregationResponseEntry {
   private String annotatedUser;
   private final int count;
   private List<String> deviceIds;
+  private List<String> serialNumbers;
 
   public AggregationResponseEntry(
       MultiKey key,
-      List<String> deviceIds,
+      List<ChromeOSDevice> devices,
       LinkedHashSet<AnnotatedField> fields) {
 
     String keys[] = (String[]) key.getKeys();
@@ -40,7 +42,13 @@ public final class AggregationResponseEntry {
       }
     }
 
-    this.count = deviceIds.size();
-    this.deviceIds = deviceIds;
+    this.count = devices.size();
+
+    this.deviceIds = new ArrayList<String>();
+    this.serialNumbers = new ArrayList<String>();
+    for (ChromeOSDevice device : devices) {
+      this.deviceIds.add(device.getDeviceId());
+      this.serialNumbers.add(device.getSerialNumber());
+    }
   }
 }

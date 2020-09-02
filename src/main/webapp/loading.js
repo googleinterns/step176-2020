@@ -44,12 +44,13 @@ class Loading {
   async doTask() {
     let passedMinimumLoadTime = new Promise(resolve => setTimeout(resolve, this.minimumLoadTime));
 
-    await Promise.all([this.func(), passedMinimumLoadTime]);
+    let results = await Promise.all([this.func(), passedMinimumLoadTime]);
 
     this.progress = 100;
     this.setProgress();
 
     this.done = true;
+    return results[0];
   }
 
   // Used for testing
@@ -85,7 +86,7 @@ class Loading {
       setTimeout(this.updateProgressWrapper.bind(this), 250);
     }
 
-    await this.doTask();
+    const result = await this.doTask();
 
     if (!this.isShort) {
       // TODO: add a done button and stop auto-hiding on long loading bars.
@@ -93,6 +94,8 @@ class Loading {
     } else {
       this.container.remove();
     }
+
+    return result;
   }
 }
 

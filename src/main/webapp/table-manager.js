@@ -5,6 +5,11 @@ const BLANK_PAGE_TOKEN = '';
 const MAX_DEVICE_COUNT_PARAMETER_NAME = 'maxDeviceCount';
 const PAGE_TOKEN_PARAMETER_NAME = 'pageToken';
 
+/*
+ * Table Column Organization:
+ * Aggregation table has Field 1 | ... | Field n | deviceCount | Button | deviceIds | serialNumbers | Row #
+ * Normal view has Field 1 | ... | Field n
+ */
 class TableManager {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
@@ -102,16 +107,15 @@ class TableManager {
   }
 
   setTableView(numOfCols) {
-    /*
-     * Aggregation table has Field 1 | ... | Field n | deviceCount | deviceIds | Button
-     * Normal view has Field 1 | ... | Field n
-     * In the first case we want to hide only deviceIds; in the second case we show everything
-     */
-    let viewableCols = [...Array(numOfCols - 2).keys()];
+    // See guide at top of file for table layout.  In normal view, we want to display all columns;
+    // in aggregation view, we ignore the last 4 columns which are used for internal purposes
+    let viewableCols;
     if (!this.aggregating) {
-      viewableCols.push(numOfCols - 2);
+      viewableCols = [...Array(numOfCols).keys()];
+    } else {
+      // Skip over deviceIds, serialNumbers, and Row #
+      viewableCols = [...Array(numOfCols - 3).keys()];
     }
-    viewableCols.push(numOfCols - 1);
 
     this.table.setView({'columns': viewableCols});
   }

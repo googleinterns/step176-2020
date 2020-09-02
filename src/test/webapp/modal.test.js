@@ -62,3 +62,12 @@ test('Focus is set correctly', () => {
   modal2.hide();
   expect(document.activeElement).toBe(modal1.container);
 });
+
+test('Remove callback is invoked correctly', () => {
+  let modal = new Modal('modal-container');
+  let func = jest.fn(() => {return 32;});
+  modal.setRemoveCallback(func);
+
+  modal.remove();
+  expect(func.mock.calls.length).toBe(1);
+});
