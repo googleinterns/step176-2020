@@ -41,6 +41,7 @@ public class CSVServlet extends HttpServlet {
       OutputStream outputStream = response.getOutputStream();
       final List<ChromeOSDevice> allDevices = utilObj.getAllDevices(userId);
       final String outputResult = stringifyDevicesList(allDevices);
+      System.out.println(outputResult);
       outputStream.write(outputResult.getBytes());
       outputStream.flush();
       outputStream.close();
