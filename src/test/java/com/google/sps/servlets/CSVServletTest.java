@@ -32,6 +32,7 @@ import org.junit.runners.JUnit4;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 /*
  * Test the aggregation functionality to ensure it reports accurate counts and
@@ -108,8 +109,8 @@ public final class CSVServletTest {
   }
 
   private void setNewOutputStream(HttpServletResponse response) throws IOException{
-    ServletOutputStream outputStream = new ServletOutputStream();
-    when(response.getOutputStream()).thenReturn(ServletOutputStream);
+    OutputStream outputStream = new ServletOutputStream();
+    when(response.getOutputStream()).thenReturn(outputStream);
   }
 
 }
