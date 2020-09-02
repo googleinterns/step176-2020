@@ -183,6 +183,7 @@ class Util {
             updateSingleDevice(accessToken, deviceId, updatesInJson);
           } catch (IOException e) {
             failedUpdateDeviceIds.add(deviceId);
+            System.out.println("Device failed to update: " + deviceId);
           }
         }
       );
