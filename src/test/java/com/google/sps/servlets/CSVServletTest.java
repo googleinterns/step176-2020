@@ -115,7 +115,7 @@ public final class CSVServletTest {
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
     when(mockedUtil.getAllDevices(TEST_USER_ID)).thenReturn(allDevices);
 
-    ServletOutputStream outputStream = mock(ServletOutputStream.class)
+    ServletOutputStream outputStream = mock(ServletOutputStream.class);
 
     when(response.getOutputStream()).thenReturn(outputStream);
     verify(outputStream, atLeastOnce()).println("foo");
