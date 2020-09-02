@@ -98,13 +98,16 @@ public final class CSVServletTest {
     verify(mockedUserService, times(1)).isUserLoggedIn();
   }
 
-  // @Test
-  // public void exceptionWhileGettingDevices() {
-  //   when(mockedUserService.isUserLoggedIn()).thenReturn(true);
-  //   when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+  @Test
+  public void exceptionWhileGettingDevices() throws IOException {
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
+    when(mockedUserService.getCurrentUser()).thenReturn(userFake);
+    when(mockedUtil.getAllDevices(TEST_USER_ID)).thenThrow(IOException.class);
 
-  //   servlet.doGet(request, response);
-  // }
+    servlet.doGet(request, response);
+
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
 
   @Test
   public void runsToSuccess() {
