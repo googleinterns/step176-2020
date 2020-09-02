@@ -118,7 +118,7 @@ public final class CSVServletTest {
     ServletOutputStream outputStream = mock(ServletOutputStream.class);
 
     when(response.getOutputStream()).thenReturn(outputStream);
-    verify(outputStream, atLeastOnce()).println("foo");
+    verify(outputStream, times(1)).println("foo");
     servlet.doGet(request, response);
 
   }
