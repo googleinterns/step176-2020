@@ -69,7 +69,7 @@ public final class CSVServletTest {
   private final List<ChromeOSDevice> allDevices = new ArrayList<>(
       Arrays.asList(DEVICE_ONE, DEVICE_TWO, DEVICE_THREE, DEVICE_FOUR, DEVICE_FIVE));
 
-  private AggregationServlet servlet = new CSVServlet();
+  private CSVServlet servlet = new CSVServlet();
   private HttpServletRequest request = mock(HttpServletRequest.class);
   private HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -100,7 +100,7 @@ public final class CSVServletTest {
 
   @Test
   public void exceptionWhileGettingDevices() {
-    when(mockedUserService.isUserLoggedIn()).thenReturn(True);
+    when(mockedUserService.isUserLoggedIn()).thenReturn(true);
     when(mockedUserService.getCurrentUser()).thenReturn(userFake);
 
     servlet.doGet(request, response);
