@@ -68,6 +68,7 @@ class Util {
   private static final String DEFAULT_MAX_DEVICES = "200"; //is limited to effectively 200
   private static final String DEFAULT_SORT_ORDER = "ASCENDING";
   private static final String DEFAULT_PROJECTION = "FULL";
+  private static final String FILTER_ONLY_ACTIVE_DEVICES = "status:provisioned";
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
 
@@ -127,6 +128,7 @@ class Util {
     urlBuilder.addQueryParameter("maxResults", maxDeviceCount);
 
     urlBuilder.addQueryParameter("projection", DEFAULT_PROJECTION);
+    urlBuilder.addQueryParameter("query", FILTER_ONLY_ACTIVE_DEVICES);
     urlBuilder.addQueryParameter("sortOrder", DEFAULT_SORT_ORDER);
     urlBuilder.addQueryParameter("key", apiKey);
     if (!pageToken.equals(EMPTY_PAGE_TOKEN)) {
