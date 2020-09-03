@@ -7,8 +7,8 @@ This project is a lite ChromeOS dashboard focusing on annotated fields (asset id
 - Java 1.8+
 
 
-## Installation
-First clone the repository and checkout `master`.  Create a new directory `/src/main/resources`, and create two new files inside named `api_key.txt` and `client_info.json`.  Place your ____________ inside of `api_key.txt` and place _________ inside of `client_info.json`.  You can now build and run the project with `mvn package appengine:run`.
+## Google Cloud Platform Installation
+First clone the repository and checkout `master`.  Create a new directory `/src/main/resources`, and create two new files inside named `api_key.txt` and `client_info.json`.  You must populate these files with an api key and client info as described [here](https://cloud.google.com/docs/authentication#strategies).  You can now build and run the project with `mvn package appengine:run`, or deploy it with `mvn package appengine:deploy`.
 
 ## Features
 
